@@ -75,6 +75,9 @@ mt_ext = {
             img = nil
         end
         return img or mt_ext.texture_modifier_inventorycube(chosen_tiles[1], chosen_tiles[2], chosen_tiles[3])
+    end,
+    get_color_int=function(color)
+        return color.b + (color.g*256) + (color.r*256*256)
     end
 }
 
@@ -267,18 +270,6 @@ table_ext= {
             dst[key] = value
         end
         return dst
-    end,
-
-    get_value = function(table, key)
-        if type(key) == "table" then
-            for k, v in pairs(table) do
-                if key==k then
-                    return v
-                end
-            end
-            return nil
-        end
-        return table[key]
     end,
 
     keys = function(t)
@@ -571,7 +562,7 @@ conf={
                 return "Not inside range : Expected value >= "..constraints.range[1].." and <= "..constraints.range[1]..", found "..minetest.write_json(value)
             end
         end
-        if constraints.possible_values and not table_ext.get_value(constraints.possible_values,value) then
+        if constraints.possible_values and not constraints.possible_values[value] then
             return "None of the possible values : Expected one of "..minetest.write_json(table_ext.keys(constraints.possible_values))..", found "..minetest.write_json(value)
         end
         if t == "table" then
