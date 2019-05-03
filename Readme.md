@@ -1,7 +1,13 @@
 # modlib
 Lightweight Minetest Modding Library
 
+
+## About
+No dependencies. Licensed under the MIT License. Compatibility is checked automatically.
+
 ## API
+### Some more stuff
+The things listed below are just a few, and as the library grows, I am not mentioning them all here, but I hope the function names are self-explaining. If not, feel free to contact me or create an issue / PR on GitHub.
 ### `table_ext`
 Table Helpers. Self-explaining - merge tables, count tables, add items to tables, etc.
 ### `number_ext`
