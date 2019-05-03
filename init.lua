@@ -414,6 +414,28 @@ string_ext={
     end
 }
 
+threading_ext={
+    locks={},
+    request=function(resource, func, ...)
+        if threading_ext.locks[resource] then
+            table.insert(threading_ext.locks[resource], {func=func, args={...}})
+            return false
+        end
+        threading_ext.locks[resource]={}
+        return true
+    end,
+    free=function(resource)
+        if threading_ext.locks[resource] then
+            local first=threading_ext.locks[resource][1]
+            if first then
+                first.func(unpack(first.args), true)
+            end
+        end
+        threading_ext.locks[resource]=nil
+        return true
+    end
+}
+
 -- File helpers - reading, writing, appending, exists, create_if_not_exists
 file_ext={
     read=function(filename)
