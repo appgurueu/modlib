@@ -25,7 +25,7 @@ if mt.version.project == "Minetest" then
         error("Too new Minetest version ! modlib requires Minetest 5.1 or smaller.")
     end
 else
-    error("No Minetest provided ! Modlib requires Minetest instead of "..mt.version.project..".")
+    --error("No Minetest provided ! Modlib requires Minetest instead of "..mt.version.project..".")
 end
 
 MT=mt
