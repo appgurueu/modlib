@@ -103,7 +103,7 @@ cmd_ext = {
 -- Player specific values
 
 player_ext = {
-    forbidden_names={},
+    forbidden_names={"me"},
     register_forbidden_name=function(name)
         player_ext.forbidden_names[name]=true
     end,
@@ -163,7 +163,11 @@ player_ext = {
     end
 }
 
--- TODO mt.register on prenewplayer - check for disallowed playernames
+minetest.register_on_prejoinplayer(function(name, ip)
+    if player_ext.forbidden_names[name] then
+        return "The name '"..name.."' is already used in the game and thus not allowed as playername."
+    end
+end )
 
 minetest.register_on_joinplayer(function(player)
     local playername=player:get_player_name()
