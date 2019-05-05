@@ -11,9 +11,6 @@ if _VERSION then
 end
 
 -- MT shorthands
-for k, v in pairs(minetest) do
-    print(k.." : "..type(v))
-end
 mt=minetest
 mt.version=minetest.get_version()
 
@@ -542,7 +539,7 @@ data={
         return file_ext.write(data.get_path(modname, filename)..".lua", minetest.serialize(stuff))
     end,
     load_json =function(modname, filename)
-        return minetest.parse_json(file_ext.read(data.get_path(modname, filename)..".json"))
+        return minetest.parse_json(file_ext.read(data.get_path(modname, filename)..".json") or "null")
     end,
     save_json=function(modname, filename, stuff)
         return file_ext.write(data.get_path(modname, filename)..".json", minetest.write_json(stuff))
