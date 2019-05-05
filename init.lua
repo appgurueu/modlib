@@ -412,6 +412,14 @@ string_ext={
 
     is_hexadecimal=function(byte)
         return (byte >= string_ext.zero and byte <= string_ext.nine) or (byte >= string_ext.letter_a and byte <= string_ext.letter_f)
+    end,
+
+    magic_chars={"(", ")", "." "%", "+", "-", "*", "?", "[", "^", "$"},
+
+    escape_magic_chars=function(text)
+        for _, magic_char in pairs(string_ext.magic_chars) do
+            text=string.gsub(string, "%"..magic_char,"%"..magic_char)
+        end
     end
 }
 
