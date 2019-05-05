@@ -414,13 +414,31 @@ string_ext={
         return (byte >= string_ext.zero and byte <= string_ext.nine) or (byte >= string_ext.letter_a and byte <= string_ext.letter_f)
     end,
 
-    magic_chars={"(", ")", ".", "%", "+", "-", "*", "?", "[", "^", "$"},
+    magic_chars={"%", "(", ")", ".", "+", "-", "*", "?", "[", "^", "$"},
 
     escape_magic_chars=function(text)
-        for _, magic_char in pairs(string_ext.magic_chars) do
+        for _, magic_char in ipairs(string_ext.magic_chars) do
             text=string.gsub(text, "%"..magic_char,"%%"..magic_char)
         end
         return text
+    end,
+
+    utf8=function(number)
+        if number < 0x00A0 or number > 0x10FFFF then --Out of range
+            return
+        end
+        local result=""
+        local i=0
+        while true do
+            local remainder=number % 64
+            result=string.char(128+remainder)..result
+            number=(number-remainder) / 64
+            i=i+1
+            if number <= math.pow(2, 8-i-2) then
+                break
+            end
+        end
+        return string.char(256-math.pow(2, 8-i-1)+number)..result --256 = math.pow(2, 8)
     end
 }
 
