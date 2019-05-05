@@ -418,7 +418,7 @@ string_ext={
 
     escape_magic_chars=function(text)
         for _, magic_char in pairs(string_ext.magic_chars) do
-            text=string.gsub(text, "%"..magic_char,"%"..magic_char)
+            text=string.gsub(text, "%"..magic_char,"%%"..magic_char)
         end
         return text
     end
