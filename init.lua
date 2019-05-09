@@ -414,7 +414,7 @@ string_ext={
         return (byte >= string_ext.zero and byte <= string_ext.nine) or (byte >= string_ext.letter_a and byte <= string_ext.letter_f)
     end,
 
-    magic_chars={"%", "(", ")", ".", "+", "-", "*", "?", "[", "^", "$"},
+    magic_chars={"%", "(", ")", ".", "+", "-", "*", "?", "[", "^", "$"--[[,":"]]},
 
     escape_magic_chars=function(text)
         for _, magic_char in ipairs(string_ext.magic_chars) do
@@ -424,6 +424,9 @@ string_ext={
     end,
 
     utf8=function(number)
+        if number < 0x007F then
+            return string.char(number)
+        end
         if number < 0x00A0 or number > 0x10FFFF then --Out of range
             return
         end
