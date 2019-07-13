@@ -30,6 +30,7 @@ MT=mt
 -- MT extension
 -- TODO add formspec queues and event system + sync handler
 -- TODO add chatcommand helper
+-- TODO add easy (ingame?) config editor forcing restart ?
 
 mt_ext = {
     delta_times={},
@@ -75,7 +76,28 @@ mt_ext = {
     end,
     get_color_int=function(color)
         return color.b + (color.g*256) + (color.r*256*256)
-    end
+    end,
+    check_player_privs=function(playername, privtable)
+        local privs=minetest.get_player_privs(playername)
+        local missing_privs={}
+        local to_lose_privs={}
+        for priv, expected_value in pairs(privtable) do
+            local actual_value=privs[priv]
+            if expected_value then
+                if not actual_value then
+                    table.insert(missing_privs, priv)
+                end
+            else
+                if actual_value then
+                    table.insert(to_lose_privs, priv)
+                end
+            end
+        end
+        return missing_privs, to_lose_privs
+    end,
+    -- TODO dream a littl'
+    --register_chatcommand=function() end,
+    --chat_send_all=function() end
 }
 
 minetest.register_globalstep(function(dtime)
@@ -148,6 +170,10 @@ player_ext = {
             sender_color="#FFFFFF"
         end
         return sender_color
+    end,
+    get_color_table=function(player)
+        local sender_color=player:get_properties().nametag_color
+        return sender_color or {r=255, g=255, b=255}
     end,
     get_color_int=function(player)
         local sender_color=player:get_properties().nametag_color
@@ -273,6 +299,14 @@ table_ext= {
         return dst
     end,
 
+    append=function(t1, t2)
+        local l=#t1
+        for k, v in ipairs(t2) do
+            t1[l+k]=v
+        end
+        return t1
+    end,
+
     keys = function(t)
         local keys = {}
         for key, _ in pairs(t) do
@@ -293,6 +327,14 @@ table_ext= {
         local flipped = {}
         for key, val in pairs(table) do
             flipped[val] = key
+        end
+        return flipped
+    end,
+
+    set = function(table)
+        local flipped = {}
+        for _, val in pairs(table) do
+            flipped[val] = true
         end
         return flipped
     end,
@@ -353,10 +395,16 @@ number_ext={
     end
 }
 
+-- TODO probably set metatables ?
 -- String helpers - split & trim at end & begin
 string_ext={
+    starts_with=function(str, start)
+        return str:sub(1, start:len()) == start
+    end,
+    ends_with=function(str, suffix)
+        return str:sub(str:len()-suffix:len()+1) == suffix
+    end,
     trim=function(str, to_remove)
-
         local j=1
         for i=1, string.len(str) do
             if str:sub(i,i) ~= to_remove then
@@ -377,7 +425,6 @@ string_ext={
     end,
 
     trim_begin=function(str, to_remove)
-
         local j=1
         for i=1, string.len(str) do
             if str:sub(i,i) ~= to_remove then
@@ -390,6 +437,7 @@ string_ext={
     end,
 
     split=function(str, delim, limit)
+        if not limit then return string_ext.split_without_limit(str, delim) end
         local parts={}
         local occurences=1
         local last_index=1
@@ -404,6 +452,19 @@ string_ext={
         return parts
     end,
 
+    split_without_limit=function(str, delim)
+        local parts={}
+        local last_index=1
+        local index=string.find(str, delim)
+        while index do
+            table.insert(parts, string.sub(str, last_index, index-1))
+            last_index=index+string.len(delim)
+            index=string.find(str, delim, index+string.len(delim))
+        end
+        table.insert(parts, string.sub(str, last_index))
+        return parts
+    end,
+
     hashtag=string.byte("#"),
     zero=string.byte("0"),
     nine=string.byte("9"),
@@ -411,7 +472,7 @@ string_ext={
     letter_f=string.byte("F"),
 
     is_hexadecimal=function(byte)
-        return (byte >= string_ext.zero and byte <= string_ext.nine) or (byte >= string_ext.letter_a and byte <= string_ext.letter_f)
+        return (byte >= zero and byte <= string_ext.nine) or (byte >= string_ext.letter_a and byte <= string_ext.letter_f)
     end,
 
     magic_chars={"%", "(", ")", ".", "+", "-", "*", "?", "[", "^", "$"--[[,":"]]},
@@ -442,6 +503,26 @@ string_ext={
             end
         end
         return string.char(256-math.pow(2, 8-i-1)+number)..result --256 = math.pow(2, 8)
+    end,
+
+    handle_ifndefs=function(code, vars)
+        local finalcode={}
+        local endif
+        local after_endif=-1
+        local ifndef_pos, after_ifndef=string.find(code, "%-%-IFNDEF")
+        while ifndef_pos do
+            table.insert(finalcode, string.sub(code, after_endif+2, ifndef_pos-1))
+            local linebreak=string.find(code, "\n", after_ifndef+1)
+            local varname=string.sub(code, after_ifndef+2, linebreak-1)
+            endif, after_endif=string.find(code, "%-%-ENDIF", linebreak+1)
+            if not endif then break end
+            if vars[varname] then
+                table.insert(finalcode, string.sub(code, linebreak+1, endif-1))
+            end
+            ifndef_pos, after_ifndef=string.find(code, "%-%-IFNDEF", after_endif+1)
+        end
+        table.insert(finalcode, string.sub(code, after_endif+2))
+        return table.concat(finalcode, "")
     end
 }
 
@@ -469,6 +550,7 @@ threading_ext={
 
 -- File helpers - reading, writing, appending, exists, create_if_not_exists
 file_ext={
+
     read=function(filename)
         local file=io.open(filename,"r")
         if file==nil then
@@ -506,13 +588,60 @@ file_ext={
     end,
     create_if_not_exists=function(filename, content)
         if not file_ext.exists(filename) then
-            file_ext.write(filename, content)
+            file_ext.write(filename, content or "")
             return true
         end
         return false
     end,
     create_if_not_exists_from_file=function(filename, src_filename)
         return file_ext.create_if_not_exists(filename, file_ext.read(src_filename))
+    end,
+
+    -- Process Bridge Helpers
+    process_bridges={},
+    
+    process_bridge_build=function(name, input, output, logs)
+        if not input or not output or not logs then
+            minetest.mkdir(minetest.get_worldpath().."/bridges/"..name)
+        end
+        input=input or minetest.get_worldpath().."/bridges/"..name.."/input.txt"
+        output=output or minetest.get_worldpath().."/bridges/"..name.."/output.txt"
+        logs=logs or minetest.get_worldpath().."/bridges/"..name.."/logs.txt"
+        -- Clear input
+        file_ext.write(input, "")
+        -- Clear output
+        file_ext.write(output, "")
+        -- Create logs if not exists
+        file_ext.create_if_not_exists(logs, "")
+        file_ext.process_bridges[name]={input=input, output=output, logs=logs, output_file=io.open(output,"a")}
+    end,
+    process_bridge_listen=function(name, line_consumer, step)
+        local bridge=file_ext.process_bridges[name]
+        mt_ext.register_globalstep(step or 0.1, function(dtime)
+            local content=io.open(bridge.input, "r")
+            local line=content:read()
+            while line do
+                line_consumer(line)
+                line=content:read()
+            end
+            file_ext.write(bridge.input, "")
+        end)
+    end,
+    process_bridge_serve=function(name, step)
+        local bridge=file_ext.process_bridges[name]
+        mt_ext.register_globalstep(step or 0.1, function(dtime)
+            bridge.output_file:close()
+            file_ext.process_bridges[name].output_file=io.open(bridge.output,"a")
+        end)
+    end,
+    process_bridge_write=function(name, message)
+        local bridge=file_ext.process_bridges[name]
+        bridge.output_file:write(message.."\n")
+        --file_ext.append(bridge.input, message)
+    end,
+    process_bridge_start=function(name, command)
+        local bridge=file_ext.process_bridges[name]
+        os.execute(string.format(command, bridge.output, bridge.input, bridge.logs))
     end
 }
 
@@ -551,6 +680,12 @@ function extend_mod(modname, filename)
     local fnc=assert(loadstring(class))
     fnc()
     file:close()
+end
+
+function extend_mod_string(modname, string)
+    local class="setfenv(1,setmetatable("..modname..", {__index=_G, __call=_G}))\n"..string.."\n"
+    local fnc=assert(loadstring(class))
+    fnc()
 end
 
 -- Data helpers - load data, save data...
@@ -634,6 +769,30 @@ conf={
                 for k, _ in pairs(constraints.children) do
                     if value[k] == nil then
                         return "Table entry missing : Expected key "..minetest.write_json(k).." to be present in table "..minetest.write_json(value)
+                    end
+                end
+            end
+            if constraints.required_children then
+                for k,v_constraints in pairs(constraints.required_children) do
+                    local v=value[k]
+                    if v then
+                        local possible_errors=conf.check_constraints(v, v_constraints)
+                        if possible_errors then
+                            return possible_errors
+                        end
+                    else
+                        return "Table entry missing : Expected key "..minetest.write_json(k).." to be present in table "..minetest.write_json(value)
+                    end
+                end
+            end
+            if constraints.possible_children then
+                for k,v_constraints in pairs(constraints.possible_children) do
+                    local v=value[k]
+                    if v then
+                        local possible_errors=conf.check_constraints(v, v_constraints)
+                        if possible_errors then
+                            return possible_errors
+                        end
                     end
                 end
             end
