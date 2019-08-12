@@ -1,11 +1,12 @@
--- Error override - TODO discuss about silent errors
+-- Set boolean flag
+modlib = true
 
 -- Lua version check
 if _VERSION then
     if _VERSION < "Lua 5" then
         error("Outdated Lua version ! modlib requires Lua 5 or greater.")
     end
-    if _VERSION > "Lua 5.1" then
+    if _VERSION > "Lua 5.1" then -- TODO automatically use _ENV instead of s/getfenv if _VERSION > 5.1
         error("Too new Lua version ! modlib requires Lua 5.1 or smaller.")
     end
 end
@@ -29,8 +30,6 @@ MT=mt
 
 -- MT extension
 -- TODO add formspec queues and event system + sync handler
--- TODO add chatcommand helper
--- TODO add easy (ingame?) config editor forcing restart ?
 
 mt_ext = {
     delta_times={},
@@ -94,10 +93,7 @@ mt_ext = {
             end
         end
         return missing_privs, to_lose_privs
-    end,
-    -- TODO dream a littl'
-    --register_chatcommand=function() end,
-    --chat_send_all=function() end
+    end
 }
 
 minetest.register_globalstep(function(dtime)
@@ -111,13 +107,8 @@ minetest.register_globalstep(function(dtime)
     end
 end)
 
--- Chatcommand Extension
-
-cmd_ext = {
-    -- TODO register chatcommand - constraint checking, automatic call with parameters, automatic reject in case of missing parameters or stuff liek t'is
-    register_chatcommand=function(name, def)
-    end
-}
+-- Chatcommand Extension : Won't be implemented in modlib, will make another library for that purpose
+-- cmd_ext = nil
 
 -- Player specific values
 
@@ -203,7 +194,6 @@ minetest.register_on_leaveplayer(function(player)
     player_ext.delete_player_data(playername)
 end)
 
--- TODO code 'em
 -- OOP helpers
 
 class={
@@ -384,6 +374,13 @@ table_ext= {
 
     max = function(table)
         return table_ext.best_value(table, function(v, m) return v > m end)
+    end,
+
+    binary_search = function(list, value) -- TODO code this
+        local min, size = 1, #list
+        while size > 1 do
+            local pivot = math.floor(max - min / 2)
+        end
     end
 }
 
@@ -395,7 +392,7 @@ number_ext={
     end
 }
 
--- TODO probably set metatables ?
+-- TODO probably set string metatables ?
 -- String helpers - split & trim at end & begin
 string_ext={
     starts_with=function(str, start)
@@ -441,11 +438,11 @@ string_ext={
         local parts={}
         local occurences=1
         local last_index=1
-        local index=string.find(str, delim)
+        local index=string.find(str, delim, 1, true)
         while index and occurences < limit do
             table.insert(parts, string.sub(str, last_index, index-1))
             last_index=index+string.len(delim)
-            index=string.find(str, delim, index+string.len(delim))
+            index=string.find(str, delim, index+string.len(delim), true)
             occurences=occurences+1
         end
         table.insert(parts, string.sub(str, last_index))
@@ -455,11 +452,11 @@ string_ext={
     split_without_limit=function(str, delim)
         local parts={}
         local last_index=1
-        local index=string.find(str, delim)
+        local index=string.find(str, delim, 1, true)
         while index do
             table.insert(parts, string.sub(str, last_index, index-1))
             last_index=index+string.len(delim)
-            index=string.find(str, delim, index+string.len(delim))
+            index=string.find(str, delim, index+string.len(delim), true)
         end
         table.insert(parts, string.sub(str, last_index))
         return parts
@@ -509,17 +506,17 @@ string_ext={
         local finalcode={}
         local endif
         local after_endif=-1
-        local ifndef_pos, after_ifndef=string.find(code, "%-%-IFNDEF")
+        local ifndef_pos, after_ifndef=string.find(code, "--IFNDEF", 1, true)
         while ifndef_pos do
             table.insert(finalcode, string.sub(code, after_endif+2, ifndef_pos-1))
-            local linebreak=string.find(code, "\n", after_ifndef+1)
+            local linebreak=string.find(code, "\n", after_ifndef+1, true)
             local varname=string.sub(code, after_ifndef+2, linebreak-1)
-            endif, after_endif=string.find(code, "%-%-ENDIF", linebreak+1)
+            endif, after_endif=string.find(code, "--ENDIF", linebreak+1, true)
             if not endif then break end
             if vars[varname] then
                 table.insert(finalcode, string.sub(code, linebreak+1, endif-1))
             end
-            ifndef_pos, after_ifndef=string.find(code, "%-%-IFNDEF", after_endif+1)
+            ifndef_pos, after_ifndef=string.find(code, "--IFNDEF", after_endif+1, true)
         end
         table.insert(finalcode, string.sub(code, after_endif+2))
         return table.concat(finalcode, "")
@@ -646,6 +643,7 @@ file_ext={
 }
 
 -- Minetest related helpers --
+-- TODO automatically know current mod
 
 -- get modpath wrapper
 function get_resource(modname, resource)
