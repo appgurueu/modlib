@@ -1,9 +1,9 @@
 # modlib
 Lightweight Minetest Modding Library
 
-
 ## About
-No dependencies. Licensed under the MIT License. Compatibility is checked automatically.
+No dependencies. Compatibility is checked automatically.  
+Licensed under the MIT License. Written by Lars Mueller aka LMD or appguru(eu).
 
 ## API
 ### Some more stuff
