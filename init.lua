@@ -20,7 +20,7 @@ if mt.version.project == "Minetest" then
         error("Outdated Minetest version ! modlib requires Minetest 0.4 or greater.")
     end
     if mt.version.string > "5.1" then
-        error("Too new Minetest version ! modlib requires Minetest 5.1 or smaller.")
+        --error("Too new Minetest version ! modlib requires Minetest 5.1 or smaller.")
     end
 else
     --error("No Minetest provided ! Modlib requires Minetest instead of "..mt.version.project..".")
