@@ -376,10 +376,16 @@ table_ext= {
         return table_ext.best_value(table, function(v, m) return v > m end)
     end,
 
-    binary_search = function(list, value) -- TODO code this
+    binary_search = function(list, value)
         local min, size = 1, #list
         while size > 1 do
-            local pivot = math.floor(max - min / 2)
+            local s_half = math.floor(size / 2)
+            local pivot = min + s_half
+            local element = list[pivot]
+            if value > element then
+                min = pivot
+            end
+            size = s_half
         end
     end
 }
@@ -636,9 +642,9 @@ file_ext={
         bridge.output_file:write(message.."\n")
         --file_ext.append(bridge.input, message)
     end,
-    process_bridge_start=function(name, command)
+    process_bridge_start=function(name, command, os_execute)
         local bridge=file_ext.process_bridges[name]
-        os.execute(string.format(command, bridge.output, bridge.input, bridge.logs))
+        os_execute(string.format(command, bridge.output, bridge.input, bridge.logs))
     end
 }
 
