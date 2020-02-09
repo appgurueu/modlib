@@ -73,3 +73,19 @@ minetest.register_globalstep(function(dtime)
         delta_times[k]=v
     end
 end)
+
+form_listeners = {}
+function register_form_listener(formname, func)
+    local current_listeners = form_listeners[formname] or {}
+    table.insert(current_listeners, func)
+    form_listeners[formname] = current_listeners
+end
+
+minetest.register_on_player_receive_fields(function(player, formname, fields)
+    local handlers = form_listeners[formname]
+    if handlers then
+        for _, handler in pairs(handlers) do
+            handler(player, fields)
+        end
+    end
+end)
