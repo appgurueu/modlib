@@ -1,79 +1,85 @@
-forbidden_names={"me"}
-register_forbidden_name=function(name)
-    forbidden_names[name]=true
+forbidden_names = {"me"}
+function register_forbidden_name(name)
+    forbidden_names[name] = true
 end
-unregister_forbidden_name=function(name)
-    forbidden_names[name]=nil
+function unregister_forbidden_name(name)
+    forbidden_names[name] = nil
 end
 playerdata = {}
-defaults={}
-playerdata_functions={}
-delete_player_data=function(playername)
-    playerdata[playername]=nil
+defaults = {}
+playerdata_functions = {}
+function delete_player_data(playername)
+    playerdata[playername] = nil
 end
-create_player_data=function(playername)
-    playerdata[playername]={}
+function create_player_data(playername)
+    playerdata[playername] = {}
 end
-init_player_data=function(playername)
+function init_player_data(playername)
     modlib.table.add_all(playerdata[playername], defaults)
     for _, callback in ipairs(playerdata_functions) do
         callback(playerdata[playername])
     end
 end
-get_player_data=function(playername)
+function get_player_data(playername)
     return playerdata[playername]
 end
-get_property =function(playername, propertyname)
+function get_property(playername, propertyname)
     return get_player_data(playername)[propertyname]
 end
-set_property =function(playername, propertyname, propertyvalue)
-    get_player_data(playername)[propertyname]=propertyvalue
+function set_property(playername, propertyname, propertyvalue)
+    get_player_data(playername)[propertyname] = propertyvalue
 end
-get_property_default =function(propertyname)
+function get_property_default(propertyname)
     return defaults[propertyname]
 end
-set_property_default =function(propertyname, defaultvalue)
-    defaults[propertyname]=defaultvalue
+function set_property_default(propertyname, defaultvalue)
+    defaults[propertyname] = defaultvalue
 end
-add_playerdata_function=function(callback)
+function add_playerdata_function(callback)
     table.insert(playerdata_functions, callback)
 end
-get_color=function(player)
-    local sender_color=player:get_properties().nametag_color
+function get_color(player)
+    local sender_color = player:get_properties().nametag_color
     if sender_color then
         sender_color = minetest.rgba(sender_color.r, sender_color.g, sender_color.b)
     else
-        sender_color="#FFFFFF"
+        sender_color = "#FFFFFF"
     end
     return sender_color
 end
-get_color_table=function(player)
-    local sender_color=player:get_properties().nametag_color
-    return sender_color or {r=255, g=255, b=255}
+function get_color_table(player)
+    local sender_color = player:get_properties().nametag_color
+    return sender_color or {r = 255, g = 255, b = 255}
 end
-get_color_int=function(player)
-    local sender_color=player:get_properties().nametag_color
+function get_color_int(player)
+    local sender_color = player:get_properties().nametag_color
     if sender_color then
-        sender_color = sender_color.b + (sender_color.g*256) + (sender_color.r*256*256)
+        sender_color = sender_color.b + (sender_color.g * 256) + (sender_color.r * 256 * 256)
     else
-        sender_color=0xFFFFFF
+        sender_color = 0xFFFFFF
     end
     return sender_color
 end
 
-minetest.register_on_prejoinplayer(function(name, ip)
-    if forbidden_names[name] then
-        return "The name '"..name.."' is already used in the game and thus not allowed as playername."
+minetest.register_on_prejoinplayer(
+    function(name, ip)
+        if forbidden_names[name] then
+            return 'The name "' .. name .. '" is not allowed as a player name'
+        end
     end
-end )
+)
 
-minetest.register_on_joinplayer(function(player)
-    local playername=player:get_player_name()
-    create_player_data(playername)
-    init_player_data(playername)
-end)
+minetest.register_on_joinplayer(
+    function(player)
+        local playername = player:get_player_name()
+        create_player_data(playername)
+        init_player_data(playername)
+    end
+)
 
-minetest.register_on_leaveplayer(function(player)
-    local playername=player:get_player_name()
-    delete_player_data(playername)
-end)
+minetest.register_on_leaveplayer(
+    function(player)
+        local playername = player:get_player_name()
+        delete_player_data(playername)
+    end
+)

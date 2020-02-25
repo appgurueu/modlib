@@ -1,4 +1,4 @@
-# modlib
+# Modding Library (`modlib`)
 
 Multipurpose Minetest Modding Library
 
