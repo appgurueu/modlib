@@ -33,23 +33,7 @@ if _VERSION then
     end
 end
 
--- MT shorthands
-mt = minetest
-MT = mt
-
--- TODO automatically know current mod
-
--- get modpath wrapper
-function get_resource(modname, resource)
-    return minetest.get_modpath(modname) .. "/" .. resource
-end
-
--- get resource + dofile
-function include(modname, file)
-    dofile(get_resource(modname, file))
-end
-
-function loadfile_exports(filename)
+local function loadfile_exports(filename)
     local env = setmetatable({}, {__index = _G, __call = _G})
     local file = assert(loadfile(filename))
     setfenv(file, env)
@@ -57,33 +41,10 @@ function loadfile_exports(filename)
     return env
 end
 
--- loadfile with table env
-function include_class(classname, filename)
-    _G[classname] = setmetatable(_G[classname] or {}, {__index = _G, __call = _G})
-    local class = assert(loadfile(filename))
-    setfenv(class, _G[classname])
-    class()
-    return _G[classname]
-end
-
--- runs main.lua in table env
-function include_mod(modname)
-    include_class(modname, get_resource(modname, "main.lua"))
-end
-
-function extend_mod(modname, filename)
-    include_class(modname, get_resource(modname, filename .. ".lua"))
-end
-
-function extend_mod_string(modname, string)
-    _G[modname] = setmetatable(_G[modname] or {}, {__index = _G, __call = _G})
-    local string = assert(loadstring(string))
-    setfenv(string, _G[modname])
-    string()
-    return _G[modname]
-end
+-- TODO automatically know current mod
 
 local components = {
+    mod = {},
     class = {class = "global"},
     conf = {conf = "global"},
     data = {data = "global"},
@@ -93,7 +54,7 @@ local components = {
     number = {number_ext = "global"},
     player = {player_ext = "global"},
     table = {table_ext = "global"},
-    text = {string_ext = "global"},
+    text = {string_ext = "global", string = "local"},
     threading = {threading_ext = "global"}
 }
 
@@ -110,5 +71,7 @@ for component, additional in pairs(components) do
         end
     end
 end
+
+modlib.mod.loadfile_exports = loadfile_exports
 
 _ml = modlib
