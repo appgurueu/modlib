@@ -9,7 +9,7 @@ function include(modname, file)
 end
 
 -- loadfile with table env
-function include_class(classname, filename)
+function include_namespace(classname, filename)
     _G[classname] = setmetatable(_G[classname] or {}, {__index = _G, __call = _G})
     local class = assert(loadfile(filename))
     setfenv(class, _G[classname])
@@ -18,15 +18,18 @@ function include_class(classname, filename)
 end
 
 -- runs main.lua in table env
-function include_mod(modname)
-    include_class(modname, get_resource(modname, "main.lua"))
+-- formerly include_mod
+function init(modname)
+    include_namespace(modname, get_resource(modname, "main.lua"))
 end
 
-function extend_mod(modname, filename)
-    include_class(modname, get_resource(modname, filename .. ".lua"))
+-- formerly extend_mod
+function extend(modname, filename)
+    include_namespace(modname, get_resource(modname, filename .. ".lua"))
 end
 
-function extend_mod_string(modname, string)
+-- formerly extend_mod_string
+function extend_string(modname, string)
     _G[modname] = setmetatable(_G[modname] or {}, {__index = _G, __call = _G})
     local string = assert(loadstring(string))
     setfenv(string, _G[modname])

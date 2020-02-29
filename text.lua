@@ -37,7 +37,7 @@ function trim_begin(str, to_remove)
 end
 
 function split(str, delim, limit)
-    if not limit then return string_ext.split_without_limit(str, delim) end
+    if not limit then return split_without_limit(str, delim) end
     local parts = {}
     local occurences = 1
     local last_index = 1
@@ -72,8 +72,8 @@ letter_a = string.byte("A")
 letter_f = string.byte("F")
 
 function is_hexadecimal(byte)
-    return (byte >= zero and byte <= string_ext.nine) or
-               (byte >= string_ext.letter_a and byte <= string_ext.letter_f)
+    return (byte >= zero and byte <= nine) or
+               (byte >= letter_a and byte <= letter_f)
 end
 
 magic_chars = {
@@ -81,7 +81,7 @@ magic_chars = {
 }
 
 function escape_magic_chars(text)
-    for _, magic_char in ipairs(string_ext.magic_chars) do
+    for _, magic_char in ipairs(magic_chars) do
         text = string.gsub(text, "%" .. magic_char, "%%" .. magic_char)
     end
     return text

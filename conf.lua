@@ -17,7 +17,7 @@ function load_or_create(filename, replacement_file, constraints)
     return load(filename, constraints)
 end
 function import(modname,constraints)
-    return load_or_create(get_path(modname)..".json",get_resource(modname, "default_config.json"),constraints)
+    return load_or_create(get_path(modname)..".json", modlib.mod.get_resource(modname, "default_config.json"),constraints)
 end
 function check_constraints(value, constraints)
     local t=type(value)

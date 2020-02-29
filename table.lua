@@ -150,7 +150,7 @@ function unique(table)
     for val in ipairs(table) do
         lookup[val] = true
     end
-    return table_ext.keys(lookup)
+    return keys(lookup)
 end
 
 function rpairs(t)
@@ -185,11 +185,11 @@ function best_value(table, is_better_fnc)
 end
 
 function min(table)
-    return table_ext.best_value(table, function(v, m) return v < m end)
+    return best_value(table, function(v, m) return v < m end)
 end
 
 function max(table)
-    return table_ext.best_value(table, function(v, m) return v > m end)
+    return best_value(table, function(v, m) return v > m end)
 end
 
 function binary_search(list, value)

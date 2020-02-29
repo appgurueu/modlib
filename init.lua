@@ -33,6 +33,11 @@ if _VERSION then
     end
 end
 
+-- get modpath wrapper
+local function get_resource(modname, resource)
+    return minetest.get_modpath(modname) .. "/" .. resource
+end
+
 local function loadfile_exports(filename)
     local env = setmetatable({}, {__index = _G, __call = _G})
     local file = assert(loadfile(filename))
@@ -45,17 +50,17 @@ end
 
 local components = {
     mod = {},
-    class = {class = "global"},
-    conf = {conf = "global"},
-    data = {data = "global"},
-    file = {file_ext = "global"},
-    log = {log = "global"},
-    minetest = {mt_ext = "global"},
-    number = {number_ext = "global"},
-    player = {player_ext = "global"},
-    table = {table_ext = "global"},
-    text = {string_ext = "global", string = "local"},
-    threading = {threading_ext = "global"}
+    class = {},
+    conf = {},
+    data = {},
+    file = {},
+    log = {},
+    minetest = {},
+    number = {},
+    player = {},
+    table = {},
+    text = {string = "local"},
+    threading = {}
 }
 
 modlib = {}
