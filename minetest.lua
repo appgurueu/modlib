@@ -63,6 +63,15 @@ function check_player_privs(playername, privtable)
     return missing_privs, to_lose_privs
 end
 
+function box_box_collision(a, b)
+    for i=1, 3 do
+        if a[i] < (b[i] + b[i+3]) or b[i] < (a[i] + a[i+3]) then
+            return false
+        end
+    end
+    return true
+end
+
 minetest.register_globalstep(function(dtime)
     for k, v in pairs(delta_times) do
         local v=dtime+v

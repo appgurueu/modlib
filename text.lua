@@ -1,5 +1,11 @@
 -- TODO probably set string metatables ?
 -- String helpers - split & trim at end & begin
+function upper_first(str)
+    return str:sub(1,1):upper()..str:sub(2)
+end
+function lower_first(str)
+    return str:sub(1,1):lower()..str:sub(2)
+end
 function starts_with(str, start) return str:sub(1, start:len()) == start end
 function ends_with(str, suffix)
     return str:sub(str:len() - suffix:len() + 1) == suffix

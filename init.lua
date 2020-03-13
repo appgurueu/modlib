@@ -5,6 +5,7 @@ if _VERSION then
     end
     if _VERSION > "Lua 5.1" then -- TODO automatically use _ENV instead of s/getfenv if _VERSION > 5.1
         -- not throwing error("Too new Lua version! modlib requires Lua 5.1 or smaller.") anymore
+        unpack = unpack or table.unpack -- unpack was moved to table.unpack in Lua 5.2
         loadstring = load
         function setfenv(fn, env)
             local i = 1

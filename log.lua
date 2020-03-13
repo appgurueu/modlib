@@ -45,6 +45,10 @@ function write_all_to_file()
         write_to_file(name, channel, current_date)
     end
 end
+function write_safe(channelname, msg)
+    write(channelname, msg)
+    write_all_to_file()
+end
 
 local timer = 0
 
