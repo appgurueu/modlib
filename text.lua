@@ -1,4 +1,3 @@
--- TODO probably set string metatables ?
 -- String helpers - split & trim at end & begin
 function upper_first(str)
     return str:sub(1,1):upper()..str:sub(2)

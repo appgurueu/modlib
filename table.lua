@@ -47,6 +47,8 @@ function tablecopy(t)
     return table.copy(t)
 end
 
+copy = tablecopy
+
 function count(table)
     local count = 0
     for _ in pairs(table) do
@@ -59,10 +61,29 @@ function is_empty(table)
     return next(table) == nil
 end
 
+function foreach(t, func)
+    for k, v in pairs(t) do
+        func(k, v)
+    end
+end
+
+function foreach_value(t, func)
+    for _, v in pairs(t) do
+        func(v)
+    end
+end
+
+function foreach_key(t, func)
+    for k, _ in pairs(t) do
+        func(k)
+    end
+end
+
 function map(t, func)
     for k, v in pairs(t) do
         t[k]=func(v)
     end
+    return t
 end
 
 function process(t, func)
@@ -79,13 +100,16 @@ function call(funcs, ...)
     end
 end
 
-function merge_tables(table1, table2)
-    local table1copy = table.copy(table1)
-    for key, value in pairs(table2) do
-        table1copy[key] = value
+function find(list, value)
+    for index, other_value in pairs(list) do
+        if value == other_value then
+            return index
+        end
     end
-    return table1copy
+    return false
 end
+
+contains = find
 
 function difference(table1, table2)
     local result={}
@@ -103,6 +127,31 @@ function add_all(dst, new)
         dst[key] = value
     end
     return dst
+end
+
+function complete(dst, new)
+    for key, value in pairs(new) do
+        if  dst[key] == nil then
+            dst[key] = value
+        end
+    end
+    return dst
+end
+
+function merge_tables(table1, table2)
+    return add_all(copy(table1), table2)
+end
+
+union = merge_tables
+
+function intersection(t1, t2)
+    local result = {}
+    for key, value in pairs(t1) do
+        if t2[key] then
+            result[key] = value
+        end
+    end
+    return result
 end
 
 function append(t1, t2)
@@ -192,15 +241,42 @@ function max(table)
     return best_value(table, function(v, m) return v > m end)
 end
 
-function binary_search(list, value)
-    local min, size = 1, #list
-    while size > 1 do
-        local s_half = math.floor(size / 2)
-        local pivot = min + s_half
-        local element = list[pivot]
-        if value > element then
-            min = pivot
-        end
-        size = s_half
+function default_comparator(a, b)
+    if a == b then
+        return 0
     end
+    if a > b then
+        return 1
+    end
+    return -1
+end
+
+function binary_search_comparator(comparator)
+    -- if found, returns index; if not found, returns -index for insertion
+    function binary_search(list, value)
+        local min, max = 1, #list
+        while min <= max do
+            local pivot = min + math.floor((max-min)/2)
+            local element = list[pivot]
+            local compared = comparator(value, element)
+            if compared == 0 then
+                return pivot
+            elseif compared > 0 then
+                min = pivot+1
+            else
+                max = pivot-1
+            end
+        end
+        return -min
+    end
+end
+
+binary_search = binary_search_comparator(default_comparator)
+
+function reverse(list)
+    local len = #list
+    for i = 1, math.floor(#list/2) do
+        list[len-i+1], list[i] = list[i], list[len-i+1]
+    end
+    return list
 end

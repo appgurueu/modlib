@@ -7,7 +7,7 @@ function define(name, def)
 end
 function new(classname, ...)
     local obj = get(classname).new(...)
-    obj = setmetatable(obj, {__index = classes[classname]}) -- TODO ? metatable add __call with setfenv
+    obj = setmetatable(obj, {__index = classes[classname]})
     return obj
 end
 function get(classname)

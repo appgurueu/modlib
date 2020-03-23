@@ -9,12 +9,13 @@ function include(modname, file)
 end
 
 -- loadfile with table env
-function include_namespace(classname, filename)
-    _G[classname] = setmetatable(_G[classname] or {}, {__index = _G, __call = _G})
+function include_namespace(classname, filename, parent_namespace)
+    parent_namespace = parent_namespace or _G
+    parent_namespace[classname] = setmetatable(parent_namespace[classname] or {}, {__index = parent_namespace, __call = parent_namespace})
     local class = assert(loadfile(filename))
-    setfenv(class, _G[classname])
+    setfenv(class, parent_namespace[classname])
     class()
-    return _G[classname]
+    return parent_namespace[classname]
 end
 
 -- runs main.lua in table env

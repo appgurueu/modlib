@@ -1,5 +1,4 @@
 -- MT extension
--- TODO add formspec queues and event system + sync handler
 delta_times={}
 delays={}
 callbacks={}

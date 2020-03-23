@@ -3,7 +3,7 @@ if _VERSION then
     if _VERSION < "Lua 5" then
         error("Outdated Lua version! modlib requires Lua 5 or greater.")
     end
-    if _VERSION > "Lua 5.1" then -- TODO automatically use _ENV instead of s/getfenv if _VERSION > 5.1
+    if _VERSION > "Lua 5.1" then
         -- not throwing error("Too new Lua version! modlib requires Lua 5.1 or smaller.") anymore
         unpack = unpack or table.unpack -- unpack was moved to table.unpack in Lua 5.2
         loadstring = load
@@ -47,14 +47,13 @@ local function loadfile_exports(filename)
     return env
 end
 
--- TODO automatically know current mod
-
 local components = {
     mod = {},
     class = {},
     conf = {},
     data = {},
     file = {},
+    func = {},
     log = {},
     minetest = {},
     number = {},
@@ -79,5 +78,8 @@ for component, additional in pairs(components) do
 end
 
 modlib.mod.loadfile_exports = loadfile_exports
+
+-- complete the string library (=metatable) with text helpers
+modlib.table.complete(string, modlib.text)
 
 _ml = modlib
