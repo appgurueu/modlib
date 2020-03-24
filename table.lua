@@ -1,4 +1,13 @@
 -- Table helpers
+
+-- Fisher-Yates
+function shuffle(t)
+    for i = 1, #t-1 do
+        t[i] = t[math.random(i+1, #t)]
+    end
+    return t
+end
+
 function equals(t1, t2)
     local is_equal = t1 == t2
     if type(t1) ~= "table" or type(t2) ~= "table" then
