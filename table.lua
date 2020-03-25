@@ -3,7 +3,8 @@
 -- Fisher-Yates
 function shuffle(t)
     for i = 1, #t-1 do
-        t[i] = t[math.random(i+1, #t)]
+        local j = math.random(i+1, #t)
+        t[i], t[j] = t[j], t[i]
     end
     return t
 end
