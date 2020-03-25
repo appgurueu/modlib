@@ -3,9 +3,9 @@ function get_path(confname)
     return minetest.get_worldpath().."/config/"..confname
 end
 function load (filename, constraints)
-    local config=minetest.parse_json(modlib.file.read(filename))
+    local config = minetest.parse_json(modlib.file.read(filename))
     if constraints then
-        local error_message=check_constraints(config, constraints)
+        local error_message = check_constraints(config, constraints)
         if error_message then
             error("Configuration - "..filename.." doesn't satisfy constraints : "..error_message)
         end
@@ -16,8 +16,8 @@ function load_or_create(filename, replacement_file, constraints)
     modlib.file.create_if_not_exists_from_file(filename, replacement_file)
     return load(filename, constraints)
 end
-function import(modname,constraints)
-    return load_or_create(get_path(modname)..".json", modlib.mod.get_resource(modname, "default_config.json"),constraints)
+function import(modname, constraints)
+    return load_or_create(get_path(modname)..".json", modlib.mod.get_resource(modname, "default_config.json"), constraints)
 end
 function check_constraints(value, constraints)
     local t=type(value)
