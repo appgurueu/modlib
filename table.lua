@@ -1,7 +1,7 @@
 -- Table helpers
 
 function map_index(table, func)
-    return setmetatable(roles, {
+    return setmetatable(table, {
         __index = function(table, key)
             return rawget(table, func(key))
         end,
