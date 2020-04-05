@@ -7,7 +7,7 @@ function load (filename, constraints)
     if constraints then
         local error_message = check_constraints(config, constraints)
         if error_message then
-            error("Configuration - "..filename.." doesn't satisfy constraints : "..error_message)
+            error("Configuration - "..filename.." doesn't satisfy constraints: "..error_message)
         end
     end
     return config
@@ -28,22 +28,22 @@ function check_constraints(value, constraints)
         end
     end
     if constraints.type and constraints.type~=t then
-        return "Wrong type : Expected "..constraints.type..", found "..t
+        return "Wrong type: Expected "..constraints.type..", found "..t
     end
     if (t == "number" or t == "string") and constraints.range then
         if value < constraints.range[1] or (constraints.range[2] and value > constraints.range[2]) then
-            return "Not inside range : Expected value >= "..constraints.range[1].." and <= "..constraints.range[1]..", found "..minetest.write_json(value)
+            return "Not inside range: Expected value >= "..constraints.range[1].." and <= "..constraints.range[1]..", found "..minetest.write_json(value)
         end
     end
     if constraints.possible_values and not constraints.possible_values[value] then
-        return "None of the possible values : Expected one of "..minetest.write_json(modlib.table.keys(constraints.possible_values))..", found "..minetest.write_json(value)
+        return "None of the possible values: Expected one of "..minetest.write_json(modlib.table.keys(constraints.possible_values))..", found "..minetest.write_json(value)
     end
     if t == "table" then
         if constraints.children then
             for k, v in pairs(value) do
                 local child=constraints.children[k]
                 if not child then
-                    return "Unexpected table entry : Expected one of "..minetest.write_json(modlib.table.keys(constraints.children))..", found "..minetest.write_json(k)
+                    return "Unexpected table entry: Expected one of "..minetest.write_json(modlib.table.keys(constraints.children))..", found "..minetest.write_json(k)
                 else
                     local possible_errors=check_constraints(v, child)
                     if possible_errors then
@@ -53,7 +53,7 @@ function check_constraints(value, constraints)
             end
             for k, _ in pairs(constraints.children) do
                 if value[k] == nil then
-                    return "Table entry missing : Expected key "..minetest.write_json(k).." to be present in table "..minetest.write_json(value)
+                    return "Table entry missing: Expected key "..minetest.write_json(k).." to be present in table "..minetest.write_json(value)
                 end
             end
         end
@@ -66,7 +66,7 @@ function check_constraints(value, constraints)
                         return possible_errors
                     end
                 else
-                    return "Table entry missing : Expected key "..minetest.write_json(k).." to be present in table "..minetest.write_json(value)
+                    return "Table entry missing: Expected key "..minetest.write_json(k).." to be present in table "..minetest.write_json(value)
                 end
             end
         end

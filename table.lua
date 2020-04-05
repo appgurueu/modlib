@@ -1,5 +1,20 @@
 -- Table helpers
 
+function map_index(table, func)
+    return setmetatable(roles, {
+        __index = function(table, key)
+            return rawget(table, func(key))
+        end,
+        __newindex = function(table, key, value)
+            rawset(table, func(key), value)
+        end
+    })
+end
+
+function set_case_insensitive_index(table)
+    return map_index(table, string.lower)
+end
+
 -- Fisher-Yates
 function shuffle(t)
     for i = 1, #t-1 do
