@@ -1,6 +1,6 @@
 -- Make random random
 math.randomseed(minetest.get_us_time())
-for i = 1, 3 do
+for i = 1, 100 do
     math.random()
 end
 -- Number helpers
