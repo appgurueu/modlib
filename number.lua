@@ -1,3 +1,8 @@
+-- Make random random
+math.randomseed(minetest.get_us_time())
+for i = 1, 3 do
+    math.random()
+end
 -- Number helpers
 function round(number, steps) -- Rounds a number
     steps = steps or 1
