@@ -77,6 +77,8 @@ for component, additional in pairs(components) do
     end
 end
 
+modlib.conf.build_setting_tree()
+
 modlib.mod.loadfile_exports = loadfile_exports
 
 -- complete the string library (=metatable) with text helpers

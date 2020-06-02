@@ -41,33 +41,56 @@ function trim_begin(str, to_remove)
     return str:sub(j)
 end
 
-function split(str, delim, limit)
-    if not limit then return split_without_limit(str, delim) end
+trim_left = trim_begin
+
+function trim_end(str, to_remove)
+    local k = 1
+    for i = string.len(str), 1, -1 do
+        if str:sub(i, i) ~= to_remove then
+            k = i
+            break
+        end
+    end
+    return str:sub(1, k)
+end
+
+trim_right = trim_end
+
+function split(str, delim, limit, regex)
+    if not limit then return split_without_limit(str, delim, regex) end
+    local no_regex = not regex
     local parts = {}
     local occurences = 1
     local last_index = 1
-    local index = string.find(str, delim, 1, true)
+    local index = string.find(str, delim, 1, no_regex)
     while index and occurences < limit do
         table.insert(parts, string.sub(str, last_index, index - 1))
         last_index = index + string.len(delim)
-        index = string.find(str, delim, index + string.len(delim), true)
+        index = string.find(str, delim, index + string.len(delim), no_regex)
         occurences = occurences + 1
     end
     table.insert(parts, string.sub(str, last_index))
     return parts
 end
 
-function split_without_limit(str, delim)
+function split_without_limit(str, delim, regex)
+    local no_regex = not regex
     local parts = {}
     local last_index = 1
-    local index = string.find(str, delim, 1, true)
+    local index = string.find(str, delim, 1, no_regex)
     while index do
         table.insert(parts, string.sub(str, last_index, index - 1))
         last_index = index + string.len(delim)
-        index = string.find(str, delim, index + string.len(delim), true)
+        index = string.find(str, delim, index + string.len(delim), no_regex)
     end
     table.insert(parts, string.sub(str, last_index))
     return parts
+end
+
+split_unlimited = split_without_limit
+
+function split_lines(str, limit)
+    modlib.text.split(str, "\r?\n", limit, true)
 end
 
 hashtag = string.byte("#")
