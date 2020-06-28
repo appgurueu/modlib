@@ -305,3 +305,11 @@ function reverse(list)
     end
     return list
 end
+
+function repetition(value, count)
+    local table = {}
+    for i = 1, count do
+        table[i] = value
+    end
+    return table
+end

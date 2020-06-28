@@ -89,14 +89,27 @@ function load_or_create(filename, replacement_file, constraints)
 end
 function import(modname, constraints, no_settingtypes)
     local default_config = modlib.mod.get_resource(modname, "default_config.json")
+    local default_conf = minetest.parse_json(modlib.file.read(default_config))
     local config = load_or_create(get_path(modname)..".json", default_config, constraints)
+    local formats = {
+        { extension = ".lua", load = minetest.deserialize },
+        { extension = ".luon", load = function(text) minetest.deserialize("return "..text) end },
+        { extension = ".conf", load = function(text) return fix_types(build_tree(read_conf(text)), constraints) end }
+    }
+    for _, format in ipairs(formats) do
+        local conf = modlib.file.read(get_path(modname)..format.extension)
+        if conf then
+            config = merge_config(config, format.load(conf))
+        end
+    end
     if not no_settingtypes then
         constraints.name = modname
-        local settingtypes = generate_settingtypes(minetest.parse_json(modlib.file.read(default_config)), constraints)
+        local settingtypes = generate_settingtypes(default_conf, constraints)
         modlib.file.write(modlib.mod.get_resource(modname, "settingtypes.txt"), settingtypes)
     end
     local additional_settings = modlib.conf.settings[modname] or {}
     additional_settings = fix_types(additional_settings, constraints)
+    -- TODO implement merge_config_legal(default_conf, ...)
     config = merge_config(config, additional_settings)
     if constraints then
         check_config_constraints(config, constraints, function(message)

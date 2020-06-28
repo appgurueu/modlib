@@ -83,3 +83,14 @@ minetest.register_on_leaveplayer(
         delete_player_data(playername)
     end
 )
+
+function datatable(table, default)
+    table = table or {}
+    default = default or {}
+    minetest.register_on_joinplayer(function(player)
+        local name = player:get_player_name()
+        table[name] = table[name] or default
+    end)
+    minetest.register_on_leaveplayer(function(player) table[player:get_player_name()] = nil end)
+    return table
+end
