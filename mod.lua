@@ -1,39 +1,58 @@
 -- get modpath wrapper
 function get_resource(modname, resource)
+    if not resource then
+        resource = modname
+        modname = minetest.get_current_modname()
+    end
     return minetest.get_modpath(modname) .. "/" .. resource
 end
 
 -- get resource + dofile
 function include(modname, file)
+    if not file then
+        file = modname
+        modname = minetest.get_current_modname()
+    end
     dofile(get_resource(modname, file))
 end
 
--- loadfile with table env
-function include_namespace(classname, filename, parent_namespace)
+function include_env(file_or_string, env, is_string)
+    setfenv(assert((is_string and loadstring or loadfile)(file_or_string)), env)()
+end
+
+function create_namespace(namespace_name, parent_namespace)
+    namespace_name = namespace_name or minetest.get_current_modname()
     parent_namespace = parent_namespace or _G
-    parent_namespace[classname] = setmetatable(parent_namespace[classname] or {}, {__index = parent_namespace, __call = parent_namespace})
-    local class = assert(loadfile(filename))
-    setfenv(class, parent_namespace[classname])
-    class()
-    return parent_namespace[classname]
+    local namespace = setmetatable({}, {__index = parent_namespace})
+    parent_namespace[namespace_name] = namespace
+    -- prevent MT's warning
+    if parent_namespace == _G then
+        rawset(parent_namespace, namespace_name, namespace)
+    end
+    return namespace
+end
+
+-- formerly extend_mod
+function extend(modname, file)
+    if not file then
+        file = modname
+        modname = minetest.get_current_modname()
+    end
+    include_env(get_resource(modname, file .. ".lua"), _G[modname])
 end
 
 -- runs main.lua in table env
 -- formerly include_mod
 function init(modname)
-    include_namespace(modname, get_resource(modname, "main.lua"))
+    modname = modname or minetest.get_current_modname()
+    create_namespace(modname)
+    extend(modname, "main")
 end
 
--- formerly extend_mod
-function extend(modname, filename)
-    include_namespace(modname, get_resource(modname, filename .. ".lua"))
-end
-
--- formerly extend_mod_string
 function extend_string(modname, string)
-    _G[modname] = setmetatable(_G[modname] or {}, {__index = _G, __call = _G})
-    local string = assert(loadstring(string))
-    setfenv(string, _G[modname])
-    string()
-    return _G[modname]
+    if not string then
+        string = modname
+        modname = minetest.get_current_modname()
+    end
+    include_env(string, _G[modname], true)
 end
