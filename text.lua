@@ -132,22 +132,22 @@ function utf8(number)
     return string.char(256 - math.pow(2, 8 - i - 1) + number) .. result -- 256 = math.pow(2, 8)
 end
 
-function handle_ifndefs(code, vars)
+function handle_ifdefs(code, vars)
     local finalcode = {}
     local endif
     local after_endif = -1
-    local ifndef_pos, after_ifndef = string.find(code, "--IFNDEF", 1, true)
-    while ifndef_pos do
+    local ifdef_pos, after_ifdef = string.find(code, "--IFDEF", 1, true)
+    while ifdef_pos do
         table.insert(finalcode,
-                     string.sub(code, after_endif + 2, ifndef_pos - 1))
-        local linebreak = string.find(code, "\n", after_ifndef + 1, true)
-        local varname = string.sub(code, after_ifndef + 2, linebreak - 1)
+                     string.sub(code, after_endif + 2, ifdef_pos - 1))
+        local linebreak = string.find(code, "\n", after_ifdef + 1, true)
+        local varname = string.sub(code, after_ifdef + 2, linebreak - 1)
         endif, after_endif = string.find(code, "--ENDIF", linebreak + 1, true)
         if not endif then break end
         if vars[varname] then
             table.insert(finalcode, string.sub(code, linebreak + 1, endif - 1))
         end
-        ifndef_pos, after_ifndef = string.find(code, "--IFNDEF",
+        ifdef_pos, after_ifdef = string.find(code, "--IFDEF",
                                                after_endif + 1, true)
     end
     table.insert(finalcode, string.sub(code, after_endif + 2))
