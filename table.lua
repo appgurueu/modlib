@@ -16,43 +16,41 @@ function set_case_insensitive_index(table)
 end
 
 -- Fisher-Yates
-function shuffle(t)
-    for i = 1, #t-1 do
-        local j = math.random(i+1, #t)
-        t[i], t[j] = t[j], t[i]
+function shuffle(table)
+    for index = 1, #table - 1 do
+        local index_2 = math.random(index + 1, #table)
+        table[index], table[index_2] = table[index_2], table[index]
     end
-    return t
+    return table
 end
 
-function equals(t1, t2)
-    local is_equal = t1 == t2
-    if type(t1) ~= "table" or type(t2) ~= "table" then
+-- TODO circular equals
+function equals_noncircular(table_1, table_2)
+    local is_equal = table_1 == table_2
+    if is_equal or type(table_1) ~= "table" or type(table_2) ~= "table" then
         return is_equal
     end
-    if is_equal then
-        return true
-    end
-    if #t1 ~= #t2 then
+    if #table_1 ~= #table_2 then
         return false
     end
     local table_keys = {}
-    for k1, v1 in pairs(t1) do
-        local v2 = t2[k1]
-        if not equals(v1, v2) then
-            if type(k1) == "table" then
-                table_keys[k1] = v1
+    for key_1, value_1 in pairs(table_1) do
+        local value_2 = table_2[key_1]
+        if not equals_noncircular(value_1, value_2) then
+            if type(key_1) == "table" then
+                table_keys[key_1] = value_1
             else
                 return false
             end
         end
     end
-    for k2, v2 in pairs(t2) do
-        if type(k2) == "table" then
+    for key_2, value_2 in pairs(table_2) do
+        if type(key_2) == "table" then
             local found
-            for t, v in table_keys do
-                if equals(k2, t) and equals(v2, v) then
-                    table_keys[t] = nil
-                    found=true
+            for table, value in pairs(table_keys) do
+                if equals_noncircular(key_2, table) and equals_noncircular(value_2, value) then
+                    table_keys[table] = nil
+                    found = true
                     break
                 end
             end
@@ -60,7 +58,7 @@ function equals(t1, t2)
                 return false
             end
         else
-            if t1[k2] == nil then
+            if table_1[key_2] == nil then
                 return false
             end
         end
@@ -73,6 +71,45 @@ function tablecopy(t)
 end
 
 copy = tablecopy
+
+function deepcopy_noncircular(table)
+    local function _copy(value)
+        if type(value) == "table" then
+            return deepcopy_noncircular(value)
+        end
+        return value
+    end
+    local copy = {}
+    for key, value in pairs(table) do
+        copy[_copy(key)] = _copy(value)
+    end
+    return copy
+end
+
+function deepcopy(table)
+    local copies = {}
+    local function _deepcopy(table)
+        if copies[table] then
+            return copies[table]
+        end
+        local copy = {}
+        copies[table] = copy
+        local function _copy(value)
+            if type(value) == "table" then
+                if copies[value] then
+                    return copies[value]
+                end
+                return _deepcopy(value)
+            end
+            return value
+        end
+        for key, value in pairs(table) do
+            copy[_copy(key)] = _copy(value)
+        end
+        return copy
+    end
+    return _deepcopy(table)
+end
 
 function count(table)
     local count = 0
