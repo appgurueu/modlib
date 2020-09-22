@@ -34,13 +34,17 @@ if _VERSION then
     end
 end
 
--- get modpath wrapper
+-- TODO get rid of code duplication
 local function get_resource(modname, resource)
+    if not resource then
+        resource = modname
+        modname = minetest.get_current_modname()
+    end
     return minetest.get_modpath(modname) .. "/" .. resource
 end
 
 local function loadfile_exports(filename)
-    local env = setmetatable({}, {__index = _G, __call = _G})
+    local env = setmetatable({}, {__index = _G})
     local file = assert(loadfile(filename))
     setfenv(file, env)
     file()
@@ -60,13 +64,14 @@ local components = {
     player = {},
     table = {},
     text = {string = "local"},
-    threading = {}
+    threading = {},
+    vector = {}
 }
 
 modlib = {}
 
 for component, additional in pairs(components) do
-    local comp = loadfile_exports(get_resource("modlib", component .. ".lua"))
+    local comp = loadfile_exports(get_resource(component .. ".lua"))
     modlib[component] = comp
     for alias, scope in pairs(additional) do
         if scope == "global" then
@@ -81,7 +86,8 @@ modlib.conf.build_setting_tree()
 
 modlib.mod.loadfile_exports = loadfile_exports
 
--- complete the string library (=metatable) with text helpers
-modlib.table.complete(string, modlib.text)
-
 _ml = modlib
+
+--[[
+--modlib.mod.include("test.lua")
+]]
