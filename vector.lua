@@ -18,17 +18,19 @@ function to_minetest(v)
 end
 
 function combine(v1, v2, f)
-    local v = {}
-    for k, c in pairs(v1) do
-        v[k] = f(c, v2[k])
+    local new_vector = {}
+    for key, value in pairs(v1) do
+        new_vector[key] = f(value, v2[key])
     end
-    return new(v)
+    return new(new_vector)
 end
 
 function apply(v, s, f)
-    for i, c in pairs(v) do
-        v[i] = f(c, s)
+    local new_vector = {}
+    for key, value in pairs(v) do
+        new_vector[key] = f(value, s)
     end
+    return new(new_vector)
 end
 
 function combinator(f)
@@ -44,10 +46,18 @@ subtract, subtract_scalar = combinator(function(a, b) return a - b end)
 multiply, multiply_scalar = combinator(function(a, b) return a * b end)
 divide, divide_scalar = combinator(function(a, b) return a / b end)
 
-function length(v)
+function norm(v)
     local sum = 0
     for _, c in pairs(v) do
         sum = sum + c*c
     end
-    return math.sqrt(sum)
+    return sum
+end
+
+function length(v)
+    return math.sqrt(norm(v))
+end
+
+function normalize(v)
+    return divide_scalar(v, length(v))
 end
