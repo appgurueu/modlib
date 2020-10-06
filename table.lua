@@ -148,6 +148,14 @@ function map(t, func)
     return t
 end
 
+function map_keys(tab, func)
+    local new_tab = {}
+    for key, value in pairs(tab) do
+        new_tab[func(key)] = value
+    end
+    return new_tab
+end
+
 function process(t, func)
     local r={}
     for k, v in pairs(t) do
@@ -315,7 +323,7 @@ end
 
 function binary_search_comparator(comparator)
     -- if found, returns index; if not found, returns -index for insertion
-    function binary_search(list, value)
+    return function(list, value)
         local min, max = 1, #list
         while min <= max do
             local pivot = min + math.floor((max-min)/2)
