@@ -1,3 +1,4 @@
+max_wear = math.pow(2, 16) - 1
 function override(function_name, function_builder)
     local func = minetest[function_name]
     minetest["original_" .. function_name] = func
