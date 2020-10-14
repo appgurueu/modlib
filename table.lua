@@ -166,7 +166,7 @@ end
 
 function call(funcs, ...)
     for _, func in ipairs(funcs) do
-        func(unpack(arg))
+        func(...)
     end
 end
 
