@@ -24,10 +24,11 @@ function create_namespace(namespace_name, parent_namespace)
     namespace_name = namespace_name or minetest.get_current_modname()
     parent_namespace = parent_namespace or _G
     local namespace = setmetatable({}, {__index = parent_namespace})
-    parent_namespace[namespace_name] = namespace
     -- prevent MT's warning
     if parent_namespace == _G then
         rawset(parent_namespace, namespace_name, namespace)
+    else
+        parent_namespace[namespace_name] = namespace
     end
     return namespace
 end
