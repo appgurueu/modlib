@@ -72,6 +72,14 @@ end
 
 copy = tablecopy
 
+function shallowcopy(table)
+    local copy = {}
+    for key, value in pairs(table) do
+        copy[key] = value
+    end
+    return copy
+end
+
 function deepcopy_noncircular(table)
     local function _copy(value)
         if type(value) == "table" then
