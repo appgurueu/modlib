@@ -136,3 +136,120 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         end
     end
 end)
+
+liquid_level_max = 8
+--+ Calculates the flow direction of a flowingliquid node
+--# as returned by `minetest.get_node`
+--> 4 corner levels from 0 to 1 as list
+function get_liquid_corner_levels(pos, node)
+    local def = minetest.registered_nodes[node.name]
+    if not (def and def.drawtype == "flowingliquid") then return pointed_thing end
+    local source, flowing = def.liquid_alternative_source, node.name
+    local range = def.liquid_range or liquid_level_max
+    local neighbors = {}
+    for x = -1, 1 do
+        neighbors[x] = {}
+        for z = -1, 1 do
+            local neighbor_pos = {x = pos.x + x, y = pos.y, z = pos.z + z}
+            local neighbor_node = minetest.get_node(neighbor_pos)
+            local level
+            if neighbor_node.name == source then
+                level = 1
+            elseif neighbor_node.name == flowing then
+                local neighbor_level = neighbor_node.param2 % 8
+                level = (math.max(0, neighbor_level - liquid_level_max + range) + 0.5) / range
+            end
+            neighbor_pos.y = neighbor_pos.y + 1
+            local node_above = minetest.get_node(neighbor_pos)
+            neighbors[x][z] = {
+                air = neighbor_node.name == "air",
+                level = level,
+                above_is_same_liquid = node_above.name == flowing or node_above.name == source
+            }
+        end
+    end
+    local function get_corner_level(x, z)
+        local air_neighbor
+        local levels = 0
+        local neighbor_count = 0
+        for nx = x - 1, x do
+            for nz = z - 1, z do
+                local neighbor = neighbors[nx][nz]
+                if neighbor.above_is_same_liquid then
+                    return 1
+                end
+                local level = neighbor.level
+                if level then
+                    if level == 1 then
+                        return 1
+                    end
+                    levels = levels + level
+                    neighbor_count = neighbor_count + 1
+                elseif neighbor.air then
+                    if air_neighbor then
+                        return 0.02
+                    end
+                    air_neighbor = true
+                end
+            end
+        end
+        if neighbor_count == 0 then
+            return 0
+        end
+        return levels / neighbor_count
+    end
+    local corner_levels = {
+        {x = 0, z = 0},
+        {x = 1, z = 0},
+        {x = 1, z = 1},
+        {x = 0, z = 1}
+    }
+    for _, corner_level in pairs(corner_levels) do
+        corner_level.y = get_corner_level(corner_level.x, corner_level.z)
+    end
+    return corner_levels
+end
+
+flowing_downwards = vector.new(0, -1, 0)
+--+ Calculates the flow direction of a flowingliquid node
+--# as returned by `minetest.get_node`
+--> `modlib.minetest.flowing_downwards = vector.new(0, -1, 0)` if only flowing downwards
+--> surface direction as `vector` else
+function get_liquid_flow_direction(pos, node)
+    local corner_levels = get_liquid_corner_levels(pos, node)
+    local max_level = corner_levels[1].y
+    for index = 2, 4 do
+        local level = corner_levels[index].y
+        if level > max_level then
+            max_level = level
+        end
+    end
+    local dir = vector.new(0, 0, 0)
+    local count = 0
+    for max_level_index, corner_level in pairs(corner_levels) do
+        if corner_level.y == max_level then
+            for offset = 1, 3 do
+                local index = (max_level_index + offset - 1) % 4 + 1
+                local diff = vector.subtract(corner_level, corner_levels[index])
+                if diff.y ~= 0 then
+                    diff.x = diff.x * diff.y
+                    diff.z = diff.z * diff.y
+                    if offset == 3 then
+                        diff = vector.divide(diff, math.sqrt(2))
+                    end
+                    dir = vector.add(dir, diff)
+                    count = count + 1
+                end
+            end
+        end
+    end
+    if count ~= 0 then
+        dir = vector.divide(dir, count)
+    end
+    if vector.equals(dir, vector.new(0, 0, 0)) then
+        if node.param2 % 32 > 7 then
+            return flowing_downwards
+        end
+    end
+    return dir
+end
