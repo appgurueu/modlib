@@ -15,6 +15,21 @@ function set_case_insensitive_index(table)
     return map_index(table, string.lower)
 end
 
+function nilget(table, key, ...)
+    assert(key ~= nil)
+    local function nilget(table, key, ...)
+        if key == nil then
+            return table
+        end
+        local value = table[key]
+        if value == nil then
+            return nil
+        end
+        return nilget(value, ...)
+    end
+    return nilget(table, key, ...)
+end
+
 -- Fisher-Yates
 function shuffle(table)
     for index = 1, #table - 1 do
