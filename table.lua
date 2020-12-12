@@ -133,6 +133,9 @@ function deepcopy(table)
     return _deepcopy(table)
 end
 
+tablecopy = deepcopy
+copy = deepcopy
+
 function count(table)
     local count = 0
     for _ in pairs(table) do
