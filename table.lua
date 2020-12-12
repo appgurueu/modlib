@@ -39,7 +39,6 @@ function shuffle(table)
     return table
 end
 
--- TODO circular equals
 function equals_noncircular(table_1, table_2)
     local is_equal = table_1 == table_2
     if is_equal or type(table_1) ~= "table" or type(table_2) ~= "table" then
@@ -146,45 +145,57 @@ function is_empty(table)
     return next(table) == nil
 end
 
-function foreach(t, func)
-    for k, v in pairs(t) do
+function foreach(table, func)
+    for k, v in pairs(table) do
         func(k, v)
     end
 end
 
-function foreach_value(t, func)
-    for _, v in pairs(t) do
+function foreach_value(table, func)
+    for _, v in pairs(table) do
         func(v)
     end
 end
 
-function foreach_key(t, func)
-    for k, _ in pairs(t) do
-        func(k)
+function call(table, ...)
+    for _, func in pairs(table) do
+        func(...)
     end
 end
 
-function map(t, func)
-    for k, v in pairs(t) do
-        t[k]=func(v)
+function icall(table, ...)
+    for _, func in ipairs(table) do
+        func(...)
     end
-    return t
 end
 
-function map_keys(tab, func)
+function foreach_key(table, func)
+    for key, _ in pairs(table) do
+        func(key)
+    end
+end
+
+function map(table, func)
+    for key, value in pairs(table) do
+        table[key] = func(value)
+    end
+    return table
+end
+
+function map_keys(table, func)
     local new_tab = {}
-    for key, value in pairs(tab) do
+    for key, value in pairs(table) do
         new_tab[func(key)] = value
     end
     return new_tab
 end
 
-function process(t, func)
-    local r={}
-    for k, v in pairs(t) do
-        table.insert(r, func(k,v))
+function process(table, func)
+    local results = {}
+    for key, value in pairs(table) do
+        table.insert(results, func(key,value))
     end
-    return r
+    return results
 end
 
 function call(funcs, ...)
@@ -204,160 +215,171 @@ end
 
 contains = find
 
-function difference(table1, table2)
-    local result={}
-    for k, v in pairs(table2) do
-        local v2=table1[v]
-        if v2~=v then
-            result[k]=v
-        end
-    end
-    return result
-end
-
-function add_all(dst, new)
-    for key, value in pairs(new) do
-        dst[key] = value
-    end
-    return dst
-end
-
-function complete(dst, new)
-    for key, value in pairs(new) do
-        if  dst[key] == nil then
-            dst[key] = value
-        end
-    end
-    return dst
-end
-
-function merge_tables(table1, table2)
-    return add_all(copy(table1), table2)
-end
-
-union = merge_tables
-
-function intersection(t1, t2)
+function difference(table, other_table)
     local result = {}
-    for key, value in pairs(t1) do
-        if t2[key] then
+    for key, value in pairs(other_table) do
+        if table[value] ~= value then
             result[key] = value
         end
     end
     return result
 end
 
-function append(t1, t2)
-    local l=#t1
-    for k, v in ipairs(t2) do
-        t1[l+k]=v
+function add_all(table, additions)
+    for key, value in pairs(additions) do
+        table[key] = value
     end
-    return t1
+    return table
 end
 
-function keys(t)
+function complete(table, completions)
+    for key, value in pairs(completions) do
+        if table[key] == nil then
+            table[key] = value
+        end
+    end
+    return table
+end
+
+function deepcomplete(table, completions)
+    for key, value in pairs(completions) do
+        if table[key] == nil then
+            table[key] = value
+        elseif type(table[key]) == "table" and type(value) == "table" then
+            deepcomplete(table[key], value)
+        end
+    end
+    return table
+end
+
+function merge_tables(table, other_table)
+    return add_all(copy(table), other_table)
+end
+
+union = merge_tables
+
+function intersection(table, other_table)
+    local result = {}
+    for key, value in pairs(table) do
+        if other_table[key] then
+            result[key] = value
+        end
+    end
+    return result
+end
+
+function append(table, other_table)
+    local length = #table
+    for index, value in ipairs(other_table) do
+        table[length + index] = value
+    end
+    return table
+end
+
+function keys(table)
     local keys = {}
-    for key, _ in pairs(t) do
-        table.insert(keys, key)
+    for key, _ in pairs(table) do
+        keys[#keys + 1] = key
     end
     return keys
 end
 
-function values(t)
+function values(table)
     local values = {}
-    for key, _ in pairs(t) do
-        table.insert(values, key)
+    for _, value in pairs(table) do
+        values[#values + 1] = value
     end
     return values
 end
 
 function flip(table)
     local flipped = {}
-    for key, val in pairs(table) do
-        flipped[val] = key
+    for key, value in pairs(table) do
+        flipped[value] = key
     end
     return flipped
 end
 
 function set(table)
     local flipped = {}
-    for _, val in pairs(table) do
-        flipped[val] = true
+    for _, value in pairs(table) do
+        flipped[value] = true
     end
     return flipped
 end
 
 function unique(table)
     local lookup = {}
-    for val in ipairs(table) do
-        lookup[val] = true
+    for _, value in pairs(table) do
+        lookup[value] = true
     end
     return keys(lookup)
 end
 
-function rpairs(t)
-    local i = #t
-    return function ()
-        if i >= 1 then
-            local v=t[i]
-            i = i-1
-            if v then
-                return i+1, v
+function rpairs(table)
+    local index = #table
+    return function()
+        if index >= 1 then
+            local value = table[index]
+            index = index - 1
+            if value ~= nil then
+                return index + 1, value
             end
         end
     end
 end
 
-function best_value(table, is_better_fnc)
-    if not table or not is_better_fnc then
-        return nil
+function best_value(table, is_better_func)
+    local best = next(table)
+    if best == nil then
+        return
     end
-    local l=#table
-    if l==0 then
-        return nil
-    end
-    local m=table[1]
-    for i=2, l do
-        local v=table[i]
-        if is_better_fnc(v, m) then
-            m=v
+    local candidate = best
+    while true do
+        candidate = next(table, candidate)
+        if candidate == nil then
+            return best
+        end
+        if is_better_func(candidate, best) then
+            best = candidate
         end
     end
-    return m
+    error()
 end
 
 function min(table)
-    return best_value(table, function(v, m) return v < m end)
+    return best_value(table, function(value, other_value) return value < other_value end)
 end
 
 function max(table)
-    return best_value(table, function(v, m) return v > m end)
+    return best_value(table, function(value, other_value) return value > other_value end)
 end
 
-function default_comparator(a, b)
-    if a == b then
+function default_comparator(value, other_value)
+    if value == other_value then
         return 0
     end
-    if a > b then
+    if value > other_value then
         return 1
     end
     return -1
 end
 
+--> index if element found
+--> -index for insertion if not found
 function binary_search_comparator(comparator)
-    -- if found, returns index; if not found, returns -index for insertion
     return function(list, value)
         local min, max = 1, #list
         while min <= max do
-            local pivot = min + math.floor((max-min)/2)
+            local pivot = min + math.floor((max - min) / 2)
             local element = list[pivot]
             local compared = comparator(value, element)
             if compared == 0 then
                 return pivot
             elseif compared > 0 then
-                min = pivot+1
+                min = pivot + 1
             else
-                max = pivot-1
+                max = pivot - 1
             end
         end
         return -min
@@ -366,18 +388,18 @@ end
 
 binary_search = binary_search_comparator(default_comparator)
 
-function reverse(list)
-    local len = #list
-    for i = 1, math.floor(#list/2) do
-        list[len-i+1], list[i] = list[i], list[len-i+1]
+function reverse(table)
+    local l = #table + 1
+    for index = 1, math.floor(#table / 2) do
+        table[l - index], table[index] = table[index], table[l - index]
     end
-    return list
+    return table
 end
 
 function repetition(value, count)
     local table = {}
-    for i = 1, count do
-        table[i] = value
+    for index = 1, count do
+        table[index] = value
     end
     return table
 end
