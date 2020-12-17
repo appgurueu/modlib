@@ -140,10 +140,10 @@ end)
 liquid_level_max = 8
 --+ Calculates the flow direction of a flowingliquid node
 --# as returned by `minetest.get_node`
---> 4 corner levels from 0 to 1 as list
-function get_liquid_corner_levels(pos, node)
+--> 4 corner levels from -0.5 to 0.5 as list
+function get_liquid_corner_levels(pos)
+    local node = minetest.get_node(pos)
     local def = minetest.registered_nodes[node.name]
-    if not (def and def.drawtype == "flowingliquid") then return pointed_thing end
     local source, flowing = def.liquid_alternative_source, node.name
     local range = def.liquid_range or liquid_level_max
     local neighbors = {}
@@ -205,7 +205,8 @@ function get_liquid_corner_levels(pos, node)
         {x = 0, z = 1}
     }
     for _, corner_level in pairs(corner_levels) do
-        corner_level.y = get_corner_level(corner_level.x, corner_level.z)
+        corner_level.y = get_corner_level(corner_level.x, corner_level.z) - 0.5
+        corner_level.x, corner_level.z = corner_level.x - 0.5, corner_level.z - 0.5
     end
     return corner_levels
 end
@@ -215,8 +216,8 @@ flowing_downwards = vector.new(0, -1, 0)
 --# as returned by `minetest.get_node`
 --> `modlib.minetest.flowing_downwards = vector.new(0, -1, 0)` if only flowing downwards
 --> surface direction as `vector` else
-function get_liquid_flow_direction(pos, node)
-    local corner_levels = get_liquid_corner_levels(pos, node)
+function get_liquid_flow_direction(pos)
+    local corner_levels = get_liquid_corner_levels(pos)
     local max_level = corner_levels[1].y
     for index = 2, 4 do
         local level = corner_levels[index].y
