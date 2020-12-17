@@ -254,3 +254,167 @@ function get_liquid_flow_direction(pos)
     end
     return dir
 end
+
+--+ Möller-Trumbore
+function ray_triangle_intersection(origin, direction, triangle)
+    local point_1, point_2, point_3 = unpack(triangle)
+    local edge_1, edge_2 = vector.subtract(point_2, point_1), vector.subtract(point_3, point_1)
+    local h = vector.cross(direction, edge_2)
+    local a = vector.dot(edge_1, h)
+    if math.abs(a) < 1e-9 then
+        return
+    end
+    local f = 1 / a
+    local diff = vector.subtract(origin, point_1)
+    local u = f * vector.dot(diff, h)
+    if u < 0 or u > 1 then
+        return
+    end
+    local q = vector.cross(diff, edge_1)
+    local v = f * vector.dot(direction, q)
+    if v < 0 or u + v > 1 then
+        return
+    end
+    local pos_on_line = f * vector.dot(edge_2, q);
+    if pos_on_line >= 0 then
+        return pos_on_line
+    end
+end
+
+function triangle_normal(triangle)
+    local point_1, point_2, point_3 = unpack(triangle)
+    local edge_1, edge_2 = vector.subtract(point_2, point_1), vector.subtract(point_3, point_1)
+    return vector.normalize{
+        x = edge_1.y * edge_2.z - edge_1.z * edge_2.y,
+        y = edge_1.z * edge_2.x - edge_1.x * edge_2.z,
+        z = edge_1.x * edge_2.y - edge_1.y * edge_2.x
+    }
+end
+
+--+ Raycast wrapper with proper flowingliquid intersections
+function raycast(pos1, pos2, objects, liquids)
+    local raycast = minetest.raycast(pos1, pos2, objects, liquids)
+    if not liquids then
+        return raycast
+    end
+    local direction = vector.direction(pos1, pos2)
+    local length = vector.distance(pos1, pos2)
+    local function next()
+        for pointed_thing in raycast do
+            if pointed_thing.type ~= "node" then
+                return pointed_thing
+            end
+            local pos = pointed_thing.under
+            local node = minetest.get_node(pos)
+            local def = minetest.registered_nodes[node.name]
+            if not (def and def.drawtype == "flowingliquid") then return pointed_thing end
+            local corner_levels = get_liquid_corner_levels(pos)
+            local full_corner_levels = true
+            for _, corner_level in pairs(corner_levels) do
+                if corner_level.y < 0.5 then
+                    full_corner_levels = false
+                    break
+                end
+            end
+            if full_corner_levels then
+                return pointed_thing
+            end
+            -- origin = pos
+            local relative = vector.subtract(pos1, pos)
+            local inside = true
+            for _, prop in pairs(relative) do
+                if prop <= -0.5 or prop >= 0.5 then
+                    inside = false
+                    break
+                end
+            end
+            local function level(x, z)
+                local function distance_squared(corner)
+                    return (x - corner.x) ^ 2 + (z - corner.z) ^ 2
+                end
+                local irrelevant_corner, distance = 1, distance_squared(corner_levels[1])
+                for index = 2, 4 do
+                    local other_distance = distance_squared(corner_levels[index])
+                    if other_distance > distance then
+                        irrelevant_corner, distance = index, other_distance
+                    end
+                end
+                local function corner(off)
+                    return corner_levels[((irrelevant_corner + off) % 4) + 1]
+                end
+                local base = corner(2)
+                local edge_1, edge_2 = vector.subtract(corner(1), base), vector.subtract(corner(3), base)
+                assert(math.abs(edge_1.x + edge_1.z) + math.abs(edge_2.x + edge_2.z) == 2)
+                if edge_1.x == 0 then
+                    edge_1, edge_2 = edge_2, edge_1
+                end
+                local level = base.y + (edge_1.y * ((x - base.x) / edge_1.x)) + (edge_2.y * ((z - base.z) / edge_2.z))
+                assert(level >= -0.5 and level <= 0.5)
+                return level
+            end
+            inside = inside and (relative.y < level(relative.x, relative.z))
+            if inside then
+                -- pos1 is inside the liquid node
+                pointed_thing.intersection_point = pos1
+                pointed_thing.intersection_normal = vector.new(0, 0, 0)
+                return pointed_thing
+            end
+            local function intersection_normal(axis, dir)
+                return {x = 0, y = 0, z = 0, [axis] = dir}
+            end
+            local function plane(axis, dir)
+                local offset = dir * 0.5
+                local diff_axis = (relative[axis] - offset) / -direction[axis]
+                local intersection_point = {}
+                for plane_axis in pairs{x = true, y = true, z = true, [axis] = nil} do
+                    local value = direction[plane_axis] * diff_axis + relative[plane_axis]
+                    if value < -0.5 or value > 0.5 then
+                        return
+                    end
+                    intersection_point[plane_axis] = value
+                end
+                intersection_point[axis] = offset
+                return intersection_point
+            end
+            if direction.y > 0 then
+                local intersection_point = plane("y", -1)
+                if intersection_point then
+                    pointed_thing.intersection_point = vector.add(intersection_point, pos)
+                    pointed_thing.intersection_normal = intersection_normal("y", -1)
+                    return pointed_thing
+                end
+            end
+            for coord, other in pairs{x = "z", z = "x"} do
+                if direction[coord] ~= 0 then
+                    local dir = direction[coord] > 0 and -1 or 1
+                    local intersection_point = plane(coord, dir)
+                    if intersection_point then
+                        local height = 0
+                        for _, corner in pairs(corner_levels) do
+                            if corner[coord] == dir * 0.5 then
+                                height = height + (math.abs(intersection_point[other] + corner[other])) * corner.y
+                            end
+                        end
+                        if intersection_point.y <= height then
+                            pointed_thing.intersection_point = vector.add(intersection_point, pos)
+                            pointed_thing.intersection_normal = intersection_normal(coord, dir)
+                            return pointed_thing
+                        end
+                    end
+                end
+            end
+            for _, triangle in pairs{
+                {corner_levels[1], corner_levels[2], corner_levels[3]},
+                {corner_levels[1], corner_levels[3], corner_levels[4]}
+            } do
+                local pos_on_ray = ray_triangle_intersection(relative, direction, triangle)
+                if pos_on_ray and pos_on_ray <= length then
+                    pointed_thing.intersection_point = vector.add(pos1, vector.multiply(direction, pos_on_ray))
+                    pointed_thing.intersection_normal = vector.multiply(triangle_normal(triangle), -1)
+                    return pointed_thing
+                end
+            end
+        end
+    end
+    return setmetatable({next = next}, {__call = next})
+end
