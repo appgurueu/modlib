@@ -137,6 +137,23 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     end
 end)
 
+--+ Improved base64 decode removing valid padding
+function decode_base64(base64)
+    local len = base64:len()
+    local padding_char = base64:sub(len, len) == "="
+    if padding_char then
+        if len % 4 ~= 0 then
+            return
+        end
+        if base64:sub(len-1, len-1) == "=" then
+            base64 = base64:sub(1, len-2)
+        else
+            base64 = base64:sub(1, len-1)
+        end
+    end
+    return minetest.decode_base64(base64)
+end
+
 liquid_level_max = 8
 --+ Calculates the flow direction of a flowingliquid node
 --# as returned by `minetest.get_node`
