@@ -67,7 +67,8 @@ local components = {
     table = {},
     text = {string = "local"},
     threading = {},
-    vector = {}
+    vector = {},
+    trie = {}
 }
 
 modlib = {}
