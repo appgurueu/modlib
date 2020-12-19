@@ -120,9 +120,9 @@ function utf8(number)
 		result = string.char(128 + remainder) .. result
 		number = (number - remainder) / 64
 		i = i + 1
-		if number <= math.pow(2, 8 - i - 2) then break end
+		if number <= 2 ^ (8 - i - 2) then break end
 	end
-	return string.char(256 - math.pow(2, 8 - i - 1) + number) .. result
+	return string.char(256 - 2 ^ (8 - i - 1) + number) .. result
 end
 
 --+ deprecated

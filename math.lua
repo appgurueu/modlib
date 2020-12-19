@@ -39,7 +39,7 @@ function tostring(number, base, digit_function, precision)
 	number = number % 1
 	if number ~= 0 and number >= base ^ -precision then
 		table.insert(out, ".")
-		while precision >= 0 and number >= math.pow(base, precision) do
+		while precision >= 0 and number >= base ^ precision do
 			number = number * base
 			digit = math.floor(number % base)
 			table.insert(out, digit_function(digit))

@@ -153,7 +153,7 @@ function generate_settingtypes(default_conf, constraints)
         local range = constraints.range
         if range then
             -- TODO consider better max
-            type_args = (constraints.int and "%d %d" or "%f %f"):format(range[1], range[2] or math.pow(2, 30))
+            type_args = (constraints.int and "%d %d" or "%f %f"):format(range[1], range[2] or 2 ^ 30)
         end
         -- HACK
         if not default_conf then default_conf = range[1] end
