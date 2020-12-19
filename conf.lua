@@ -155,6 +155,8 @@ function generate_settingtypes(default_conf, constraints)
             -- TODO consider better max
             type_args = (constraints.int and "%d %d" or "%f %f"):format(range[1], range[2] or math.pow(2, 30))
         end
+        -- HACK
+        if not default_conf then default_conf = range[1] end
     elseif constraint_type == "table" then
         local handled = {}
         local settings = {}
