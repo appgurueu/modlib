@@ -9,6 +9,10 @@ function from_xyzw(v)
     return new{v.x, v.y, v.z, v.w}
 end
 
+function from_minetest(v)
+    return new{v.x, v.y, v.z}
+end
+
 function to_xyzw(v)
     return {x = v[1], y = v[2], z = v[3], w = v[4]}
 end
@@ -25,10 +29,10 @@ function combine(v1, v2, f)
     return new(new_vector)
 end
 
-function apply(v, s, f)
+function apply(v, f, ...)
     local new_vector = {}
     for key, value in pairs(v) do
-        new_vector[key] = f(value, s)
+        new_vector[key] = f(value, ...)
     end
     return new(new_vector)
 end
@@ -36,8 +40,8 @@ end
 function combinator(f)
     return function(v1, v2)
         return combine(v1, v2, f)
-    end, function(v, s)
-        return apply(v, s, f)
+    end, function(v, ...)
+        return apply(v, f, ...)
     end
 end
 
@@ -60,4 +64,16 @@ end
 
 function normalize(v)
     return divide_scalar(v, length(v))
+end
+
+function floor(v)
+    return apply(v, math.floor)
+end
+
+function ceil(v)
+    return apply(v, math.ceil)
+end
+
+function clamp(v, min, max)
+    return apply(apply(v, math.max, min), math.min, max)
 end
