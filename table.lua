@@ -193,9 +193,9 @@ function map_keys(table, func)
     return new_tab
 end
 
-function process(table, func)
+function process(tab, func)
     local results = {}
-    for key, value in pairs(table) do
+    for key, value in pairs(tab) do
         table.insert(results, func(key,value))
     end
     return results
