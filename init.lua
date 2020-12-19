@@ -62,7 +62,7 @@ local components = {
     func = {},
     log = {},
     minetest = {},
-    number = {},
+    math = {string = "local"},
     player = {},
     table = {},
     text = {string = "local"},
