@@ -235,6 +235,17 @@ function add_all(table, additions)
     return table
 end
 
+function deep_add_all(table, additions)
+    for key, value in pairs(additions) do
+        if type(table[key]) == "table" and type(value) == "table" then
+            deep_add_all(table[key], value)
+        else
+            table[key] = value
+        end
+    end
+    return table
+end
+
 function complete(table, completions)
     for key, value in pairs(completions) do
         if table[key] == nil then
