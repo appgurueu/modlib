@@ -1,3 +1,22 @@
+-- not deprecated
+function build_tree(dict)
+    local tree = {}
+    for key, value in pairs(dict) do
+        local path = modlib.text.split_unlimited(key, ".")
+        local subtree = tree
+        for i = 1, #path - 1 do
+            local index = tonumber(path[i]) or path[i]
+            subtree[index] = subtree[index] or {}
+            subtree = subtree[index]
+        end
+        subtree[path[#path]] = value
+    end
+    return tree
+end
+function build_setting_tree()
+    modlib.conf.settings = build_tree(minetest.settings:to_table())
+end
+-- deprecated, use modlib.mod.configuration instead
 minetest.mkdir(minetest.get_worldpath().."/config")
 function get_path(confname)
     return minetest.get_worldpath().."/config/"..confname
@@ -50,23 +69,6 @@ function read_conf(text)
         end
     end
     return dict
-end
-function build_tree(dict)
-    local tree = {}
-    for key, value in pairs(dict) do
-        local path = modlib.text.split_unlimited(key, ".")
-        local subtree = tree
-        for i = 1, #path - 1 do
-            local index = tonumber(path[i]) or path[i]
-            subtree[index] = subtree[index] or {}
-            subtree = subtree[index]
-        end
-        subtree[path[#path]] = value
-    end
-    return tree
-end
-function build_setting_tree()
-    modlib.conf.settings = build_tree(minetest.settings:to_table())
 end
 function check_config_constraints(config, constraints, handler)
     local no_error, error_or_retval = pcall(function() check_constraints(config, constraints) end)
@@ -153,7 +155,7 @@ function generate_settingtypes(default_conf, constraints)
         local range = constraints.range
         if range then
             -- TODO consider better max
-            type_args = (constraints.int and "%d %d" or "%f %f"):format(range[1], range[2] or 2 ^ 30)
+            type_args = (constraints.int and "%d %d" or "%f %f"):format(range[1], range[2] or (2 ^ 30))
         end
         -- HACK
         if not default_conf then default_conf = range[1] end

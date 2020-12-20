@@ -57,6 +57,7 @@ local components = {
     mod = {},
     class = {},
     conf = {},
+    schema = {},
     data = {},
     file = {},
     func = {},
