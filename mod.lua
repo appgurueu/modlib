@@ -1,12 +1,3 @@
--- get modpath wrapper
-function get_resource(modname, resource)
-    if not resource then
-        resource = modname
-        modname = minetest.get_current_modname()
-    end
-    return minetest.get_modpath(modname) .. "/" .. resource
-end
-
 -- get resource + dofile
 function include(modname, file)
     if not file then

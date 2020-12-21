@@ -36,7 +36,6 @@ if _VERSION then
     end
 end
 
--- TODO get rid of code duplication
 local function get_resource(modname, resource)
     if not resource then
         resource = modname
@@ -62,30 +61,27 @@ local components = {
     func = {},
     log = {},
     minetest = {},
-    math = {number = "local"},
+    math = {"number"},
     player = {},
     table = {},
-    text = {string = "local"},
+    text = {"string"},
     vector = {},
     trie = {}
 }
 
 modlib = {}
 
-for component, additional in pairs(components) do
+for component, aliases in pairs(components) do
     local comp = loadfile_exports(get_resource(component .. ".lua"))
     modlib[component] = comp
-    for alias, scope in pairs(additional) do
-        if scope == "global" then
-            _G[alias] = comp
-        else
-            modlib[alias] = comp
-        end
+    for _, alias in pairs(aliases) do
+        modlib[alias] = comp
     end
 end
 
 modlib.conf.build_setting_tree()
 
+modlib.mod.get_resource = get_resource
 modlib.mod.loadfile_exports = loadfile_exports
 
 _ml = modlib
