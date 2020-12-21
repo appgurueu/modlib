@@ -66,7 +66,6 @@ local components = {
     player = {},
     table = {},
     text = {string = "local"},
-    threading = {},
     vector = {},
     trie = {}
 }
