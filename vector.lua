@@ -86,3 +86,39 @@ function box_box_collision(diff, box, other_box)
     end
     return true
 end
+
+--+ Möller-Trumbore
+function ray_triangle_intersection(origin, direction, triangle)
+    local point_1, point_2, point_3 = unpack(triangle)
+    local edge_1, edge_2 = vector.subtract(point_2, point_1), vector.subtract(point_3, point_1)
+    local h = vector.cross(direction, edge_2)
+    local a = vector.dot(edge_1, h)
+    if math.abs(a) < 1e-9 then
+        return
+    end
+    local f = 1 / a
+    local diff = vector.subtract(origin, point_1)
+    local u = f * vector.dot(diff, h)
+    if u < 0 or u > 1 then
+        return
+    end
+    local q = vector.cross(diff, edge_1)
+    local v = f * vector.dot(direction, q)
+    if v < 0 or u + v > 1 then
+        return
+    end
+    local pos_on_line = f * vector.dot(edge_2, q);
+    if pos_on_line >= 0 then
+        return pos_on_line
+    end
+end
+
+function triangle_normal(triangle)
+    local point_1, point_2, point_3 = unpack(triangle)
+    local edge_1, edge_2 = vector.subtract(point_2, point_1), vector.subtract(point_3, point_1)
+    return vector.normalize{
+        x = edge_1.y * edge_2.z - edge_1.z * edge_2.y,
+        y = edge_1.z * edge_2.x - edge_1.x * edge_2.z,
+        z = edge_1.x * edge_2.y - edge_1.y * edge_2.x
+    }
+end
