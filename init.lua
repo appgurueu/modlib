@@ -55,7 +55,6 @@ end
 
 local components = {
     mod = {},
-    class = {},
     conf = {},
     schema = {},
     data = {},
