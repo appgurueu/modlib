@@ -77,3 +77,12 @@ end
 function clamp(v, min, max)
     return apply(apply(v, math.max, min), math.min, max)
 end
+
+function box_box_collision(diff, box, other_box)
+    for index, diff in pairs(diff) do
+        if box[index] + diff > other_box[index + 3] or other_box[index] > box[index + 3] + diff then
+            return false
+        end
+    end
+    return true
+end
