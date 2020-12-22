@@ -12,25 +12,29 @@ local function field_name_to_title(name)
 end
 
 function generate_settingtypes(self)
-    local type = self.type
+    local typ = self.type
     local settingtype, type_args
     self.title = self.title or field_name_to_title(self.name)
     self._level = self._level or 0
     local default = self.default
-    if type == "boolean" then
+    if typ == "boolean" then
         settingtype = "bool"
         default = default and "true" or "false"
-    elseif type == "string" then
+    elseif typ == "string" then
         settingtype = "string"
-    elseif type == "number" then
+    elseif typ == "number" then
         settingtype = self.int and "int" or "float"
         if self.min or self.max then
             -- TODO handle exclusive min/max
             type_args = (self.int and "%d %d" or "%f %f"):format(self.min or (2 ^ -30), self.max or (2 ^ 30))
         end
-    elseif type == "table" then
+    elseif typ == "table" then
         local handled = {}
-        local settings = {"[" .. table.concat(modlib.table.repetition("*", self._level)) .. self.name .. "]"}
+        local settings = {}
+        if self._level > 0 then
+            -- HACK: Minetest automatically adds the modname
+            return {"[" .. table.concat(modlib.table.repetition("*", self._level)) .. self.name .. "]"}
+        end
         local function setting(key, value_scheme)
             if handled[key] then
                 return
@@ -52,7 +56,7 @@ function generate_settingtypes(self)
         end
         return table.concat(settings, "\n")
     end
-    if not type then
+    if not typ then
         return ""
     end
     local description = self.description

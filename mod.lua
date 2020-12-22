@@ -99,6 +99,7 @@ function configuration(modname)
         overrides = modlib.table.deep_add_all(overrides, minetest_conf)
         conf = schema:load(overrides, {convert_strings = true, error_message = true})
     end
+    modlib.file.ensure_content(get_resource(modname, "settingtypes.txt"), schema:generate_settingtypes())
     if conf == nil then
         return schema:load({}, {error_message = true})
     end
