@@ -29,17 +29,13 @@ function generate_settingtypes(self)
             type_args = (self.int and "%d %d" or "%f %f"):format(self.min or (2 ^ -30), self.max or (2 ^ 30))
         end
     elseif typ == "table" then
-        local handled = {}
         local settings = {}
         if self._level > 0 then
             -- HACK: Minetest automatically adds the modname
-            return {"[" .. table.concat(modlib.table.repetition("*", self._level)) .. self.name .. "]"}
+            -- TODO simple names (not modname.field.other_field)
+            settings = {"[" .. table.concat(modlib.table.repetition("*", self._level)) .. self.name .. "]"}
         end
         local function setting(key, value_scheme)
-            if handled[key] then
-                return
-            end
-            handled[key] = true
             assert(not key:find("[=%.%s]"))
             value_scheme.name = self.name .. "." .. key
             value_scheme.title = value_scheme.title or self.title .. " " .. field_name_to_title(key)
@@ -79,13 +75,8 @@ function generate_markdown(self)
     self.title = self.title or field_name_to_title(self._md_name)
     self._md_level = self._md_level or 1
     if typ == "table" then
-        local handled = {}
         local settings = {}
         local function setting(key, value_scheme)
-            if handled[key] then
-                return
-            end
-            handled[key] = true
             value_scheme._md_name = key
             value_scheme.title = value_scheme.title or self.title .. " " .. field_name_to_title(key)
             value_scheme._md_level = self._md_level + 1
@@ -112,7 +103,11 @@ function generate_markdown(self)
     end
     local description = self.description
     if description then
-        modlib.table.append(lines, type(description) == "table" and description or {description})
+        if type(description) ~= "table" then
+            table.insert(lines, description)
+        else
+            modlib.table.append(lines, description)
+        end
     end
     table.insert(lines, "")
     line("Type: " .. self.type)
@@ -180,11 +175,11 @@ function load(self, override, params)
         end
     end
     local _error = error
-    local function format_error(type, ...)
-        if type == "type" then
+    local function format_error(typ, ...)
+        if typ == "type" then
             return "mismatched type: expected " .. self.type ..", got " .. type(override) .. (converted and " (converted)" or "")
         end
-        if type == "range" then
+        if typ == "range" then
             local conditions = {}
             local function push(condition, bound)
                 if self.range[bound] then
@@ -197,27 +192,27 @@ function load(self, override, params)
             push("<=", "max")
             return "out of range: expected value " .. table.concat(conditions, "and")
         end
-        if type == "int" then
+        if typ == "int" then
             return "expected integer"
         end
-        if type == "infinity" then
+        if typ == "infinity" then
             return "expected no infinity"
         end
-        if type == "nan" then
+        if typ == "nan" then
             return "expected no nan"
         end
-        if type == "required" then
+        if typ == "required" then
             local key = ...
             return "required field " .. minetest.write_json(key) .. " missing"
         end
-        if type == "additional" then
+        if typ == "additional" then
             local key = ...
             return "superfluous field " .. minetest.write_json(key)
         end
-        if type == "list" then
+        if typ == "list" then
             return "not a list"
         end
-        if type == "values" then
+        if typ == "values" then
             return "expected one of " .. minetest.write_json(modlib.table.keys(self.values)) .. ", got " .. minetest.write_json(override)
         end
         _error("unknown error type")
