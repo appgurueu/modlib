@@ -27,16 +27,15 @@ if tests.liquid_dir then
             local direction = modlib.minetest.get_liquid_flow_direction(pos, node)
             local start_pos = pos
             start_pos.y = start_pos.y + 1
-            for i = 0, 20 do
+            for i = 0, 5 do
                 minetest.add_particle{
-                    pos = vector.add(start_pos, vector.multiply(direction, i/20)),
-                    size = i/10,
+                    pos = vector.add(start_pos, vector.multiply(direction, i/5)),
+                    size = i/2.5,
                     texture = "logo.png"
                 }
             end
         end
     }
-
 end
 if tests.liquid_raycast then
     minetest.register_globalstep(function()

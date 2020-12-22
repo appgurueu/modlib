@@ -148,7 +148,7 @@ end
 liquid_level_max = 8
 --+ Calculates the flow direction of a flowingliquid node
 --# as returned by `minetest.get_node`
---> 4 corner levels from -0.5 to 0.5 as list
+--> 4 corner levels from -0.5 to 0.5 as list of `modlib.vector`
 function get_liquid_corner_levels(pos)
     local node = minetest.get_node(pos)
     local def = minetest.registered_nodes[node.name]
@@ -207,56 +207,56 @@ function get_liquid_corner_levels(pos)
         return levels / neighbor_count
     end
     local corner_levels = {
-        {x = 0, z = 0},
-        {x = 1, z = 0},
-        {x = 1, z = 1},
-        {x = 0, z = 1}
+        {0, nil, 0},
+        {1, nil, 0},
+        {1, nil, 1},
+        {0, nil, 1}
     }
-    for _, corner_level in pairs(corner_levels) do
-        corner_level.y = get_corner_level(corner_level.x, corner_level.z) - 0.5
-        corner_level.x, corner_level.z = corner_level.x - 0.5, corner_level.z - 0.5
+    for index, corner_level in pairs(corner_levels) do
+        corner_level[2] = get_corner_level(corner_level[1], corner_level[3])
+        corner_levels[index] = modlib.vector.subtract_scalar(modlib.vector.new(corner_level), 0.5)
     end
     return corner_levels
 end
 
-flowing_downwards = vector.new(0, -1, 0)
+flowing_downwards = modlib.vector.new{0, -1, 0}
 --+ Calculates the flow direction of a flowingliquid node
 --# as returned by `minetest.get_node`
---> `modlib.minetest.flowing_downwards = vector.new(0, -1, 0)` if only flowing downwards
---> surface direction as `vector` else
+--> `modlib.minetest.flowing_downwards = modlib.vector.new{0, -1, 0}` if only flowing downwards
+--> surface direction as `modlib.vector` else
 function get_liquid_flow_direction(pos)
     local corner_levels = get_liquid_corner_levels(pos)
-    local max_level = corner_levels[1].y
+    local max_level = corner_levels[1][2]
     for index = 2, 4 do
-        local level = corner_levels[index].y
+        local level = corner_levels[index][2]
         if level > max_level then
             max_level = level
         end
     end
-    local dir = vector.new(0, 0, 0)
+    local dir = modlib.vector.new{0, 0, 0}
     local count = 0
     for max_level_index, corner_level in pairs(corner_levels) do
-        if corner_level.y == max_level then
+        if corner_level[2] == max_level then
             for offset = 1, 3 do
                 local index = (max_level_index + offset - 1) % 4 + 1
-                local diff = vector.subtract(corner_level, corner_levels[index])
-                if diff.y ~= 0 then
-                    diff.x = diff.x * diff.y
-                    diff.z = diff.z * diff.y
+                local diff = corner_level - corner_levels[index]
+                if diff[2] ~= 0 then
+                    diff[1] = diff[1] * diff[2]
+                    diff[3] = diff[3] * diff[2]
                     if offset == 3 then
-                        diff = vector.divide(diff, math.sqrt(2))
+                        diff = modlib.vector.divide_scalar(diff, math.sqrt(2))
                     end
-                    dir = vector.add(dir, diff)
+                    dir = dir + diff
                     count = count + 1
                 end
             end
         end
     end
     if count ~= 0 then
-        dir = vector.divide(dir, count)
+        dir = modlib.vector.divide_scalar(dir, count)
     end
-    if vector.equals(dir, vector.new(0, 0, 0)) then
-        if node.param2 % 32 > 7 then
+    if dir == modlib.vector.new{0, 0, 0} then
+        if minetest.get_node(pos).param2 % 32 > 7 then
             return flowing_downwards
         end
     end
@@ -264,26 +264,29 @@ function get_liquid_flow_direction(pos)
 end
 
 --+ Raycast wrapper with proper flowingliquid intersections
-function raycast(pos1, pos2, objects, liquids)
-    local raycast = minetest.raycast(pos1, pos2, objects, liquids)
+function raycast(_pos1, _pos2, objects, liquids)
+    local raycast = minetest.raycast(_pos1, _pos2, objects, liquids)
     if not liquids then
         return raycast
     end
-    local direction = vector.direction(pos1, pos2)
-    local length = vector.distance(pos1, pos2)
+    local pos1 = modlib.vector.from_minetest(_pos1)
+    local _direction = vector.direction(_pos1, _pos2)
+    local direction = modlib.vector.from_minetest(_direction)
+    local length = vector.distance(_pos1, _pos2)
     local function next()
         for pointed_thing in raycast do
             if pointed_thing.type ~= "node" then
                 return pointed_thing
             end
-            local pos = pointed_thing.under
-            local node = minetest.get_node(pos)
+            local _pos = pointed_thing.under
+            local pos = modlib.vector.from_minetest(_pos)
+            local node = minetest.get_node(_pos)
             local def = minetest.registered_nodes[node.name]
             if not (def and def.drawtype == "flowingliquid") then return pointed_thing end
-            local corner_levels = get_liquid_corner_levels(pos)
+            local corner_levels = get_liquid_corner_levels(_pos)
             local full_corner_levels = true
             for _, corner_level in pairs(corner_levels) do
-                if corner_level.y < 0.5 then
+                if corner_level[2] < 0.5 then
                     full_corner_levels = false
                     break
                 end
@@ -291,8 +294,7 @@ function raycast(pos1, pos2, objects, liquids)
             if full_corner_levels then
                 return pointed_thing
             end
-            -- origin = pos
-            local relative = vector.subtract(pos1, pos)
+            local relative = pos1 - pos
             local inside = true
             for _, prop in pairs(relative) do
                 if prop <= -0.5 or prop >= 0.5 then
@@ -302,7 +304,7 @@ function raycast(pos1, pos2, objects, liquids)
             end
             local function level(x, z)
                 local function distance_squared(corner)
-                    return (x - corner.x) ^ 2 + (z - corner.z) ^ 2
+                    return (x - corner[1]) ^ 2 + (z - corner[3]) ^ 2
                 end
                 local irrelevant_corner, distance = 1, distance_squared(corner_levels[1])
                 for index = 2, 4 do
@@ -315,19 +317,20 @@ function raycast(pos1, pos2, objects, liquids)
                     return corner_levels[((irrelevant_corner + off) % 4) + 1]
                 end
                 local base = corner(2)
-                local edge_1, edge_2 = vector.subtract(corner(1), base), vector.subtract(corner(3), base)
-                assert(math.abs(edge_1.x + edge_1.z) + math.abs(edge_2.x + edge_2.z) == 2)
-                if edge_1.x == 0 then
+                local edge_1, edge_2 = corner(1) - base, corner(3) - base
+                -- Properly selected edges will have a total length of 2
+                assert(math.abs(edge_1[1] + edge_1[3]) + math.abs(edge_2[1] + edge_2[3]) == 2)
+                if edge_1[1] == 0 then
                     edge_1, edge_2 = edge_2, edge_1
                 end
-                local level = base.y + (edge_1.y * ((x - base.x) / edge_1.x)) + (edge_2.y * ((z - base.z) / edge_2.z))
+                local level = base[2] + (edge_1[2] * ((x - base[1]) / edge_1[1])) + (edge_2[2] * ((z - base[3]) / edge_2[3]))
                 assert(level >= -0.5 and level <= 0.5)
                 return level
             end
-            inside = inside and (relative.y < level(relative.x, relative.z))
+            inside = inside and (relative[2] < level(relative[1], relative[3]))
             if inside then
                 -- pos1 is inside the liquid node
-                pointed_thing.intersection_point = pos1
+                pointed_thing.intersection_point = _pos1
                 pointed_thing.intersection_normal = vector.new(0, 0, 0)
                 return pointed_thing
             end
@@ -338,25 +341,27 @@ function raycast(pos1, pos2, objects, liquids)
                 local offset = dir * 0.5
                 local diff_axis = (relative[axis] - offset) / -direction[axis]
                 local intersection_point = {}
-                for plane_axis in pairs{x = true, y = true, z = true, [axis] = nil} do
-                    local value = direction[plane_axis] * diff_axis + relative[plane_axis]
-                    if value < -0.5 or value > 0.5 then
-                        return
+                for plane_axis = 1, 3 do
+                    if plane_axis ~= axis then
+                        local value = direction[plane_axis] * diff_axis + relative[plane_axis]
+                        if value < -0.5 or value > 0.5 then
+                            return
+                        end
+                        intersection_point[plane_axis] = value
                     end
-                    intersection_point[plane_axis] = value
                 end
                 intersection_point[axis] = offset
                 return intersection_point
             end
-            if direction.y > 0 then
-                local intersection_point = plane("y", -1)
+            if direction[2] > 0 then
+                local intersection_point = plane(2, -1)
                 if intersection_point then
-                    pointed_thing.intersection_point = vector.add(intersection_point, pos)
+                    pointed_thing.intersection_point = (intersection_point + pos):to_minetest()
                     pointed_thing.intersection_normal = intersection_normal("y", -1)
                     return pointed_thing
                 end
             end
-            for coord, other in pairs{x = "z", z = "x"} do
+            for coord, other in pairs{[1] = 3, [3] = 1} do
                 if direction[coord] ~= 0 then
                     local dir = direction[coord] > 0 and -1 or 1
                     local intersection_point = plane(coord, dir)
@@ -364,25 +369,25 @@ function raycast(pos1, pos2, objects, liquids)
                         local height = 0
                         for _, corner in pairs(corner_levels) do
                             if corner[coord] == dir * 0.5 then
-                                height = height + (math.abs(intersection_point[other] + corner[other])) * corner.y
+                                height = height + (math.abs(intersection_point[other] + corner[other])) * corner[2]
                             end
                         end
-                        if intersection_point.y <= height then
-                            pointed_thing.intersection_point = vector.add(intersection_point, pos)
-                            pointed_thing.intersection_normal = intersection_normal(coord, dir)
+                        if intersection_point[2] <= height then
+                            pointed_thing.intersection_point = (intersection_point + pos):to_minetest()
+                            pointed_thing.intersection_normal = intersection_normal(modlib.vector.index_aliases[coord], dir)
                             return pointed_thing
                         end
                     end
                 end
             end
             for _, triangle in pairs{
-                {corner_levels[1], corner_levels[2], corner_levels[3]},
-                {corner_levels[1], corner_levels[3], corner_levels[4]}
+                {corner_levels[3], corner_levels[2], corner_levels[1]},
+                {corner_levels[4], corner_levels[3], corner_levels[1]}
             } do
                 local pos_on_ray = modlib.vector.ray_triangle_intersection(relative, direction, triangle)
                 if pos_on_ray and pos_on_ray <= length then
-                    pointed_thing.intersection_point = vector.add(pos1, vector.multiply(direction, pos_on_ray))
-                    pointed_thing.intersection_normal = vector.multiply(modlib.vector.triangle_normal(triangle), -1)
+                    pointed_thing.intersection_point = (pos1 + modlib.vector.multiply_scalar(direction, pos_on_ray)):to_minetest()
+                    pointed_thing.intersection_normal = modlib.vector.triangle_normal(triangle):to_minetest()
                     return pointed_thing
                 end
             end

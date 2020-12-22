@@ -52,32 +52,30 @@ local function loadfile_exports(filename)
     return env
 end
 
-local components = {
-    mod = {},
-    conf = {},
-    schema = {},
-    data = {},
-    file = {},
-    func = {},
-    log = {},
-    minetest = {},
-    math = {"number"},
-    player = {},
-    table = {},
-    text = {"string"},
-    vector = {},
-    trie = {}
-}
-
 modlib = {}
 
-for component, aliases in pairs(components) do
-    local comp = loadfile_exports(get_resource(component .. ".lua"))
-    modlib[component] = comp
-    for _, alias in pairs(aliases) do
-        modlib[alias] = comp
-    end
+for _, component in ipairs{
+    "mod",
+    "conf",
+    "schema",
+    "data",
+    "file",
+    "func",
+    "log",
+    "math",
+    "player",
+    "table",
+    "text",
+    "vector",
+    "minetest",
+    "trie"
+} do
+    modlib[component] = loadfile_exports(get_resource(component .. ".lua"))
 end
+
+-- Aliases
+modlib.string = modlib.text
+modlib.number = modlib.math
 
 modlib.conf.build_setting_tree()
 
@@ -86,6 +84,7 @@ modlib.mod.loadfile_exports = loadfile_exports
 
 _ml = modlib
 
+modlib.mod.include("test.lua")
 --[[
 --modlib.mod.include("test.lua")
 ]]
