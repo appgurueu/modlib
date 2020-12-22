@@ -106,7 +106,8 @@ function configuration(modname)
         local modified = false
         readme = readme:gsub("<!%-%-modlib:conf:(%d)%-%->" .. "(.-)" .. "<!%-%-modlib:conf%-%->", function(level, content)
             schema._md_level = assert(tonumber(level)) + 1
-            local markdown = schema:generate_markdown()
+            -- HACK: Newline between comment and heading (MD implementations don't handle comments properly)
+            local markdown = "\n" .. schema:generate_markdown()
             if content ~= markdown then
                 modified = true
                 return "<!--modlib:conf:" .. level .. "-->" .. markdown .. "<!--modlib:conf-->"
