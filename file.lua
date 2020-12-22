@@ -14,6 +14,14 @@ function write(filename, new_content)
 	return true
 end
 
+function ensure_content(filename, ensured_content)
+    local content = read(filename)
+    if content ~= ensured_content then
+        return write(filename, ensured_content)
+    end
+    return true
+end
+
 function append(filename, new_content)
 	local file = io.open(filename, "a")
 	if file == nil then return false end
