@@ -77,7 +77,7 @@ function generate_markdown(self)
     -- TODO address redundancies
     local typ = self.type
     self.title = self.title or field_name_to_title(self._md_name)
-    self._level = self._level or 1
+    self._md_level = self._md_level or 1
     if typ == "table" then
         local handled = {}
         local settings = {}
@@ -88,8 +88,8 @@ function generate_markdown(self)
             handled[key] = true
             value_scheme._md_name = key
             value_scheme.title = value_scheme.title or self.title .. " " .. field_name_to_title(key)
-            value_scheme._level = self._level + 1
-            table.insert(settings, table.concat(modlib.table.repetition("#", self._level)) .. " `" .. key .. "`")
+            value_scheme._md_level = self._md_level + 1
+            table.insert(settings, table.concat(modlib.table.repetition("#", self._md_level)) .. " `" .. key .. "`")
             table.insert(settings, generate_markdown(value_scheme))
             table.insert(settings, "")
         end

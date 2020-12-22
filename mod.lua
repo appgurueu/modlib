@@ -100,6 +100,22 @@ function configuration(modname)
         conf = schema:load(overrides, {convert_strings = true, error_message = true})
     end
     modlib.file.ensure_content(get_resource(modname, "settingtypes.txt"), schema:generate_settingtypes())
+    local readme_path = get_resource(modname, "Readme.md")
+    local readme = modlib.file.read(readme_path)
+    if readme then
+        local modified = false
+        readme = readme:gsub("<!%-%-modlib:conf:(%d)%-%->" .. "(.-)" .. "<!%-%-modlib:conf%-%->", function(level, content)
+            schema._md_level = assert(tonumber(level)) + 1
+            local markdown = schema:generate_markdown()
+            if content ~= markdown then
+                modified = true
+                return "<!--modlib:conf:" .. level .. "-->" .. markdown .. "<!--modlib:conf-->"
+            end
+        end, 1)
+        if modified then
+            assert(modlib.file.write(readme_path, readme))
+        end
+    end
     if conf == nil then
         return schema:load({}, {error_message = true})
     end
