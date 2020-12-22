@@ -73,10 +73,10 @@ end
 
 metatable.__le = less_or_equal
 
-function combine(v1, v2, f)
+function combine(v, other_v, f)
     local new_vector = {}
-    for key, value in pairs(v1) do
-        new_vector[key] = f(value, v2[key])
+    for key, value in pairs(v) do
+        new_vector[key] = f(value, other_v[key])
     end
     return new(new_vector)
 end
@@ -90,8 +90,8 @@ function apply(v, f, ...)
 end
 
 function combinator(f)
-    return function(v1, v2)
-        return combine(v1, v2, f)
+    return function(v, other_v)
+        return combine(v, other_v, f)
     end, function(v, ...)
         return apply(v, f, ...)
     end
