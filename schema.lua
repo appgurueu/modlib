@@ -127,14 +127,14 @@ function generate_markdown(self)
     end
     if self.range then
         if self.range.min then
-            line("> " .. self.range.min)
+            line("&gt;= " .. self.range.min)
         elseif self.range.min_exclusive then
-            line(">= " .. self.range.min_exclusive)
+            line("&gt; " .. self.range.min_exclusive)
         end
         if self.range.max then
-            line("< " .. self.range.max)
+            line("&lt;= " .. self.range.max)
         elseif self.range.max_exclusive then
-            line("<= " .. self.range.max_exclusive)
+            line("&lt; " .. self.range.max_exclusive)
         end
     end
     if self.values then
