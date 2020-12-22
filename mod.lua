@@ -82,7 +82,7 @@ function configuration(modname)
                 check_type(value)
                 return value
             end},
-            {extension = "conf", read = function(text) return Settings(text):to_table() end, convert_strings = true},
+            {extension = "conf", read = function(text) return modlib.conf.build_setting_tree(Settings(text):to_table()) end, convert_strings = true},
             {extension = "json", read = minetest.parse_json}
         } do
             local content = modlib.file.read(path .. "." .. format.extension)
