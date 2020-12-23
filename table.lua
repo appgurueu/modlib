@@ -80,11 +80,61 @@ function equals_noncircular(table_1, table_2)
     return true
 end
 
-function tablecopy(t)
-    return table.copy(t)
+-- circular references can be different as long as the content is identical
+function equals_content(table_1, table_2)
+    local equal_tables = {}
+    local function _equals(table_1, table_2)
+        local function set_equal_tables(value)
+            equal_tables[table_1] = equal_tables[table_1] or {}
+            equal_tables[table_1][table_2] = value
+            return value
+        end
+        local is_equal = table_1 == table_2
+        if is_equal or type(table_1) ~= "table" or type(table_2) ~= "table" then
+            return is_equal
+        end
+        if #table_1 ~= #table_2 then
+            return false
+        end
+        local lookup_equal = (equal_tables[table_1] or {})[table_2]
+        if lookup_equal ~= nil then
+            return lookup_equal
+        end
+        set_equal_tables(true)
+        local table_keys = {}
+        for key_1, value_1 in pairs(table_1) do
+            local value_2 = table_2[key_1]
+            if not _equals(value_1, value_2) then
+                if type(key_1) == "table" then
+                    table_keys[key_1] = value_1
+                else
+                    return set_equal_tables(false)
+                end
+            end
+        end
+        for key_2, value_2 in pairs(table_2) do
+            if type(key_2) == "table" then
+                local found
+                for table, value in pairs(table_keys) do
+                    if _equals(key_2, table) and _equals(value_2, value) then
+                        table_keys[table] = nil
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    return set_equal_tables(false)
+                end
+            else
+                if table_1[key_2] == nil then
+                    return set_equal_tables(false)
+                end
+            end
+        end
+        return true
+    end
+    return _equals(table_1, table_2)
 end
-
-copy = tablecopy
 
 function shallowcopy(table)
     local copy = {}
