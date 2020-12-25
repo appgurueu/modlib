@@ -39,6 +39,26 @@ function shuffle(table)
     return table
 end
 
+function is_circular(table)
+    assert(type(table) == "table")
+    local known = {}
+    local function _is_circular(value)
+        if type(value) ~= "table" then
+            return false
+        end
+        if known[value] then
+            return true
+        end
+        known[value] = true
+        for key, value in pairs(value) do
+            if _is_circular(key) or _is_circular(value) then
+                return true
+            end
+        end
+    end
+    return _is_circular(table)
+end
+
 function equals_noncircular(table_1, table_2)
     local is_equal = table_1 == table_2
     if is_equal or type(table_1) ~= "table" or type(table_2) ~= "table" then
