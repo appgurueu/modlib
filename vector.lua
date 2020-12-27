@@ -97,12 +97,20 @@ function combinator(f)
     end
 end
 
+function invert(v)
+    for key, value in pairs(v) do
+        v[key] = -value
+    end
+end
+
 add, add_scalar = combinator(function(a, b) return a + b end)
 subtract, subtract_scalar = combinator(function(a, b) return a - b end)
 multiply, multiply_scalar = combinator(function(a, b) return a * b end)
 divide, divide_scalar = combinator(function(a, b) return a / b end)
+pow, pow_scalar = combinator(function(a, b) return a ^ b end)
 
 metatable.__add = add
+metatable.__unm = invert
 metatable.__sub = subtract
 metatable.__mul = multiply
 metatable.__div = divide
