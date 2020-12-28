@@ -81,6 +81,7 @@ function generate_markdown(self)
             value_scheme.title = value_scheme.title or self.title .. " " .. field_name_to_title(key)
             value_scheme._md_level = self._md_level + 1
             table.insert(settings, table.concat(modlib.table.repetition("#", self._md_level)) .. " `" .. key .. "`")
+            table.insert(settings, "")
             table.insert(settings, generate_markdown(value_scheme))
             table.insert(settings, "")
         end
