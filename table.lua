@@ -288,15 +288,17 @@ end
 
 contains = find
 
-function difference(table, other_table)
-    local result = {}
-    for key, value in pairs(other_table) do
-        if table[value] ~= value then
-            result[key] = value
+function to_add(table, after_additions)
+    local additions = {}
+    for key, value in pairs(after_additions) do
+        if table[key] ~= value then
+            additions[key] = value
         end
     end
-    return result
+    return additions
 end
+
+difference = to_add
 
 function add_all(table, additions)
     for key, value in pairs(additions) do
