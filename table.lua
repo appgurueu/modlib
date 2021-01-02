@@ -59,30 +59,34 @@ function is_circular(table)
     return _is_circular(table)
 end
 
-function equals_noncircular(table_1, table_2)
-    local is_equal = table_1 == table_2
-    if is_equal or type(table_1) ~= "table" or type(table_2) ~= "table" then
+--+ Simple table equality check. Stack overflow if tables are too deep or circular.
+--+ Use `is_circular(table)` to check whether a table is circular.
+--> Equality of noncircular tables if `table` and `other_table` are tables
+--> `table == other_table` else
+function equals_noncircular(table, other_table)
+    local is_equal = table == other_table
+    if is_equal or type(table) ~= "table" or type(other_table) ~= "table" then
         return is_equal
     end
-    if #table_1 ~= #table_2 then
+    if #table ~= #other_table then
         return false
     end
     local table_keys = {}
-    for key_1, value_1 in pairs(table_1) do
-        local value_2 = table_2[key_1]
-        if not equals_noncircular(value_1, value_2) then
-            if type(key_1) == "table" then
-                table_keys[key_1] = value_1
+    for key, value in pairs(table) do
+        local value_2 = other_table[key]
+        if not equals_noncircular(value, value_2) then
+            if type(key) == "table" then
+                table_keys[key] = value
             else
                 return false
             end
         end
     end
-    for key_2, value_2 in pairs(table_2) do
-        if type(key_2) == "table" then
+    for other_key, other_value in pairs(other_table) do
+        if type(other_key) == "table" then
             local found
             for table, value in pairs(table_keys) do
-                if equals_noncircular(key_2, table) and equals_noncircular(value_2, value) then
+                if equals_noncircular(other_key, table) and equals_noncircular(other_value, value) then
                     table_keys[table] = nil
                     found = true
                     break
@@ -92,7 +96,7 @@ function equals_noncircular(table_1, table_2)
                 return false
             end
         else
-            if table_1[key_2] == nil then
+            if table[other_key] == nil then
                 return false
             end
         end
@@ -100,45 +104,51 @@ function equals_noncircular(table_1, table_2)
     return true
 end
 
--- circular references can be different as long as the content is identical
-function equals_content(table_1, table_2)
+equals = equals_noncircular
+
+--+ Table equality check properly handling circular tables - tables are equal as long as they provide equal key/value-pairs
+--> Table content equality if `table` and `other_table` are tables
+--> `table == other_table` else
+function equals_content(table, other_table)
     local equal_tables = {}
-    local function _equals(table_1, table_2)
+    local function _equals(table, other_equal_table)
         local function set_equal_tables(value)
-            equal_tables[table_1] = equal_tables[table_1] or {}
-            equal_tables[table_1][table_2] = value
+            equal_tables[table] = equal_tables[table] or {}
+            equal_tables[table][other_equal_table] = value
             return value
         end
-        local is_equal = table_1 == table_2
-        if is_equal or type(table_1) ~= "table" or type(table_2) ~= "table" then
+        local is_equal = table == other_equal_table
+        if is_equal or type(table) ~= "table" or type(other_equal_table) ~= "table" then
             return is_equal
         end
-        if #table_1 ~= #table_2 then
-            return false
+        if #table ~= #other_equal_table then
+            return set_equal_tables(false)
         end
-        local lookup_equal = (equal_tables[table_1] or {})[table_2]
+        local lookup_equal = (equal_tables[table] or {})[other_equal_table]
         if lookup_equal ~= nil then
             return lookup_equal
         end
+        -- Premise
         set_equal_tables(true)
         local table_keys = {}
-        for key_1, value_1 in pairs(table_1) do
-            local value_2 = table_2[key_1]
-            if not _equals(value_1, value_2) then
-                if type(key_1) == "table" then
-                    table_keys[key_1] = value_1
+        for key, value in pairs(table) do
+            local other_value = other_equal_table[key]
+            if not _equals(value, other_value) then
+                if type(key) == "table" then
+                    table_keys[key] = value
                 else
                     return set_equal_tables(false)
                 end
             end
         end
-        for key_2, value_2 in pairs(table_2) do
-            if type(key_2) == "table" then
-                local found
-                for table, value in pairs(table_keys) do
-                    if _equals(key_2, table) and _equals(value_2, value) then
-                        table_keys[table] = nil
+        for other_key, other_value in pairs(other_equal_table) do
+            if type(other_key) == "table" then
+                local found = false
+                for table_key, value in pairs(table_keys) do
+                    if _equals(table_key, other_key) and _equals(value, other_value) then
+                        table_keys[table_key] = nil
                         found = true
+                        -- Breaking is fine as per transitivity
                         break
                     end
                 end
@@ -146,14 +156,77 @@ function equals_content(table_1, table_2)
                     return set_equal_tables(false)
                 end
             else
-                if table_1[key_2] == nil then
+                if table[other_key] == nil then
                     return set_equal_tables(false)
                 end
             end
         end
         return true
     end
-    return _equals(table_1, table_2)
+    return _equals(table, other_table)
+end
+
+--+ Table equality check: content has to be equal, relations between tables as well
+--+ The only difference may be in the memory addresses ("identities") of the (sub)tables
+--+ Performance may suffer if the tables contain table keys
+--+ equals(table, copy(table)) is true
+--> equality (same tables after table reference substitution) of circular tables if `table` and `other_table` are tables
+--> `table == other_table` else
+function equals_references(table, other_table)
+    local function _equals(table, other_table, equal_refs)
+        if equal_refs[table] then
+            return equal_refs[table] == other_table
+        end
+        local is_equal = table == other_table
+        -- this check could be omitted if table key equality is being checked
+        if type(table) ~= "table" or type(other_table) ~= "table" then
+            return is_equal
+        end
+        if is_equal then
+            equal_refs[table] = other_table
+            return true
+        end
+        -- Premise: table = other table
+        equal_refs[table] = other_table
+        local table_keys = {}
+        for key, value in pairs(table) do
+            if type(key) == "table" then
+                table_keys[key] = value
+            else
+                local other_value = other_table[key]
+                if not _equals(value, other_value, equal_refs) then
+                    return false
+                end
+            end
+        end
+        local other_table_keys = {}
+        for other_key, other_value in pairs(other_table) do
+            if type(other_key) == "table" then
+                other_table_keys[other_key] = other_value
+            elseif table[other_key] == nil then
+                return false
+            end
+        end
+        local function _next(current_key, equal_refs, available_keys)
+            local key, value = next(table_keys, current_key)
+            if key == nil then
+                return true
+            end
+            for other_key, other_value in pairs(other_table_keys) do
+                local copy_equal_refs = shallowcopy(equal_refs)
+                if _equals(key, other_key, copy_equal_refs) and _equals(value, other_value, copy_equal_refs) then
+                    local copy_available_keys = shallowcopy(available_keys)
+                    copy_available_keys[other_key] = nil
+                    if _next(key, copy_equal_refs, copy_available_keys) then
+                        return true
+                    end
+                end
+            end
+            return false
+        end
+        return _next(nil, equal_refs, other_table_keys)
+    end
+    return _equals(table, other_table, {})
 end
 
 function shallowcopy(table)
