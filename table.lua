@@ -373,6 +373,18 @@ end
 
 difference = to_add
 
+function deep_to_add(table, after_additions)
+    local additions = {}
+    for key, value in pairs(after_additions) do
+        if type(table[key]) == "table" and type(value) == "table" then
+            additions[key] = deep_to_add(table[key], value)
+        elseif table[key] ~= value then
+            additions[key] = value
+        end
+    end
+    return additions
+end
+
 function add_all(table, additions)
     for key, value in pairs(additions) do
         table[key] = value
