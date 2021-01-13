@@ -146,8 +146,7 @@ function decode_base64(base64)
 end
 
 liquid_level_max = 8
---+ Calculates the flow direction of a flowingliquid node
---# as returned by `minetest.get_node`
+--+ Calculates the corner levels of a flowingliquid node
 --> 4 corner levels from -0.5 to 0.5 as list of `modlib.vector`
 function get_liquid_corner_levels(pos)
     local node = minetest.get_node(pos)
@@ -221,7 +220,6 @@ end
 
 flowing_downwards = modlib.vector.new{0, -1, 0}
 --+ Calculates the flow direction of a flowingliquid node
---# as returned by `minetest.get_node`
 --> `modlib.minetest.flowing_downwards = modlib.vector.new{0, -1, 0}` if only flowing downwards
 --> surface direction as `modlib.vector` else
 function get_liquid_flow_direction(pos)
