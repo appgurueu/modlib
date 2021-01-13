@@ -427,11 +427,12 @@ end)
 minetest.register_globalstep(function()
     for _, player in pairs(minetest.get_connected_players()) do
         local item, index = player:get_wielded_item(), player:get_wield_index()
-        local previous_item, previous_index = player.wield.item, player.wield.index
+        local playerdata = players[player:get_player_name()]
+        local previous_item, previous_index = playerdata.wield.item, playerdata.wield.index
         if item:get_name() ~= previous_item or index ~= previous_index then
-            player.wield.item = item
-            player.wield.index = index
-            modlib.table.icall(player, previous_item, previous_index, item)
+            playerdata.wield.item = item
+            playerdata.wield.index = index
+            modlib.table.icall(registered_on_wielditem_changes, player, previous_item, previous_index, item)
         end
     end
 end)
