@@ -396,6 +396,48 @@ function raycast(_pos1, _pos2, objects, liquids)
     return setmetatable({next = next}, {__call = next})
 end
 
+players = {}
+
+registered_on_wielditem_changes = {function(...)
+    local _, previous_item, _, item = ...
+    if previous_item then
+        ((previous_item:get_definition()._modlib or {}).un_wield or modlib.func.no_op)(...)
+    end
+    if item then
+        ((item:get_definition()._modlib or {}).on_wield or modlib.func.no_op)(...)
+    end
+end}
+
+--+ Registers an on_wielditem_change callback: function(player, previous_item, previous_index, item)
+--+ Will be called once with player, nil, index, item on join
+register_on_wielditem_change = modlib.func.curry(table.insert, registered_on_wielditem_changes)
+
+minetest.register_on_joinplayer(function(player)
+    local item, index = player:get_wielded_item(), player:get_wield_index()
+    players[player:get_player_name()] = {
+        wield = {
+            item = item,
+            index = index
+        }
+    }
+    modlib.table.icall(registered_on_wielditem_changes, player, nil, index, item)
+end)
+minetest.register_on_leaveplayer(function(player)
+    player = players[player:get_player_name()]
+end)
+
+minetest.register_globalstep(function()
+    for _, player in pairs(minetest.get_connected_players()) do
+        local item, index = player:get_wielded_item(), player:get_wield_index()
+        local previous_item, previous_index = player.wield.item, player.wield.index
+        if item:get_name() ~= previous_item or index ~= previous_index then
+            player.wield.item = item
+            player.wield.index = index
+            modlib.table.icall(player, previous_item, previous_index, item)
+        end
+    end
+end)
+
 -- As in src/util/string.cpp
 named_colors = {
 	aliceblue = 0xf0f8ff,
