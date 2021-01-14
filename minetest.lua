@@ -410,18 +410,21 @@ end}
 --+ Will be called once with player, nil, index, item on join
 register_on_wielditem_change = modlib.func.curry(table.insert, registered_on_wielditem_changes)
 
-minetest.register_on_joinplayer(function(player)
-    local item, index = player:get_wielded_item(), player:get_wield_index()
-    players[player:get_player_name()] = {
-        wield = {
-            item = item,
-            index = index
+minetest.register_on_mods_loaded(function()
+    -- Other on_joinplayer / on_leaveplayer callbacks should execute first
+    minetest.register_on_joinplayer(function(player)
+        local item, index = player:get_wielded_item(), player:get_wield_index()
+        players[player:get_player_name()] = {
+            wield = {
+                item = item,
+                index = index
+            }
         }
-    }
-    modlib.table.icall(registered_on_wielditem_changes, player, nil, index, item)
-end)
-minetest.register_on_leaveplayer(function(player)
-    player = players[player:get_player_name()]
+        modlib.table.icall(registered_on_wielditem_changes, player, nil, index, item)
+    end)
+    minetest.register_on_leaveplayer(function(player)
+        players[player:get_player_name()] = nil
+    end)
 end)
 
 minetest.register_globalstep(function()
