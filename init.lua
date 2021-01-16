@@ -85,7 +85,6 @@ modlib.mod.loadfile_exports = loadfile_exports
 
 _ml = modlib
 
-modlib.mod.include("test.lua")
 --[[
 --modlib.mod.include("test.lua")
 ]]
