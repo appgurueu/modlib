@@ -55,3 +55,18 @@ if tests.liquid_raycast then
         end
     end)
 end
+
+local n = 100
+local list = {}
+for index = 1, n do
+    list[index] = index
+end
+modlib.table.shuffle(list)
+local heap = modlib.heap.new()
+for index = 1, #list do
+    heap:push(list[index])
+end
+for index = 1, #list do
+    local popped = heap:pop()
+    assert(popped == index)
+end

@@ -68,7 +68,8 @@ for _, component in ipairs{
     "text",
     "vector",
     "minetest",
-    "trie"
+    "trie",
+    "heap"
 } do
     modlib[component] = loadfile_exports(get_resource(component .. ".lua"))
 end
