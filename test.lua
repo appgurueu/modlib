@@ -5,6 +5,27 @@ local t2 = modlib.table.deepcopy(t)
 assert(t2[t2] == t2)
 
 assert(modlib.table.equals_noncircular({[{}]={}}, {[{}]={}}))
+assert(modlib.table.equals_content(t, t2))
+assert(modlib.table.is_circular(t))
+local equals_references = modlib.table.equals_references
+assert(equals_references({}, {}))
+assert(not equals_references({a = 1, b = 2}, {a = 1, b = 3}))
+t = {}
+t.a, t.b = t, t
+t2 = {}
+t2.a, t2.b = t2, t2
+assert(equals_references(t, t2))
+t = {}
+t[t] = t
+t2 = {}
+t2[t2] = t2
+assert(equals_references(t, t2))
+local x, y = {}, {}
+assert(not equals_references({[x] = x, [y] = y}, {[x] = y, [y] = x}))
+assert(equals_references({[x] = x, [y] = y}, {[x] = x, [y] = y}))
+assert(modlib.table.nilget({a = {b = {c = 42}}}, "a", "b", "c") == 42)
+assert(modlib.table.nilget({a = {}}, "a", "b", "c") == nil)
+assert(modlib.string.escape_magic_chars("%") == "%%")
 local tests = {
     liquid_dir = false,
     liquid_raycast = false
