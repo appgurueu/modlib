@@ -52,7 +52,14 @@ local function loadfile_exports(filename)
     return env
 end
 
-modlib = {}
+modlib = {_RG = setmetatable({}, {
+    __index = function(_, index)
+        return rawget(_G, index)
+    end,
+    __newindex = function(_, index, value)
+        return rawset(_G, index, value)
+    end
+})}
 
 for _, component in ipairs{
     "mod",
