@@ -1,5 +1,3 @@
--- Silence builtin/strict.lua
-setmetatable(_G, {})
 -- Lua version check
 if _VERSION then
     if _VERSION < "Lua 5" then

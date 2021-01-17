@@ -14,9 +14,14 @@ end
 function create_namespace(namespace_name, parent_namespace)
     namespace_name = namespace_name or minetest.get_current_modname()
     parent_namespace = parent_namespace or _G
-    local namespace = setmetatable({}, {__index = parent_namespace})
-    -- should use rawset if MT's strictness wasn't disabled in init.lua
-    parent_namespace[namespace_name] = namespace
+    local metatable = {__index = parent_namespace == _G and function(_, key) return rawget(_G, key) end or parent_namespace}
+    local namespace = {}
+    namespace = setmetatable(namespace, metatable)
+    if parent_namespace == _G then
+        rawset(parent_namespace, namespace_name, namespace)
+    else
+        parent_namespace[namespace_name] = namespace
+    end
     return namespace
 end
 
@@ -26,7 +31,7 @@ function extend(modname, file)
         file = modname
         modname = minetest.get_current_modname()
     end
-    include_env(get_resource(modname, file .. ".lua"), _G[modname])
+    include_env(get_resource(modname, file .. ".lua"), rawget(_G, modname))
 end
 
 -- runs main.lua in table env
