@@ -1,33 +1,53 @@
+-- string
+assert(modlib.string.escape_magic_chars"%" == "%%")
+
 -- table
-local t = {}
-t[t] = t
-local t2 = modlib.table.deepcopy(t)
-assert(t2[t2] == t2)
-assert(modlib.table.equals_noncircular({[{}]={}}, {[{}]={}}))
-assert(modlib.table.equals_content(t, t2))
-assert(modlib.table.is_circular(t))
-local equals_references = modlib.table.equals_references
-assert(equals_references({}, {}))
-assert(not equals_references({a = 1, b = 2}, {a = 1, b = 3}))
-t = {}
-t.a, t.b = t, t
-t2 = {}
-t2.a, t2.b = t2, t2
-assert(equals_references(t, t2))
-t = {}
-t[t] = t
-t2 = {}
-t2[t2] = t2
-assert(equals_references(t, t2))
-local x, y = {}, {}
-assert(not equals_references({[x] = x, [y] = y}, {[x] = y, [y] = x}))
-assert(equals_references({[x] = x, [y] = y}, {[x] = x, [y] = y}))
-local nilget = modlib.table.nilget
-assert(nilget({a = {b = {c = 42}}}, "a", "b", "c") == 42)
-assert(nilget({a = {}}, "a", "b", "c") == nil)
-assert(nilget(nil, "a", "b", "c") == nil)
-assert(nilget(nil, "a", nil, "c") == nil)
-assert(modlib.string.escape_magic_chars("%") == "%%")
+do
+    local table = {}
+    table[table] = table
+    local table_copy = modlib.table.deepcopy(table)
+    assert(table_copy[table_copy] == table_copy)
+    assert(modlib.table.is_circular(table))
+    assert(not modlib.table.is_circular{a = 1})
+    assert(modlib.table.equals_noncircular({[{}]={}}, {[{}]={}}))
+    assert(modlib.table.equals_content(table, table_copy))
+    local equals_references = modlib.table.equals_references
+    assert(equals_references(table, table_copy))
+    assert(equals_references({}, {}))
+    assert(not equals_references({a = 1, b = 2}, {a = 1, b = 3}))
+    table = {}
+    table.a, table.b = table, table
+    table_copy = modlib.table.deepcopy(table)
+    assert(equals_references(table, table_copy))
+    local x, y = {}, {}
+    assert(not equals_references({[x] = x, [y] = y}, {[x] = y, [y] = x}))
+    assert(equals_references({[x] = x, [y] = y}, {[x] = x, [y] = y}))
+    local nilget = modlib.table.nilget
+    assert(nilget({a = {b = {c = 42}}}, "a", "b", "c") == 42)
+    assert(nilget({a = {}}, "a", "b", "c") == nil)
+    assert(nilget(nil, "a", "b", "c") == nil)
+    assert(nilget(nil, "a", nil, "c") == nil)
+end
+
+-- heap
+do
+    local n = 100
+    local list = {}
+    for index = 1, n do
+        list[index] = index
+    end
+    modlib.table.shuffle(list)
+    local heap = modlib.heap.new()
+    for index = 1, #list do
+        heap:push(list[index])
+    end
+    for index = 1, #list do
+        local popped = heap:pop()
+        assert(popped == index)
+    end
+end
+
+-- in-game tests
 local tests = {
     liquid_dir = false,
     liquid_raycast = false
@@ -77,19 +97,4 @@ if tests.liquid_raycast then
             end
         end
     end)
-end
-
-local n = 100
-local list = {}
-for index = 1, n do
-    list[index] = index
-end
-modlib.table.shuffle(list)
-local heap = modlib.heap.new()
-for index = 1, #list do
-    heap:push(list[index])
-end
-for index = 1, #list do
-    local popped = heap:pop()
-    assert(popped == index)
 end
