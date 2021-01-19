@@ -1,10 +1,10 @@
 local metatable = {__index = getfenv(1)}
 
-function default_less_than(a, b) return a < b end
+function less_than(a, b) return a < b end
 
 --> empty min heap
 function new(less_than)
-    return setmetatable({less_than = less_than or default_less_than}, metatable)
+    return setmetatable({less_than = less_than}, metatable)
 end
 
 function push(self, value)
