@@ -15,19 +15,12 @@ function set_case_insensitive_index(table)
     return map_index(table, string.lower)
 end
 
-function nilget(table, key, ...)
-    assert(key ~= nil)
-    local function nilget(table, key, ...)
-        if key == nil then
-            return table
-        end
-        local value = table[key]
-        if value == nil then
-            return nil
-        end
-        return nilget(value, ...)
+--+ nilget(a, "b", "c") == a?.b?.c
+function nilget(value, key, ...)
+    if value == nil or key == nil then
+        return value
     end
-    return nilget(table, key, ...)
+    return nilget(value[key], ...)
 end
 
 -- Fisher-Yates

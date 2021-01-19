@@ -1,9 +1,8 @@
+-- table
 local t = {}
 t[t] = t
-
 local t2 = modlib.table.deepcopy(t)
 assert(t2[t2] == t2)
-
 assert(modlib.table.equals_noncircular({[{}]={}}, {[{}]={}}))
 assert(modlib.table.equals_content(t, t2))
 assert(modlib.table.is_circular(t))
@@ -23,8 +22,11 @@ assert(equals_references(t, t2))
 local x, y = {}, {}
 assert(not equals_references({[x] = x, [y] = y}, {[x] = y, [y] = x}))
 assert(equals_references({[x] = x, [y] = y}, {[x] = x, [y] = y}))
-assert(modlib.table.nilget({a = {b = {c = 42}}}, "a", "b", "c") == 42)
-assert(modlib.table.nilget({a = {}}, "a", "b", "c") == nil)
+local nilget = modlib.table.nilget
+assert(nilget({a = {b = {c = 42}}}, "a", "b", "c") == 42)
+assert(nilget({a = {}}, "a", "b", "c") == nil)
+assert(nilget(nil, "a", "b", "c") == nil)
+assert(nilget(nil, "a", nil, "c") == nil)
 assert(modlib.string.escape_magic_chars("%") == "%%")
 local tests = {
     liquid_dir = false,
