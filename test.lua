@@ -47,6 +47,49 @@ do
     end
 end
 
+-- ranked set
+do
+    local n = 100
+    local ranked_set = modlib.ranked_set.new()
+    local list = {}
+    for i = 1, n do
+        ranked_set:insert(i)
+        list[i] = i
+    end
+
+    assert(modlib.table.equals(ranked_set:to_table(), list))
+
+    local i = 0
+    for rank, key in ranked_set:ipairs() do
+        i = i + 1
+        assert(i == key and i == rank)
+        assert(ranked_set:get_by_rank(rank) == key)
+        local rank, key = ranked_set:get(i)
+        assert(key == i and i == rank)
+    end
+    assert(i == n)
+
+    for i = 1, n do
+        local _, v = ranked_set:delete(i)
+        assert(v == i, i)
+    end
+    assert(not next(ranked_set:to_table()))
+
+    local ranked_set = modlib.ranked_set.new()
+    for i = 1, n do
+        ranked_set:insert(i)
+    end
+
+    for rank, key in ranked_set:ipairs(10, 20) do
+        assert(rank == key and key >= 10 and key <= 20)
+    end
+
+    for i = n, 1, -1 do
+        local j = ranked_set:delete_by_rank(i)
+        assert(j == i)
+    end
+end
+
 -- in-game tests
 local tests = {
     liquid_dir = false,

@@ -74,7 +74,8 @@ for _, component in ipairs{
     "vector",
     "minetest",
     "trie",
-    "heap"
+    "heap",
+    "ranked_set"
 } do
     modlib[component] = loadfile_exports(get_resource(component .. ".lua"))
 end
