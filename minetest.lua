@@ -616,7 +616,7 @@ function colorspec.from_string(string)
         alpha = tonumber(alpha_text, 16)
     end
     if number then
-        return colorspec.from_number(number * 0xFF + alpha)
+        return colorspec.from_number(number * 0x100 + alpha)
     end
     local hex_text = string:match(hex)
     local len, num = hex_text:len(), tonumber(hex_text, 16)
@@ -624,7 +624,7 @@ function colorspec.from_string(string)
         return colorspec.from_number(num)
     end
     if len == 6 then
-        return colorspec.from_number(num * 0xFF + 0xFF)
+        return colorspec.from_number(num * 0x100 + 0xFF)
     end
     local floor = math.floor
     if len == 4 then
@@ -650,10 +650,10 @@ colorspec.from_text = colorspec.from_string
 function colorspec.from_number(number)
     local floor = math.floor
     return colorspec.from_table{
-        a = number % 0xFF,
-        b = floor(number / 0xFF) % 0xFF,
-        g = floor(number / 0xFFFF) % 0xFF,
-        r = floor(number / 0xFFFFFF)
+        a = number % 0x100,
+        b = floor(number / 0x100) % 0x100,
+        g = floor(number / 0x10000) % 0x100,
+        r = floor(number / 0x1000000)
     }
 end
 
@@ -684,7 +684,7 @@ function colorspec:to_string()
 end
 
 function colorspec:to_number()
-    return self.r * 0xFFFFFF + self.g * 0xFFFF + self.b * 0xFF + self.a
+    return self.r * 0x1000000 + self.g * 0x10000 + self.b * 0x100 + self.a
 end
 
 colorspec_to_colorstring = _G.minetest.colorspec_to_colorstring or function(spec)

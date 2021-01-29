@@ -90,6 +90,10 @@ do
     end
 end
 
+-- colorspec
+local colorspec = modlib.minetest.colorspec.from_number(0xDDCCBBAA)
+assert(modlib.table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), dump(colorspec))
+
 -- in-game tests
 local tests = {
     liquid_dir = false,
