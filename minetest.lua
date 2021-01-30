@@ -690,6 +690,3 @@ end
 colorspec_to_colorstring = _G.minetest.colorspec_to_colorstring or function(spec)
     return colorspec.from_any(spec):to_string()
 end
-
-write_schematic = function(fil) end
--- TODO schematic format
