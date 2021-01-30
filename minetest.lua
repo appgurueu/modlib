@@ -690,3 +690,33 @@ end
 colorspec_to_colorstring = _G.minetest.colorspec_to_colorstring or function(spec)
     return colorspec.from_any(spec):to_string()
 end
+
+local object_refs = minetest.object_refs
+--+ Objects inside radius iterator. Uses a linear search.
+function objects_inside_radius(pos, radius)
+    radius = radius^2
+    local id, object, object_pos
+    return function()
+        repeat
+            id, object = next(object_refs, id)
+            object_pos = object:get_pos()
+        until (not object) or ((pos.x-object_pos.x)^2 + (pos.y-object_pos.y)^2 + (pos.z-object_pos.z)^2) <= radius
+        return object
+    end
+end
+
+--+ Objects inside area iterator. Uses a linear search.
+function objects_inside_area(min, max)
+    local id, object, object_pos
+    return function()
+        repeat
+            id, object = next(object_refs, id)
+            object_pos = object:get_pos()
+        until (not object) or (
+            (min.x <= object_pos.x and min.y <= object_pos.y and min.z <= object_pos.z)
+            and
+            (max.y >= object_pos.x and max.y >= object_pos.y and max.z >= object_pos.z)
+        )
+        return object
+    end
+end
