@@ -34,12 +34,24 @@ if _VERSION then
     end
 end
 
-local function get_resource(modname, resource)
+modlib = {
+    dir_delim = rawget(_G, "DIR_DELIM") or "/",
+    _RG = setmetatable({}, {
+        __index = function(_, index)
+            return rawget(_G, index)
+        end,
+        __newindex = function(_, index, value)
+            return rawset(_G, index, value)
+        end
+    })
+}
+
+local function get_resource(modname, resource, ...)
     if not resource then
         resource = modname
         modname = minetest.get_current_modname()
     end
-    return minetest.get_modpath(modname) .. "/" .. resource
+    return table.concat({minetest.get_modpath(modname), resource, ...}, modlib.dir_delim)
 end
 
 local function loadfile_exports(filename)
@@ -49,15 +61,6 @@ local function loadfile_exports(filename)
     file()
     return env
 end
-
-modlib = {_RG = setmetatable({}, {
-    __index = function(_, index)
-        return rawget(_G, index)
-    end,
-    __newindex = function(_, index, value)
-        return rawset(_G, index, value)
-    end
-})}
 
 for _, component in ipairs{
     "mod",
