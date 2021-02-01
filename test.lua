@@ -94,11 +94,41 @@ end
 local colorspec = modlib.minetest.colorspec.from_number(0xDDCCBBAA)
 assert(modlib.table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), dump(colorspec))
 
--- in-game tests
+-- in-game tests & b3d testing
 local tests = {
+    -- depends on player_api
+    b3d = false,
     liquid_dir = false,
     liquid_raycast = false
 }
+if tests.b3d then
+    local stream = io.open(modlib.mod.get_resource("player_api", "models", "character.b3d"), "r")
+    assert(stream)
+    local b3d = modlib.b3d.read(stream)
+    --! dirty helper method to create truncate tables with 10+ number keys
+    local function _b3d_truncate(table)
+        local count = 1
+        for key, value in pairs(table) do
+            if type(key) == "table" then
+                _b3d_truncate(key)
+            end
+            if type(value) == "table" then
+                _b3d_truncate(value)
+            end
+            count = count + 1
+            if type(key) == "number" and count >= 9 and next(table, key) then
+                if count == 9 then
+                    table[key] = "TRUNCATED"
+                else
+                    table[key] = nil
+                end
+            end
+        end
+        return table
+    end
+    modlib.file.write(modlib.mod.get_resource"character.b3d.lua", "return " .. dump(_b3d_truncate(b3d)))
+    stream:close()
+end
 if tests.liquid_dir then
     minetest.register_abm{
         label = "get_liquid_corner_levels & get_liquid_direction test",
