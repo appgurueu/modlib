@@ -193,7 +193,11 @@ function read(stream)
             while content() do
                 local vertex_id = id()
                 assert(not bone[vertex_id], "duplicate vertex weight")
-                bone[vertex_id] = float()
+                local weight = float()
+                if weight > 0 then
+                    -- Many exporters include unneeded zero weights
+                    bone[vertex_id] = weight
+                end
             end
             return bone
         end,
