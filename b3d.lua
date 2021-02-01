@@ -191,10 +191,9 @@ function read(stream)
         BONE = function()
             local bone = {}
             while content() do
-                table.insert(bone, {
-                    vertex_id = id(),
-                    weight = float()
-                })
+                local vertex_id = id()
+                assert(not bone[vertex_id], "duplicate vertex weight")
+                bone[vertex_id] = float()
             end
             return bone
         end,
