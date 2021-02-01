@@ -42,12 +42,13 @@ function init(modname)
     extend(modname, "main")
 end
 
+--! deprecated
 function extend_string(modname, string)
     if not string then
         string = modname
         modname = minetest.get_current_modname()
     end
-    include_env(string, _G[modname], true)
+    include_env(string, rawget(_G, modname), true)
 end
 
 function configuration(modname)
