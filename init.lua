@@ -75,6 +75,7 @@ for _, component in ipairs{
     "table",
     "text",
     "vector",
+    "quaternion",
     "minetest",
     "trie",
     "heap",
