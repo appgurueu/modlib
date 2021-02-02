@@ -126,7 +126,7 @@ if tests.b3d then
         end
         return table
     end
-    modlib.file.write(modlib.mod.get_resource"character.b3d.lua", "return " .. dump(_b3d_truncate(b3d)))
+    modlib.file.write(modlib.mod.get_resource"character.b3d.lua", "return " .. dump(_b3d_truncate(modlib.table.copy(b3d))))
     stream:close()
 end
 if tests.liquid_dir then
