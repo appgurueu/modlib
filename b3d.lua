@@ -260,7 +260,8 @@ function read(stream)
                     node_type = "bone"
                     node.bone = elem
                 elseif type == "KEYS" then
-                    table.insert(node.keys, elem)
+                    assert((node.keys[#node.keys] or {}).frame ~= (elem[1] or {}).frame, "duplicate frame")
+                    modlib.table.append(node.keys, elem)
                 elseif type == "NODE" then
                     table.insert(node.children, elem)
                 elseif type == "ANIM" then
@@ -322,3 +323,60 @@ function read(stream)
 end
 
 -- TODO function write(self, stream)
+
+local binary_search_frame = modlib.table.binary_search_comparator(function(a, b)
+    return modlib.table.default_comparator(a, b.frame)
+end)
+function calculate_absolute_bone_properties(self, keyframe, interpolate)
+    local function get_frame_values(keys)
+        local values = keys[keyframe]
+        if values and values.frame == keyframe then
+            return {
+                position = values.position,
+                rotation = values.rotation,
+                scale = values.scale
+            }
+        end
+        local index = binary_search_frame(keys, keyframe)
+        if index > 0 then
+            return keys[index]
+        end
+        index = -index
+        assert(index > 1 and index <= #keys)
+        local a, b = keys[index - 1], keys[index]
+        if not interpolate then
+            return a
+        end
+        local ratio = (keyframe - a.frame) / (b.frame - a.frame)
+        return {
+            position = (a.position and b.position and modlib.vector.interpolate(a.position, b.position, ratio)) or a.position or b.position,
+            rotation = (a.rotation and b.rotation and modlib.quaternion.interpolate(a.rotation, b.rotation, ratio)) or a.rotation or b.rotation,
+            scale = (a.scale and b.scale and modlib.vector.interpolate(a.scale, b.scale, ratio)) or a.scale or b.scale,
+        }
+    end
+    local absolute_bone_properties = {}
+    local function calculate_absolute_properties(self, parent_properties)
+        local properties = {
+            name = self.name,
+            position = self.position,
+            rotation = self.rotation,
+            scale = self.scale
+        }
+        if self.keys and next(self.keys) ~= nil then
+            properties = modlib.table.add_all(properties, get_frame_values(self.keys))
+        end
+        if parent_properties then
+            properties.position = modlib.vector.add(parent_properties.position, properties.position)
+            properties.rotation = modlib.quaternion.multiply(parent_properties.rotation, properties.rotation)
+            properties.scale = modlib.vector.multiply(parent_properties.scale, properties.scale)
+        end
+        if self.bone then
+            table.insert(absolute_bone_properties, properties)
+        end
+        for _, child in ipairs(self.children or {}) do
+            calculate_absolute_properties(child, properties)
+        end
+    end
+    calculate_absolute_properties(self.node)
+    return absolute_bone_properties
+end
