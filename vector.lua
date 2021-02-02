@@ -115,6 +115,12 @@ metatable.__sub = subtract
 metatable.__mul = multiply
 metatable.__div = divide
 
+--+ linear interpolation
+--: ratio number from 0 (all the first vector) to 1 (all the second vector)
+function interpolate(v, other_v, ratio)
+    return add(multiply(v, 1 - ratio), multiply(other_v,  ratio))
+end
+
 function norm(v)
     local sum = 0
     for _, c in pairs(v) do
