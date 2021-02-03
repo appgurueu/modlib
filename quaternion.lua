@@ -16,6 +16,19 @@ function normalize(self)
 	return res
 end
 
+function conjugate(self)
+	return {
+		-self[1],
+		-self[2],
+		-self[3],
+		self[4]
+	}
+end
+
+function inverse(self)
+	return modlib.vector.divide_scalar(conjugate(self), self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + self[4] ^ 2)
+end
+
 function negate(self)
 	for key, value in pairs(self) do
 		self[key] = -value
