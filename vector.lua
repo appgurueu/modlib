@@ -42,6 +42,7 @@ function to_xyzw(v)
     return {x = v[1], y = v[2], z = v[3], w = v[4]}
 end
 
+--+ not necessarily required, as Minetest respects the metatable
 function to_minetest(v)
     return mt_vector.new(unpack(v))
 end
