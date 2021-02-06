@@ -1,3 +1,17 @@
+-- TODO OOP, extend vector
+
+function from_euler_rotation(rotation)
+	rotation = vector.divide(rotation, 2)
+	local cos = vector.apply(rotation, math.cos)
+	local sin = vector.apply(rotation, math.sin)
+	return {
+    	sin.z * cos.x * cos.y - cos.z * sin.x * sin.y,
+    	cos.z * sin.x * cos.y + sin.z * cos.x * sin.y,
+		cos.z * cos.x * sin.y - sin.z * sin.x * cos.y,
+		cos.z * cos.x * cos.y + sin.z * sin.x * sin.y
+	}
+end
+
 function multiply(self, other)
 	return {
 		other[1] * self[1] - other[2] * self[2] - other[3] * self[3] - other[4] * self[4],
@@ -60,7 +74,7 @@ function slerp(self, other, ratio)
 	return modlib.vector.add(modlib.vector.multiply_scalar(self, s_0), modlib.vector.multiply_scalar(other, s_1))
 end
 
---> {x, y, z} euler rotation in degrees
+--> {x = pitch, y = yaw, z = roll} euler rotation in degrees
 function to_euler_rotation(self)
     local rotation = {}
 
