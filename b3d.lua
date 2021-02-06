@@ -327,7 +327,9 @@ end
 local binary_search_frame = modlib.table.binary_search_comparator(function(a, b)
     return modlib.table.default_comparator(a, b.frame)
 end)
-function calculate_absolute_bone_properties(self, keyframe, interpolate)
+
+--> [bonename] = { position = vector, rotation = quaternion, scale = vector }
+function get_animated_bone_properties(self, keyframe, interpolate)
     local function get_frame_values(keys)
         local values = keys[keyframe]
         if values and values.frame == keyframe then
@@ -354,29 +356,24 @@ function calculate_absolute_bone_properties(self, keyframe, interpolate)
             scale = (a.scale and b.scale and modlib.vector.interpolate(a.scale, b.scale, ratio)) or a.scale or b.scale,
         }
     end
-    local absolute_bone_properties = {}
-    local function calculate_absolute_properties(self, parent_properties)
-        local properties = {
-            name = self.name,
-            position = self.position,
-            rotation = self.rotation,
-            scale = self.scale
-        }
-        if self.keys and next(self.keys) ~= nil then
-            properties = modlib.table.add_all(properties, get_frame_values(self.keys))
+    local bone_properties = {}
+    local function get_props(node)
+        local properties = {}
+        if node.keys and next(node.keys) ~= nil then
+            properties = modlib.table.add_all(properties, get_frame_values(node.keys))
         end
-        if parent_properties then
-            properties.position = modlib.vector.add(parent_properties.position, properties.position)
-            properties.rotation = modlib.quaternion.multiply(parent_properties.rotation, properties.rotation)
-            properties.scale = modlib.vector.multiply(parent_properties.scale, properties.scale)
+        for _, property in pairs{"position", "rotation", "scale"} do
+            properties[property] = properties[property] or modlib.table.copy(node[property])
         end
-        if self.bone then
-            table.insert(absolute_bone_properties, properties)
+        if node.bone then
+            assert(not bone_properties[node.name])
+            bone_properties[node.name] = properties
         end
-        for _, child in ipairs(self.children or {}) do
-            calculate_absolute_properties(child, properties)
+        for _, child in pairs(node.children or {}) do
+            get_props(child)
         end
     end
-    calculate_absolute_properties(self.node)
-    return absolute_bone_properties
+    get_props(self.node)
+    return bone_properties
+end
 end
