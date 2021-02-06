@@ -78,6 +78,7 @@ for _, component in ipairs{
     "quaternion",
     "minetest",
     "trie",
+    "kdtree",
     "heap",
     "ranked_set",
     "b3d"
