@@ -376,4 +376,3 @@ function get_animated_bone_properties(self, keyframe, interpolate)
     get_props(self.node)
     return bone_properties
 end
-end
