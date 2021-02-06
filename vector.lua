@@ -124,8 +124,8 @@ end
 
 function norm(v)
     local sum = 0
-    for _, c in pairs(v) do
-        sum = sum + c*c
+    for _, value in pairs(v) do
+        sum = sum + value ^ 2
     end
     return sum
 end
