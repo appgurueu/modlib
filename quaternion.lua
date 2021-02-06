@@ -65,21 +65,51 @@ function to_euler_rotation(self)
     local rotation = {}
 
     local sinr_cosp = 2 * (self[4] * self[1] + self[2] * self[3])
-    local cosr_cosp = 1 - 2 * (self[1] * self[1] + self[2] * self[2])
+    local cosr_cosp = 1 - 2 * (self[1] ^ 2 + self[2] ^ 2)
     rotation.x = math.atan2(sinr_cosp, cosr_cosp)
 
     local sinp = 2 * (self[4] * self[2] - self[3] * self[1])
     if sinp <= -1 then
-        rotation.y = -math.pi/2
+        rotation.z = -math.pi/2
     elseif sinp >= 1 then
-        rotation.y = math.pi/2
+        rotation.z = math.pi/2
     else
-        rotation.y = math.asin(sinp)
-    end
+        rotation.z = math.asin(sinp)
+	end
 
     local siny_cosp = 2 * (self[4] * self[3] + self[1] * self[2])
-    local cosy_cosp = 1 - 2 * (self[2] * self[2] + self[3] * self[3])
-	rotation.z = math.atan2(siny_cosp, cosy_cosp)
+    local cosy_cosp = 1 - 2 * (self[2] ^ 2 + self[3] ^ 2)
+	rotation.y = math.atan2(siny_cosp, cosy_cosp)
 
 	return vector.apply(rotation, math.deg)
+end
+
+-- See https://github.com/zaki/irrlicht/blob/master/include/quaternion.h#L652
+function to_euler_rotation_irrlicht(self)
+	local x, y, z, w = unpack(self)
+	local test = 2 * (y * w - x * z)
+
+	local function _calc()
+		if math.abs(test - 1) <= 1e-6 then
+			return {
+				z = -2 * math.atan2(x, w),
+				x = 0,
+				y = math.pi/2
+			}
+		end
+		if math.abs(test + 1) <= 1e-6 then
+			return {
+				z = 2 * math.atan2(x, w),
+				x = 0,
+				y = math.pi/-2
+			}
+		end
+		return {
+			z = math.atan2(2 * (x * y + z * w), x ^ 2 - y ^ 2 - z ^ 2 + w ^ 2),
+			x = math.atan2(2 * (y * z + x * w), -x ^ 2 - y ^ 2 + z ^ 2 + w ^ 2),
+			y = math.asin(math.min(math.max(test, -1), 1))
+		}
+	end
+
+	return vector.apply(_calc(), math.deg)
 end
