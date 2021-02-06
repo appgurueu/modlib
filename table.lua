@@ -349,7 +349,7 @@ function find(list, value)
             return index
         end
     end
-    return false
+    return
 end
 
 contains = find
