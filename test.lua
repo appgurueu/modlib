@@ -94,10 +94,34 @@ end
 local colorspec = modlib.minetest.colorspec.from_number(0xDDCCBBAA)
 assert(modlib.table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), dump(colorspec))
 
+-- k-d-tree
+local vectors = {}
+for _ = 1, 1000 do
+    table.insert(vectors, {math.random(), math.random(), math.random()})
+end
+local kdtree = modlib.kdtree.new(vectors)
+for _, vector in ipairs(vectors) do
+    local neighbor, distance = kdtree:get_nearest_neighbor(vector)
+    assert(modlib.vector.equals(vector, neighbor), distance == 0)
+end
+
+for _ = 1, 1000 do
+    local vector = {math.random(), math.random(), math.random()}
+    local _, distance = kdtree:get_nearest_neighbor(vector)
+    local min_distance = math.huge
+    for _, other_vector in ipairs(vectors) do
+        local other_distance = modlib.vector.distance(vector, other_vector)
+        if other_distance < min_distance then
+            min_distance = other_distance
+        end
+    end
+    assert(distance == min_distance)
+end
+
 -- in-game tests & b3d testing
 local tests = {
     -- depends on player_api
-    b3d = false,
+    b3d = true,
     liquid_dir = false,
     liquid_raycast = false
 }
