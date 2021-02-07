@@ -134,6 +134,15 @@ function length(v)
     return math.sqrt(norm(v))
 end
 
+-- Minor code duplication for the sake of performance
+function distance(v, other_v)
+    local sum = 0
+    for key, value in pairs(v) do
+        sum = sum + (value - other_v[key]) ^ 2
+    end
+    return math.sqrt(sum)
+end
+
 function normalize(v)
     return divide_scalar(v, length(v))
 end
