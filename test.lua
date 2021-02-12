@@ -121,7 +121,7 @@ end
 -- in-game tests & b3d testing
 local tests = {
     -- depends on player_api
-    b3d = true,
+    b3d = false,
     liquid_dir = false,
     liquid_raycast = false
 }
