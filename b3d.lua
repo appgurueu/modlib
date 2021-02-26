@@ -82,12 +82,12 @@ function read(stream)
     end
 
     local function color()
-        return {
-            r = float(),
-            g = float(),
-            b = float(),
-            a = float()
-        }
+        local color = {}
+        color.r = float()
+        color.g = float()
+        color.b = float()
+        color.a = float()
+        return color
     end
 
     local function vector3()
@@ -95,7 +95,8 @@ function read(stream)
     end
 
     local function quaternion()
-        return {[4] = float(), [1] = float(), [2] = float(), [3] = float()}
+        local w, x, y, z = float(), float(), float(), float()
+        return {x, y, z, w}
     end
 
     local function content()
@@ -108,14 +109,14 @@ function read(stream)
         TEXS = function()
             local textures = {}
             while content() do
-                table.insert(textures, {
-                    file = string(),
-                    flags = int(),
-                    blend = int(),
-                    pos = float_array(2),
-                    scale = float_array(2),
-                    rotation = float()
-                })
+                local texture = {}
+                texture.file = string()
+                texture.flags = int()
+                texture.blend = int()
+                texture.pos = float_array(2)
+                texture.scale = float_array(2)
+                texture.rotation = float()
+                table.insert(textures, texture)
             end
             return textures
         end,
@@ -124,14 +125,13 @@ function read(stream)
             brushes.n_texs = int()
             assert(brushes.n_texs <= 8)
             while content() do
-                local brush = {
-                    name = string(),
-                    color = color(),
-                    shininess = float(),
-                    blend = float(),
-                    fx = float(),
-                    texture_id = {}
-                }
+                local brush = {}
+                brush.name = string()
+                brush.color = color()
+                brush.shininess = float()
+                brush.blend = float()
+                brush.fx = float()
+                brush.texture_id = {}
                 for index = 1, brushes.n_texs do
                     brush.texture_id[index] = optional_id()
                 end
@@ -140,21 +140,19 @@ function read(stream)
             return brushes
         end,
         VRTS = function()
-            local vertices = {
-                flags = int(),
-                tex_coord_sets = int(),
-                tex_coord_set_size = int()
-            }
+            local vertices = {}
+            vertices.flags = int()
+            vertices.tex_coord_sets = int()
+            vertices.tex_coord_set_size = int()
             assert(vertices.tex_coord_sets <= 8 and vertices.tex_coord_set_size <= 4)
             local has_normal = (vertices.flags % 2 == 1) or nil
             local has_color = (math.floor(vertices.flags / 2) % 2 == 1) or nil
             while content() do
-                local vertex = {
-                    pos = vector3(),
-                    normal = has_normal and vector3(),
-                    color = has_color and color(),
-                    tex_coords = {}
-                }
+                local vertex = {}
+                vertex.pos = vector3()
+                vertex.normal = has_normal and vector3()
+                vertex.color = has_color and color()
+                vertex.tex_coords = {}
                 for tex_coord_set = 1, vertices.tex_coord_sets do
                     local tex_coords = {}
                     for tex_coord = 1, vertices.tex_coord_set_size do
@@ -172,15 +170,16 @@ function read(stream)
                 vertex_ids = {}
             }
             while content() do
-                table.insert(tris.vertex_ids, {id(), id(), id()})
+                -- possibly obsolete if Lua guarantees a certain order of execution for list table constructors
+                local id_1, id_2, id_3 = id(), id(), id()
+                table.insert(tris.vertex_ids, {id_1, id_2, id_3})
             end
             return tris
         end,
         MESH = function()
-            local mesh = {
-                brush_id = optional_id(),
-                vertices = chunk{VRTS = true}
-            }
+            local mesh = {}
+            mesh.brush_id = optional_id()
+            mesh.vertices = chunk{VRTS = true}
             mesh.triangle_sets = {}
             repeat
                 local tris = chunk{TRIS = true}
@@ -218,34 +217,33 @@ function read(stream)
                 flags = flags
             }
             while content() do
-                table.insert(bone, {
-                    frame = int(),
-                    position = position and vector3() or nil,
-                    scale = scale and vector3() or nil,
-                    rotation = rotation and quaternion() or nil
-                })
+                local frame = {}
+                frame.frame = int()
+                frame.position = position and vector3() or nil
+                frame.scale = scale and vector3() or nil
+                frame.rotation = rotation and quaternion() or nil
+                table.insert(bone, frame)
             end
             -- Ensure frames are sorted ascending
             table.sort(bone, function(a, b) return a.frame < b.frame end)
             return bone
         end,
         ANIM = function()
-            return {
-                -- flags are unused
-                flags = int(),
-                frames = int(),
-                fps = float()
-            }
+            local anim = {}
+            -- flags are unused
+            anim.flags = int()
+            anim.frames = int()
+            anim.fps = float()
+            return anim
         end,
         NODE = function()
-            local node = {
-                name = string(),
-                position = vector3(),
-                scale = vector3(),
-                keys = {},
-                rotation = quaternion(),
-                children = {}
-            }
+            local node = {}
+            node.name = string()
+            node.position = vector3()
+            node.scale = vector3()
+            node.keys = {}
+            node.rotation = quaternion()
+            node.children = {}
             local node_type
             -- See https://github.com/blitz-research/blitz3d/blob/master/blitz3d/loader_b3d.cpp#L263
             -- Order is not validated; double occurences of mutually exclusive node def are
