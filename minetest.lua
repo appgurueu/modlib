@@ -687,7 +687,7 @@ function colorspec:to_number()
     return self.r * 0x1000000 + self.g * 0x10000 + self.b * 0x100 + self.a
 end
 
-colorspec_to_colorstring = _G.minetest.colorspec_to_colorstring or function(spec)
+colorspec_to_colorstring = minetest.colorspec_to_colorstring or function(spec)
     return colorspec.from_any(spec):to_string()
 end
 
