@@ -1,14 +1,15 @@
 -- Table helpers
 
 function map_index(table, func)
-    return setmetatable(table, {
+    local mapping_metatable = {
         __index = function(table, key)
             return rawget(table, func(key))
         end,
         __newindex = function(table, key, value)
             rawset(table, func(key), value)
         end
-    })
+    }
+    return setmetatable(table, mapping_metatable)
 end
 
 function set_case_insensitive_index(table)
