@@ -63,8 +63,9 @@ function read(stream)
             if mantissa == 0 then
                 return sign * math.huge
             end
-            -- TODO differentiate quiet and signalling NaN as well as positive and negative
-            return 0/0
+            -- Differentiating quiet and signalling nan is not possible in Lua, hence we don't have to do it
+            -- HACK ((0/0)^1) yields nan, 0/0 yields -nan
+            return sign == 1 and ((0/0)^1) or 0/0
         end
         if exponent == 0 then
             -- subnormal value
