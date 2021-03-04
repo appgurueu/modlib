@@ -50,6 +50,19 @@ end
 
 trim_right = trim_end
 
+local inputstream_metatable = {
+	__index = {read = function(self, count)
+		local cursor = self.cursor + 1
+		self.cursor = self.cursor + count
+		local text = self.text:sub(cursor, self.cursor)
+		return text ~= "" and text or nil
+	end}
+}
+function inputstream(text)
+	return setmetatable({text = text, cursor = 0}, inputstream_metatable)
+end
+
+
 function split(text, delimiter, limit, is_regex)
 	limit = limit or math.huge
 	local no_regex = not is_regex
