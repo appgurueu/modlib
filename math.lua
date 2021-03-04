@@ -49,3 +49,24 @@ function tostring(number, base, digit_function, precision)
 	end
 	return table.concat(out)
 end
+
+-- See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/fround#polyfill
+function fround(number)
+	if number == 0 or number ~= number then
+		return number
+	end
+	local sign = 1
+	if number < 0 then
+		sign = -1
+		number = -number
+	end
+	local exp = math.floor(math.log(number, 2))
+	local powexp = 2 ^ math.max(-126, math.min(number, 127))
+	local leading = exp < -127 and 0 or 1
+	local mantissa = math.floor((leading - number / powexp) * 0x800000 + 0.5)
+	if mantissa <= -0x800000 then
+		return sign * math.huge
+	end
+	mantissa = mantissa / 0x800000
+	return sign * powexp * (leading - mantissa), mantissa
+end
