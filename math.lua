@@ -1,5 +1,5 @@
 -- Make random random
-math.randomseed(minetest.get_us_time())
+math.randomseed(minetest and minetest.get_us_time() or os.time() + os.clock())
 for _ = 1, 100 do math.random() end
 
 function round(number, steps)

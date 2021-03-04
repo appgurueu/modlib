@@ -13,13 +13,15 @@ function build_tree(dict)
     end
     return tree
 end
-function build_setting_tree()
-    modlib.conf.settings = build_tree(minetest.settings:to_table())
-end
--- deprecated, use modlib.mod.configuration instead
-minetest.mkdir(minetest.get_worldpath().."/config")
-function get_path(confname)
-    return minetest.get_worldpath().."/config/"..confname
+if minetest then
+    function build_setting_tree()
+        modlib.conf.settings = build_tree(minetest.settings:to_table())
+    end
+    -- deprecated, use modlib.mod.configuration instead
+    minetest.mkdir(minetest.get_worldpath().."/config")
+    function get_path(confname)
+        return minetest.get_worldpath().."/config/"..confname
+    end
 end
 function read_conf(text)
     local lines = modlib.text.split_lines(text, nil, true)

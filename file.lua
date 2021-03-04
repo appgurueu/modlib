@@ -47,6 +47,8 @@ end
 
 function create_if_not_exists_from_file(filename, src_filename) return create_if_not_exists(filename, read(src_filename)) end
 
+if not minetest then return end
+
 -- Process Bridge Helpers
 process_bridges = {}
 
@@ -73,7 +75,7 @@ end
 
 function process_bridge_listen(name, line_consumer, step)
 	local bridge = process_bridges[name]
-	modlib.minetest.register_globalstep(step or 0.1, function(dtime)
+	modlib.minetest.register_globalstep(step or 0.1, function()
 		local content = io.open(bridge.input, "r")
 		local line = content:read()
 		while line do
@@ -86,7 +88,7 @@ end
 
 function process_bridge_serve(name, step)
 	local bridge = process_bridges[name]
-	modlib.minetest.register_globalstep(step or 0.1, function(dtime)
+	modlib.minetest.register_globalstep(step or 0.1, function()
 		bridge.output_file:close()
 		process_bridges[name].output_file = io.open(bridge.output, "a")
 	end)
@@ -95,7 +97,6 @@ end
 function process_bridge_write(name, message)
 	local bridge = process_bridges[name]
 	bridge.output_file:write(message .. "\n")
-	-- append(bridge.input, message)
 end
 
 function process_bridge_start(name, command, os_execute)

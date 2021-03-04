@@ -62,6 +62,15 @@ local function loadfile_exports(filename)
     return env
 end
 
+local minetest_only = {
+    mod = true,
+    minetest = true,
+    data = true,
+    log = true,
+    player = true,
+    -- not actually minetest-only, but a deprecated component
+    conf = true
+}
 for _, component in ipairs{
     "mod",
     "conf",
@@ -83,20 +92,27 @@ for _, component in ipairs{
     "ranked_set",
     "b3d"
 } do
-    modlib[component] = loadfile_exports(get_resource(component .. ".lua"))
+    if minetest or not minetest_only[component] then
+        local path = minetest and get_resource(component .. ".lua") or component .. ".lua"
+        modlib[component] = loadfile_exports(path)
+    end
 end
 
 -- Aliases
 modlib.string = modlib.text
 modlib.number = modlib.math
 
-modlib.conf.build_setting_tree()
+if minetest then
+    modlib.conf.build_setting_tree()
 
-modlib.mod.get_resource = get_resource
-modlib.mod.loadfile_exports = loadfile_exports
+    modlib.mod.get_resource = get_resource
+    modlib.mod.loadfile_exports = loadfile_exports
+end
 
 _ml = modlib
 
 --[[
 --modlib.mod.include("test.lua")
 ]]
+
+return modlib
