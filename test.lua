@@ -27,6 +27,11 @@ do
     assert(nilget({a = {}}, "a", "b", "c") == nil)
     assert(nilget(nil, "a", "b", "c") == nil)
     assert(nilget(nil, "a", nil, "c") == nil)
+    local rope = modlib.table.rope{}
+    rope:write"hello"
+    rope:write" "
+    rope:write"world"
+    assert(rope:to_text() == "hello world", rope:to_text())
 end
 
 -- heap

@@ -33,6 +33,19 @@ function shuffle(table)
     return table
 end
 
+local rope_metatable = {__index = {
+    write = function(self, text)
+        table.insert(self, text)
+    end,
+    to_text = function(self)
+        return table.concat(self)
+    end
+}}
+--> rope with simple metatable (:write(text) and :to_text())
+function rope(table)
+    return setmetatable(table or {}, rope_metatable)
+end
+
 function is_circular(table)
     assert(type(table) == "table")
     local known = {}
