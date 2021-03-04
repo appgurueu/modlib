@@ -46,6 +46,16 @@ function rope(table)
     return setmetatable(table or {}, rope_metatable)
 end
 
+local rope_len_metatable = {__index = {
+    write = function(self, text)
+        self.len = self.len + text:len()
+    end
+}}
+--> rope for determining length supporting :write(text), .len being the length
+function rope_len(len)
+    return setmetatable({len = len or 0}, rope_len_metatable)
+end
+
 function is_circular(table)
     assert(type(table) == "table")
     local known = {}
