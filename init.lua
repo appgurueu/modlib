@@ -90,7 +90,8 @@ for _, component in ipairs{
     "kdtree",
     "heap",
     "ranked_set",
-    "b3d"
+    "b3d",
+    "bluon"
 } do
     if minetest or not minetest_only[component] then
         local path = minetest and get_resource(component .. ".lua") or component .. ".lua"

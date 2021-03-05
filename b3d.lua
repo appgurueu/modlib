@@ -55,8 +55,8 @@ function read(stream)
         end
         local exponent = byte_1 * 2
         if byte_2 >= 0x80 then
-            byte_2 = byte_2 - 0x80
             exponent = exponent + 1
+            byte_2 = byte_2 - 0x80
         end
         local mantissa = ((((byte_4 / 0x100) + byte_3) / 0x100) + byte_2) / 0x80
         if exponent == 0xFF then
@@ -67,6 +67,7 @@ function read(stream)
             -- HACK ((0/0)^1) yields nan, 0/0 yields -nan
             return sign == 1 and ((0/0)^1) or 0/0
         end
+        assert(mantissa < 1)
         if exponent == 0 then
             -- subnormal value
             return sign * 2^-126 * mantissa

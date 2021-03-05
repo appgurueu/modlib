@@ -123,6 +123,41 @@ for _ = 1, 1000 do
     assert(distance == min_distance)
 end
 
+-- bluon
+do
+    local bluon = modlib.bluon
+    local function assert_preserves(object)
+        local rope = modlib.table.rope{}
+        local written, read, input
+        local _, err = pcall(function()
+            bluon:write(object, rope)
+            written = rope:to_text()
+            input = modlib.text.inputstream(written)
+            read = bluon:read(input)
+        end)
+        -- TODO assertdump
+        local remaining = input:read(69)
+        assert(not remaining, remaining and modlib.text.hexdump(remaining))
+        assert(modlib.table.equals_references(object, read), dump{object = object, read = read, written = written and modlib.text.hexdump(written), err = err})
+    end
+    for _, constant in pairs{true, false, math.huge, -math.huge} do
+        assert_preserves(constant)
+    end
+    for i = 1, 69 do
+        assert_preserves(table.concat(modlib.table.repetition("x", i)))
+    end
+    for _ = 1, 1000 do
+        assert_preserves(math.random(2^-50, 2^50))
+        assert_preserves((math.random() - 0.5) * 2^math.random(-20, 20))
+    end
+    assert_preserves{hello = "world", welt = "hallo"}
+    assert_preserves{"hello", "hello", "hello"}
+    local a = {}
+    a[a] = a
+    a[1] = a
+    assert_preserves(a)
+end
+
 -- in-game tests & b3d testing
 local tests = {
     -- depends on player_api
