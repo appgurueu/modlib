@@ -62,6 +62,13 @@ function inputstream(text)
 	return setmetatable({text = text, cursor = 0}, inputstream_metatable)
 end
 
+function hexdump(text)
+	local dump = {}
+	for index = 1, text:len() do
+		dump[index] = ("%02X"):format(text:byte(index))
+	end
+	return table.concat(dump)
+end
 
 function split(text, delimiter, limit, is_regex)
 	limit = limit or math.huge
