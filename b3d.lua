@@ -45,34 +45,9 @@ function read(stream)
         end
     end
 
+    local read_single = modlib.binary.read_single
     local function float()
-        -- TODO properly truncate to single floating point
-        local byte_4, byte_3, byte_2, byte_1 = byte(), byte(), byte(), byte()
-        local sign = 1
-        if byte_1 >= 0x80 then
-            sign = -1
-            byte_1 = byte_1 - 0x80
-        end
-        local exponent = byte_1 * 2
-        if byte_2 >= 0x80 then
-            exponent = exponent + 1
-            byte_2 = byte_2 - 0x80
-        end
-        local mantissa = ((((byte_4 / 0x100) + byte_3) / 0x100) + byte_2) / 0x80
-        if exponent == 0xFF then
-            if mantissa == 0 then
-                return sign * math.huge
-            end
-            -- Differentiating quiet and signalling nan is not possible in Lua, hence we don't have to do it
-            -- HACK ((0/0)^1) yields nan, 0/0 yields -nan
-            return sign == 1 and ((0/0)^1) or 0/0
-        end
-        assert(mantissa < 1)
-        if exponent == 0 then
-            -- subnormal value
-            return sign * 2^-126 * mantissa
-        end
-        return sign * 2 ^ (exponent - 127) * (1 + mantissa)
+        return read_single(byte)
     end
 
     local function float_array(length)

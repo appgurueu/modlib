@@ -160,48 +160,21 @@ function write(self, object, stream)
     local function byte(byte)
         stream:write(string.char(byte))
     end
+    local write_uint = modlib.binary.write_uint
     local function uint(type, uint)
-        for _ = 1, uint_widths[type] do
-            byte(uint % 0x100)
-            uint = math.floor(uint / 0x100)
-        end
+        write_uint(byte, uint, uint_widths[type])
     end
     local function uint_with_type(base, _uint)
         local type_offset = uint_type(_uint)
         byte(base + type_offset)
         uint(type_offset, _uint)
     end
-    local function float(number)
-        local sign = 0
-        if number < 0 then
-            number = -number
-            sign = 0x80
-        end
-        local mantissa, exponent = math.frexp(number)
-        exponent = exponent + 127
-        if exponent > 1 then
-            -- TODO ensure this deals properly with subnormal numbers
-            mantissa = mantissa * 2 - 1
-            exponent = exponent - 1
-        end
-        local sign_byte = sign + math.floor(exponent / 2)
-        mantissa = mantissa * 0x80
-        local exponent_byte = (exponent % 2) * 0x80 + math.floor(mantissa)
-        mantissa = mantissa % 1
-        local mantissa_bytes = {}
-        -- TODO ensure this check is proper
-        local double = mantissa % 2^-23 > 0
+    local write_float = modlib.binary.write_float
+    local function float_on_write(double)
         byte(double and type_ranges.number or type_ranges.number_f32)
-        local len = double and 6 or 2
-        for index = len, 1, -1 do
-            mantissa = mantissa * 0x100
-            mantissa_bytes[index] = string.char(math.floor(mantissa))
-            mantissa = mantissa % 1
-        end
-        assert(mantissa == 0)
-        stream:write(table.concat(mantissa_bytes))
-        byte(exponent_byte)
-        byte(sign_byte)
+    end
+    local function float(number)
+        write_float(byte, number, float_on_write)
     end
     local aux_write = self.aux_write
     local function _write(object)
@@ -285,49 +258,13 @@ function read(self, stream)
     local function byte()
         return stream_read(1):byte()
     end
-    local function uint(bytes)
-        local factor = 1
-        local int = 0
-        for _ = 1, uint_widths[bytes] do
-            int = int + byte() * factor
-            factor = factor * 0x100
-        end
-        return int
+    local read_uint = modlib.binary.read_uint
+    local function uint(type)
+        return read_uint(byte, uint_widths[type])
     end
-    -- TODO get rid of code duplication (see b3d.lua)
+    local read_float = modlib.binary.read_float
     local function float(double)
-        -- First read the mantissa
-        local mantissa = 0
-        for _ = 1, double and 6 or 2 do
-            mantissa = (mantissa + byte()) / 0x100
-        end
-        -- Second and first byte in big endian: last bit of exponent + 7 bits of mantissa, sign bit + 7 bits of exponent
-        local byte_2, byte_1 = byte(), byte()
-        local sign = 1
-        if byte_1 >= 0x80 then
-            sign = -1
-            byte_1 = byte_1 - 0x80
-        end
-        local exponent = byte_1 * 2
-        if byte_2 >= 0x80 then
-            exponent = exponent + 1
-            byte_2 = byte_2 - 0x80
-        end
-        mantissa = (mantissa + byte_2) / 0x80
-        if exponent == 0xFF then
-            if mantissa == 0 then
-                return sign * math.huge
-            end
-            -- Differentiating quiet and signalling nan is not possible in Lua, hence we don't have to do it
-            -- HACK ((0/0)^1) yields nan, 0/0 yields -nan
-            return sign == 1 and ((0/0)^1) or 0/0
-        end
-        assert(mantissa < 1)
-        if exponent == 0 then
-            -- subnormal value
-            return sign * 2^-126 * mantissa
-        end
-        return sign * 2 ^ (exponent - 127) * (1 + mantissa)
+        return read_float(byte, double)
     end
     local aux_read = self.aux_read
     local function _read(type)

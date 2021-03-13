@@ -90,6 +90,7 @@ for _, component in ipairs{
     "kdtree",
     "heap",
     "ranked_set",
+    "binary",
     "b3d",
     "bluon"
 } do
