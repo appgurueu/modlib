@@ -134,20 +134,27 @@ do
             written = rope:to_text()
             input = modlib.text.inputstream(written)
             read = bluon:read(input)
+            local remaining = input:read(1000)
+            assert(not remaining)
         end)
         -- TODO assertdump
-        local remaining = input:read(69)
-        assert(not remaining, remaining and modlib.text.hexdump(remaining))
-        assert(modlib.table.equals_references(object, read), dump{object = object, read = read, written = written and modlib.text.hexdump(written), err = err})
+        assert(modlib.table.equals_references(object, read) and not err, dump{
+            object = object,
+            read = read,
+            written = written and modlib.text.hexdump(written),
+            err = err
+        })
     end
     for _, constant in pairs{true, false, math.huge, -math.huge} do
         assert_preserves(constant)
     end
-    for i = 1, 69 do
-        assert_preserves(table.concat(modlib.table.repetition("x", i)))
+    for i = 1, 1000 do
+        assert_preserves(table.concat(modlib.table.repetition(string.char(i % 256), i)))
     end
     for _ = 1, 1000 do
-        assert_preserves(math.random(2^-50, 2^50))
+        local int = math.random(-2^50, 2^50)
+        assert(int % 1 == 0)
+        assert_preserves(int)
         assert_preserves((math.random() - 0.5) * 2^math.random(-20, 20))
     end
     assert_preserves{hello = "world", welt = "hallo"}

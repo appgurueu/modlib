@@ -217,7 +217,7 @@ function write(self, object, stream)
                 return
             end
             if object % 1 == 0 then
-                uint_with_type(object > 0 and type_ranges.number_constant or type_ranges.number_positive, object > 0 and object or -object)
+                uint_with_type(object > 0 and type_ranges.number_constant or type_ranges.number_negative, object > 0 and object or -object)
                 return
             end
             float(object)
@@ -337,11 +337,11 @@ function read(self, stream)
         end
         type = type:byte()
         if type <= type_ranges.number then
-            if type <= type_ranges.number_positive then
+            if type <= type_ranges.number_negative then
                 return uint(type - type_ranges.number_constant)
             end
-            if type <= type_ranges.number_negative then
-                return -uint(type - type_ranges.number_positive)
+            if type <= type_ranges.number_positive then
+                return -uint(type - type_ranges.number_negative)
             end
             return float(type == type_ranges.number)
         end
