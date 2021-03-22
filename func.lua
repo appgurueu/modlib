@@ -34,3 +34,8 @@ function assert(value, callback)
 		error(callback())
 	end
 end
+
+--+ Calls func using the provided arguments, deepcopies all arguments
+function call_by_value(func, ...)
+	return func(unpack(modlib.table.deepcopy{...}))
+end
