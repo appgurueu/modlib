@@ -160,6 +160,7 @@ function clamp(v, min, max)
 end
 
 function cross3(v, w)
+    assert(#v == 3 and #w == 3)
     return new{
         v[2] * w[3] - v[3] * w[2],
         v[3] * w[1] - v[1] * w[3],
