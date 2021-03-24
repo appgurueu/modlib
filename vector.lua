@@ -175,6 +175,13 @@ function dot(v, other_v)
     return sum
 end
 
+--+ Angle between two vectors
+--> Signed angle in radians
+function angle(v, other_v)
+    -- Based on dot(v, w) = |v| * |w| * cos(x)
+    return math.acos(dot(v, other_v) / length(v) / length(other_v))
+end
+
 function box_box_collision(diff, box, other_box)
     for index, diff in pairs(diff) do
         if box[index] + diff > other_box[index + 3] or other_box[index] > box[index + 3] + diff then
