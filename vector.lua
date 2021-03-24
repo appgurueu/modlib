@@ -47,37 +47,37 @@ function to_minetest(v)
     return mt_vector.new(unpack(v))
 end
 
-function equals(v, other_v)
+function equals(v, w)
     for k, v in pairs(v) do
-        if v ~= other_v[k] then return false end
+        if v ~= w[k] then return false end
     end
     return true
 end
 
 metatable.__eq = equals
 
-function less_than(v, other_v)
+function less_than(v, w)
     for k, v in pairs(v) do
-        if v >= other_v[k] then return false end
+        if v >= w[k] then return false end
     end
     return true
 end
 
 metatable.__lt = less_than
 
-function less_or_equal(v, other_v)
+function less_or_equal(v, w)
     for k, v in pairs(v) do
-        if v > other_v[k] then return false end
+        if v > w[k] then return false end
     end
     return true
 end
 
 metatable.__le = less_or_equal
 
-function combine(v, other_v, f)
+function combine(v, w, f)
     local new_vector = {}
     for key, value in pairs(v) do
-        new_vector[key] = f(value, other_v[key])
+        new_vector[key] = f(value, w[key])
     end
     return new(new_vector)
 end
@@ -91,8 +91,8 @@ function apply(v, f, ...)
 end
 
 function combinator(f)
-    return function(v, other_v)
-        return combine(v, other_v, f)
+    return function(v, w)
+        return combine(v, w, f)
     end, function(v, ...)
         return apply(v, f, ...)
     end
@@ -104,11 +104,11 @@ function invert(v)
     end
 end
 
-add, add_scalar = combinator(function(a, b) return a + b end)
-subtract, subtract_scalar = combinator(function(a, b) return a - b end)
-multiply, multiply_scalar = combinator(function(a, b) return a * b end)
-divide, divide_scalar = combinator(function(a, b) return a / b end)
-pow, pow_scalar = combinator(function(a, b) return a ^ b end)
+add, add_scalar = combinator(function(v, w) return v + w end)
+subtract, subtract_scalar = combinator(function(v, w) return v - w end)
+multiply, multiply_scalar = combinator(function(v, w) return v * w end)
+divide, divide_scalar = combinator(function(v, w) return v / w end)
+pow, pow_scalar = combinator(function(v, w) return v ^ w end)
 
 metatable.__add = add
 metatable.__unm = invert
@@ -118,8 +118,8 @@ metatable.__div = divide
 
 --+ linear interpolation
 --: ratio number from 0 (all the first vector) to 1 (all the second vector)
-function interpolate(v, other_v, ratio)
-    return add(multiply(v, 1 - ratio), multiply(other_v,  ratio))
+function interpolate(v, w, ratio)
+    return add(multiply(v, 1 - ratio), multiply(w,  ratio))
 end
 
 function norm(v)
@@ -135,10 +135,10 @@ function length(v)
 end
 
 -- Minor code duplication for the sake of performance
-function distance(v, other_v)
+function distance(v, w)
     local sum = 0
     for key, value in pairs(v) do
-        sum = sum + (value - other_v[key]) ^ 2
+        sum = sum + (value - w[key]) ^ 2
     end
     return math.sqrt(sum)
 end
@@ -159,27 +159,27 @@ function clamp(v, min, max)
     return apply(apply(v, math.max, min), math.min, max)
 end
 
-function cross3(v, other_v)
+function cross3(v, w)
     return new{
-        v[2] * other_v[3] - v[3] * other_v[2],
-        v[3] * other_v[1] - v[1] * other_v[3],
-        v[1] * other_v[2] - v[2] * other_v[1]
+        v[2] * w[3] - v[3] * w[2],
+        v[3] * w[1] - v[1] * w[3],
+        v[1] * w[2] - v[2] * w[1]
     }
 end
 
-function dot(v, other_v)
+function dot(v, w)
     local sum = 0
     for i, c in pairs(v) do
-        sum = sum + c * other_v[i]
+        sum = sum + c * w[i]
     end
     return sum
 end
 
 --+ Angle between two vectors
 --> Signed angle in radians
-function angle(v, other_v)
+function angle(v, w)
     -- Based on dot(v, w) = |v| * |w| * cos(x)
-    return math.acos(dot(v, other_v) / length(v) / length(other_v))
+    return math.acos(dot(v, w) / length(v) / length(w))
 end
 
 function box_box_collision(diff, box, other_box)
