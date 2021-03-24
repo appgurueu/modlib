@@ -1,35 +1,50 @@
-local assertdump = modlib.assertdump
+-- TODO make tests minetest-independent
+
+local random, huge = math.random, math.huge
+local parent_env = getfenv(1)
+setfenv(1, setmetatable({}, {
+    __index = function(_, key)
+        local value = modlib[key]
+        if value ~= nil then
+            return value
+        end
+        return parent_env[key]
+    end,
+    __newindex = function(_, key, value)
+        error(dump{key = key, value = value})
+    end
+}))
 
 -- string
-assert(modlib.string.escape_magic_chars"%" == "%%")
+assert(string.escape_magic_chars"%" == "%%")
 
 -- table
 do
-    local table = {}
-    table[table] = table
-    local table_copy = modlib.table.deepcopy(table)
+    local tab = {}
+    tab[tab] = tab
+    local table_copy = table.deepcopy(tab)
     assert(table_copy[table_copy] == table_copy)
-    assert(modlib.table.is_circular(table))
-    assert(not modlib.table.is_circular{a = 1})
-    assert(modlib.table.equals_noncircular({[{}]={}}, {[{}]={}}))
-    assert(modlib.table.equals_content(table, table_copy))
-    local equals_references = modlib.table.equals_references
-    assert(equals_references(table, table_copy))
+    assert(table.is_circular(tab))
+    assert(not table.is_circular{a = 1})
+    assert(table.equals_noncircular({[{}]={}}, {[{}]={}}))
+    assert(table.equals_content(tab, table_copy))
+    local equals_references = table.equals_references
+    assert(equals_references(tab, table_copy))
     assert(equals_references({}, {}))
     assert(not equals_references({a = 1, b = 2}, {a = 1, b = 3}))
-    table = {}
-    table.a, table.b = table, table
-    table_copy = modlib.table.deepcopy(table)
-    assert(equals_references(table, table_copy))
+    tab = {}
+    tab.a, tab.b = tab, tab
+    table_copy = table.deepcopy(tab)
+    assert(equals_references(tab, table_copy))
     local x, y = {}, {}
     assert(not equals_references({[x] = x, [y] = y}, {[x] = y, [y] = x}))
     assert(equals_references({[x] = x, [y] = y}, {[x] = x, [y] = y}))
-    local nilget = modlib.table.nilget
+    local nilget = table.nilget
     assert(nilget({a = {b = {c = 42}}}, "a", "b", "c") == 42)
     assert(nilget({a = {}}, "a", "b", "c") == nil)
     assert(nilget(nil, "a", "b", "c") == nil)
     assert(nilget(nil, "a", nil, "c") == nil)
-    local rope = modlib.table.rope{}
+    local rope = table.rope{}
     rope:write"hello"
     rope:write" "
     rope:write"world"
@@ -43,8 +58,8 @@ do
     for index = 1, n do
         list[index] = index
     end
-    modlib.table.shuffle(list)
-    local heap = modlib.heap.new()
+    table.shuffle(list)
+    local heap = heap.new()
     for index = 1, #list do
         heap:push(list[index])
     end
@@ -57,14 +72,14 @@ end
 -- ranked set
 do
     local n = 100
-    local ranked_set = modlib.ranked_set.new()
+    local ranked_set = ranked_set.new()
     local list = {}
     for i = 1, n do
         ranked_set:insert(i)
         list[i] = i
     end
 
-    assert(modlib.table.equals(ranked_set:to_table(), list))
+    assert(table.equals(ranked_set:to_table(), list))
 
     local i = 0
     for rank, key in ranked_set:ipairs() do
@@ -82,7 +97,7 @@ do
     end
     assert(not next(ranked_set:to_table()))
 
-    local ranked_set = modlib.ranked_set.new()
+    local ranked_set = ranked_set.new()
     for i = 1, n do
         ranked_set:insert(i)
     end
@@ -98,26 +113,26 @@ do
 end
 
 -- colorspec
-local colorspec = modlib.minetest.colorspec.from_number(0xDDCCBBAA)
-assertdump(modlib.table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), colorspec)
+local colorspec = minetest.colorspec.from_number(0xDDCCBBAA)
+assertdump(table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), colorspec)
 
 -- k-d-tree
 local vectors = {}
 for _ = 1, 1000 do
-    table.insert(vectors, {math.random(), math.random(), math.random()})
+    _G.table.insert(vectors, {random(), random(), random()})
 end
-local kdtree = modlib.kdtree.new(vectors)
-for _, vector in ipairs(vectors) do
-    local neighbor, distance = kdtree:get_nearest_neighbor(vector)
-    assert(modlib.vector.equals(vector, neighbor), distance == 0)
+local kdtree = kdtree.new(vectors)
+for _, v in ipairs(vectors) do
+    local neighbor, distance = kdtree:get_nearest_neighbor(v)
+    assert(vector.equals(v, neighbor), distance == 0)
 end
 
 for _ = 1, 1000 do
-    local vector = {math.random(), math.random(), math.random()}
-    local _, distance = kdtree:get_nearest_neighbor(vector)
-    local min_distance = math.huge
-    for _, other_vector in ipairs(vectors) do
-        local other_distance = modlib.vector.distance(vector, other_vector)
+    local v = {random(), random(), random()}
+    local _, distance = kdtree:get_nearest_neighbor(v)
+    local min_distance = huge
+    for _, w in ipairs(vectors) do
+        local other_distance = vector.distance(v, w)
         if other_distance < min_distance then
             min_distance = other_distance
         end
@@ -127,36 +142,36 @@ end
 
 -- bluon
 do
-    local bluon = modlib.bluon
+    local bluon = bluon
     local function assert_preserves(object)
-        local rope = modlib.table.rope{}
+        local rope = table.rope{}
         local written, read, input
         local _, err = pcall(function()
             bluon:write(object, rope)
             written = rope:to_text()
-            input = modlib.text.inputstream(written)
+            input = text.inputstream(written)
             read = bluon:read(input)
             local remaining = input:read(1000)
             assert(not remaining)
         end)
-        assertdump(modlib.table.equals_references(object, read) and not err, {
+        assertdump(table.equals_references(object, read) and not err, {
             object = object,
             read = read,
-            written = written and modlib.text.hexdump(written),
+            written = written and text.hexdump(written),
             err = err
         })
     end
-    for _, constant in pairs{true, false, math.huge, -math.huge} do
+    for _, constant in pairs{true, false, huge, -huge} do
         assert_preserves(constant)
     end
     for i = 1, 1000 do
-        assert_preserves(table.concat(modlib.table.repetition(string.char(i % 256), i)))
+        assert_preserves(_G.table.concat(table.repetition(_G.string.char(i % 256), i)))
     end
     for _ = 1, 1000 do
-        local int = math.random(-2^50, 2^50)
+        local int = random(-2^50, 2^50)
         assert(int % 1 == 0)
         assert_preserves(int)
-        assert_preserves((math.random() - 0.5) * 2^math.random(-20, 20))
+        assert_preserves((random() - 0.5) * 2^random(-20, 20))
     end
     assert_preserves{hello = "world", welt = "hallo"}
     assert_preserves{"hello", "hello", "hello"}
@@ -174,9 +189,9 @@ local tests = {
     liquid_raycast = false
 }
 if tests.b3d then
-    local stream = io.open(modlib.mod.get_resource("player_api", "models", "character.b3d"), "r")
+    local stream = io.open(mod.get_resource("player_api", "models", "character.b3d"), "r")
     assert(stream)
-    local b3d = modlib.b3d.read(stream)
+    local b3d = b3d.read(stream)
     --! dirty helper method to create truncate tables with 10+ number keys
     local function _b3d_truncate(table)
         local count = 1
@@ -198,25 +213,26 @@ if tests.b3d then
         end
         return table
     end
-    modlib.file.write(modlib.mod.get_resource"character.b3d.lua", "return " .. dump(_b3d_truncate(modlib.table.copy(b3d))))
+    file.write(mod.get_resource"character.b3d.lua", "return " .. dump(_b3d_truncate(table.copy(b3d))))
     stream:close()
 end
+local vector, minetest, ml_mt = _G.vector, _G.minetest, minetest
 if tests.liquid_dir then
     minetest.register_abm{
         label = "get_liquid_corner_levels & get_liquid_direction test",
-        nodenames = {"default:water_flowing"},
+        nodenames = {"group:liquid"},
         interval = 1,
         chance = 1,
         action = function(pos, node)
             assert(type(node) == "table")
-            for _, corner_level in pairs(modlib.minetest.get_liquid_corner_levels(pos, node)) do
+            for _, corner_level in pairs(ml_mt.get_liquid_corner_levels(pos, node)) do
                 minetest.add_particle{
                     pos = vector.add(pos, corner_level),
                     size = 2,
                     texture = "logo.png"
                 }
             end
-            local direction = modlib.minetest.get_liquid_flow_direction(pos, node)
+            local direction = ml_mt.get_liquid_flow_direction(pos, node)
             local start_pos = pos
             start_pos.y = start_pos.y + 1
             for i = 0, 5 do
@@ -233,7 +249,7 @@ if tests.liquid_raycast then
     minetest.register_globalstep(function()
         for _, player in pairs(minetest.get_connected_players()) do
             local eye_pos = vector.offset(player:get_pos(), 0, player:get_properties().eye_height, 0)
-            local raycast = modlib.minetest.raycast(eye_pos, vector.add(eye_pos, vector.multiply(player:get_look_dir(), 3)), false, true)
+            local raycast = ml_mt.raycast(eye_pos, vector.add(eye_pos, vector.multiply(player:get_look_dir(), 3)), false, true)
             for pointed_thing in raycast do
                 if pointed_thing.type == "node" and minetest.registered_nodes[minetest.get_node(pointed_thing.under).name].liquidtype == "flowing" then
                     minetest.add_particle{
