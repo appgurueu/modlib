@@ -43,7 +43,12 @@ modlib = {
         __newindex = function(_, index, value)
             return rawset(_G, index, value)
         end
-    })
+    }),
+    assertdump = function(v, value)
+        if not v then
+            error(dump(value))
+        end
+    end
 }
 
 local function get_resource(modname, resource, ...)

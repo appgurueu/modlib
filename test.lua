@@ -1,3 +1,5 @@
+local assertdump = modlib.assertdump
+
 -- string
 assert(modlib.string.escape_magic_chars"%" == "%%")
 
@@ -97,7 +99,7 @@ end
 
 -- colorspec
 local colorspec = modlib.minetest.colorspec.from_number(0xDDCCBBAA)
-assert(modlib.table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), dump(colorspec))
+assertdump(modlib.table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), colorspec)
 
 -- k-d-tree
 local vectors = {}
@@ -137,8 +139,7 @@ do
             local remaining = input:read(1000)
             assert(not remaining)
         end)
-        -- TODO assertdump
-        assert(modlib.table.equals_references(object, read) and not err, dump{
+        assertdump(modlib.table.equals_references(object, read) and not err, {
             object = object,
             read = read,
             written = written and modlib.text.hexdump(written),
