@@ -46,7 +46,7 @@ modlib = {
     }),
     assertdump = function(v, value)
         if not v then
-            error(dump(value))
+            error(dump(value), 2)
         end
     end
 }
