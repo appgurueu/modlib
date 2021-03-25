@@ -497,11 +497,7 @@ function set(table)
 end
 
 function unique(table)
-    local lookup = {}
-    for _, value in pairs(table) do
-        lookup[value] = true
-    end
-    return keys(lookup)
+    return keys(set(table))
 end
 
 function rpairs(table)
