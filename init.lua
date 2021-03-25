@@ -90,7 +90,15 @@ for _, component in ipairs{
     "text",
     "vector",
     "quaternion",
-    "minetest",
+    {
+        name = "minetest",
+        "misc",
+        "collisionboxes",
+        "liquid",
+        "raycast",
+        "wielditem_change",
+        "colorspec"
+    },
     "trie",
     "kdtree",
     "heap",
@@ -99,7 +107,14 @@ for _, component in ipairs{
     "b3d",
     "bluon"
 } do
-    if minetest or not minetest_only[component] then
+    if component.name then
+        if minetest then
+            modlib[component.name] = loadfile_exports(get_resource(minetest.get_current_modname(), component.name, component[1] .. ".lua"))
+            for index = 2, #component do
+                modlib.mod.include_env(get_resource(minetest.get_current_modname(), component.name, component[index] .. ".lua"), modlib[component.name])
+            end
+        end
+    elseif minetest or not minetest_only[component] then
         local path = minetest and get_resource(component .. ".lua") or component .. ".lua"
         modlib[component] = loadfile_exports(path)
     end
@@ -119,7 +134,7 @@ end
 _ml = modlib
 
 --[[
---modlib.mod.include("test.lua")
+--modlib.mod.include"test.lua"
 ]]
 
 return modlib
