@@ -95,7 +95,6 @@ function split_lines(text, limit) return modlib.text.split(text, "\r?\n", limit,
 
 function lines(text) return text:gmatch"[^\r\n]*" end
 
-local hashtag = string.byte"#"
 local zero = string.byte"0"
 local nine = string.byte"9"
 local letter_a = string.byte"A"
