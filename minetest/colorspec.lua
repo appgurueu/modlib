@@ -154,107 +154,107 @@ colorspec = {}
 local colorspec_metatable = {__index = colorspec}
 
 function colorspec.new(table)
-    return setmetatable({
-        r = assert(table.r),
-        g = assert(table.g),
-        b = assert(table.b),
-        a = table.a or 255
-    }, colorspec_metatable)
+	return setmetatable({
+		r = assert(table.r),
+		g = assert(table.g),
+		b = assert(table.b),
+		a = table.a or 255
+	}, colorspec_metatable)
 end
 
 colorspec.from_table = colorspec.new
 
 function colorspec.from_string(string)
-    local hex = "#([A-Fa-f%d]+)"
-    local number, alpha = named_colors[string], 0xFF
-    if not number then
-        local name, alpha_text = string:match("^([a-z]+)" .. hex .. "$")
+	local hex = "#([A-Fa-f%d]+)"
+	local number, alpha = named_colors[string], 0xFF
+	if not number then
+		local name, alpha_text = string:match("^([a-z]+)" .. hex .. "$")
 		if name then
 			assert(alpha_text:len() == 2)
 			number = assert(named_colors[name])
 			alpha = tonumber(alpha_text, 16)
 		end
-    end
-    if number then
-        return colorspec.from_number(number * 0x100 + alpha)
-    end
-    local hex_text = string:match(hex)
-    local len, num = hex_text:len(), tonumber(hex_text, 16)
-    if len == 8 then
-        return colorspec.from_number(num)
-    end
-    if len == 6 then
-        return colorspec.from_number(num * 0x100 + 0xFF)
-    end
-    local floor = math.floor
-    if len == 4 then
-        return colorspec.from_table{
-            a = (num % 16) * 17,
-            b = (floor(num / 16) % 16) * 17,
-            g = (floor(num / (16 ^ 2)) % 16) * 17,
-            r = (floor(num / (16 ^ 3)) % 16) * 17
-        }
-    end
-    if len == 3 then
-        return colorspec.from_table{
-            b = (num % 16) * 17,
-            g = (floor(num / 16) % 16) * 17,
-            r = (floor(num / (16 ^ 2)) % 16) * 17
-        }
-    end
-    error("Invalid colorstring: " .. string)
+	end
+	if number then
+		return colorspec.from_number(number * 0x100 + alpha)
+	end
+	local hex_text = string:match(hex)
+	local len, num = hex_text:len(), tonumber(hex_text, 16)
+	if len == 8 then
+		return colorspec.from_number(num)
+	end
+	if len == 6 then
+		return colorspec.from_number(num * 0x100 + 0xFF)
+	end
+	local floor = math.floor
+	if len == 4 then
+		return colorspec.from_table{
+			a = (num % 16) * 17,
+			b = (floor(num / 16) % 16) * 17,
+			g = (floor(num / (16 ^ 2)) % 16) * 17,
+			r = (floor(num / (16 ^ 3)) % 16) * 17
+		}
+	end
+	if len == 3 then
+		return colorspec.from_table{
+			b = (num % 16) * 17,
+			g = (floor(num / 16) % 16) * 17,
+			r = (floor(num / (16 ^ 2)) % 16) * 17
+		}
+	end
+	error("Invalid colorstring: " .. string)
 end
 
 colorspec.from_text = colorspec.from_string
 
 function colorspec.from_number(number)
-    local floor = math.floor
-    return colorspec.from_table{
-        a = number % 0x100,
-        b = floor(number / 0x100) % 0x100,
-        g = floor(number / 0x10000) % 0x100,
-        r = floor(number / 0x1000000)
-    }
+	local floor = math.floor
+	return colorspec.from_table{
+		a = number % 0x100,
+		b = floor(number / 0x100) % 0x100,
+		g = floor(number / 0x10000) % 0x100,
+		r = floor(number / 0x1000000)
+	}
 end
 
 function colorspec.from_number_rgb(number)
-    local floor = math.floor
-    return colorspec.from_table{
-        a = 0xFF,
-        b = number % 0x100,
-        g = floor(number / 0x100) % 0x100,
-        r = floor(number / 0x10000)
-    }
+	local floor = math.floor
+	return colorspec.from_table{
+		a = 0xFF,
+		b = number % 0x100,
+		g = floor(number / 0x100) % 0x100,
+		r = floor(number / 0x10000)
+	}
 end
 
 function colorspec.from_any(value)
-    local type = type(value)
-    if type == "table" then
-        return colorspec.from_table(value)
-    end
-    if type == "string" then
-        return colorspec.from_string(value)
-    end
-    if type == "number" then
-        return colorspec.from_number(value)
-    end
-    error("Unsupported type " .. type)
+	local type = type(value)
+	if type == "table" then
+		return colorspec.from_table(value)
+	end
+	if type == "string" then
+		return colorspec.from_string(value)
+	end
+	if type == "number" then
+		return colorspec.from_number(value)
+	end
+	error("Unsupported type " .. type)
 end
 
 function colorspec:to_table()
-    return self
+	return self
 end
 
 --> hex string, omits alpha if possible (if opaque)
 function colorspec:to_string()
-    if self.a == 255 then
-        return ("%02X02X02X"):format(self.r, self.g, self.b)
-    end
-    return ("%02X02X02X02X"):format(self.r, self.g, self.b, self.a)
+	if self.a == 255 then
+		return ("%02X02X02X"):format(self.r, self.g, self.b)
+	end
+	return ("%02X02X02X02X"):format(self.r, self.g, self.b, self.a)
 end
 
 function colorspec:to_number()
-    return self.r * 0x1000000 + self.g * 0x10000 + self.b * 0x100 + self.a
+	return self.r * 0x1000000 + self.g * 0x10000 + self.b * 0x100 + self.a
 end
 
 function colorspec:to_number_rgb()
@@ -262,5 +262,5 @@ function colorspec:to_number_rgb()
 end
 
 colorspec_to_colorstring = minetest.colorspec_to_colorstring or function(spec)
-    return colorspec.from_any(spec):to_string()
+	return colorspec.from_any(spec):to_string()
 end

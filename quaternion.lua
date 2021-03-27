@@ -5,8 +5,8 @@ function from_euler_rotation(rotation)
 	local cos = vector.apply(rotation, math.cos)
 	local sin = vector.apply(rotation, math.sin)
 	return {
-    	sin.z * cos.x * cos.y - cos.z * sin.x * sin.y,
-    	cos.z * sin.x * cos.y + sin.z * cos.x * sin.y,
+		sin.z * cos.x * cos.y - cos.z * sin.x * sin.y,
+		cos.z * sin.x * cos.y + sin.z * cos.x * sin.y,
 		cos.z * cos.x * sin.y - sin.z * sin.x * cos.y,
 		cos.z * cos.x * cos.y + sin.z * sin.x * sin.y
 	}
@@ -76,23 +76,23 @@ end
 
 --> {x = pitch, y = yaw, z = roll} euler rotation in degrees
 function to_euler_rotation(self)
-    local rotation = {}
+	local rotation = {}
 
-    local sinr_cosp = 2 * (self[4] * self[1] + self[2] * self[3])
-    local cosr_cosp = 1 - 2 * (self[1] ^ 2 + self[2] ^ 2)
-    rotation.x = math.atan2(sinr_cosp, cosr_cosp)
+	local sinr_cosp = 2 * (self[4] * self[1] + self[2] * self[3])
+	local cosr_cosp = 1 - 2 * (self[1] ^ 2 + self[2] ^ 2)
+	rotation.x = math.atan2(sinr_cosp, cosr_cosp)
 
-    local sinp = 2 * (self[4] * self[2] - self[3] * self[1])
-    if sinp <= -1 then
-        rotation.z = -math.pi/2
-    elseif sinp >= 1 then
-        rotation.z = math.pi/2
-    else
-        rotation.z = math.asin(sinp)
+	local sinp = 2 * (self[4] * self[2] - self[3] * self[1])
+	if sinp <= -1 then
+		rotation.z = -math.pi/2
+	elseif sinp >= 1 then
+		rotation.z = math.pi/2
+	else
+		rotation.z = math.asin(sinp)
 	end
 
-    local siny_cosp = 2 * (self[4] * self[3] + self[1] * self[2])
-    local cosy_cosp = 1 - 2 * (self[2] ^ 2 + self[3] ^ 2)
+	local siny_cosp = 2 * (self[4] * self[3] + self[1] * self[2])
+	local cosy_cosp = 1 - 2 * (self[2] ^ 2 + self[3] ^ 2)
 	rotation.y = math.atan2(siny_cosp, cosy_cosp)
 
 	return vector.apply(rotation, math.deg)

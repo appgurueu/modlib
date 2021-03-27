@@ -2,106 +2,106 @@ local mt_vector = vector
 local vector = getfenv(1)
 
 index_aliases = {
-    x = 1,
-    y = 2,
-    z = 3,
-    w = 4
+	x = 1,
+	y = 2,
+	z = 3,
+	w = 4
 }
 
 modlib.table.add_all(index_aliases, modlib.table.flip(index_aliases))
 
 metatable = {
-    __index = function(table, key)
-        local index = index_aliases[key]
-        if index ~= nil then
-            return table[index]
-        end
-        return vector[key]
-    end,
-    __newindex = function(table, key, value)
-        local index = letters[key]
-        if index ~= nil then
-            return rawset(table, index, value)
-        end
-    end
+	__index = function(table, key)
+		local index = index_aliases[key]
+		if index ~= nil then
+			return table[index]
+		end
+		return vector[key]
+	end,
+	__newindex = function(table, key, value)
+		local index = letters[key]
+		if index ~= nil then
+			return rawset(table, index, value)
+		end
+	end
 }
 
 function new(v)
-    return setmetatable(v, metatable)
+	return setmetatable(v, metatable)
 end
 
 function from_xyzw(v)
-    return new{v.x, v.y, v.z, v.w}
+	return new{v.x, v.y, v.z, v.w}
 end
 
 function from_minetest(v)
-    return new{v.x, v.y, v.z}
+	return new{v.x, v.y, v.z}
 end
 
 function to_xyzw(v)
-    return {x = v[1], y = v[2], z = v[3], w = v[4]}
+	return {x = v[1], y = v[2], z = v[3], w = v[4]}
 end
 
 --+ not necessarily required, as Minetest respects the metatable
 function to_minetest(v)
-    return mt_vector.new(unpack(v))
+	return mt_vector.new(unpack(v))
 end
 
 function equals(v, w)
-    for k, v in pairs(v) do
-        if v ~= w[k] then return false end
-    end
-    return true
+	for k, v in pairs(v) do
+		if v ~= w[k] then return false end
+	end
+	return true
 end
 
 metatable.__eq = equals
 
 function less_than(v, w)
-    for k, v in pairs(v) do
-        if v >= w[k] then return false end
-    end
-    return true
+	for k, v in pairs(v) do
+		if v >= w[k] then return false end
+	end
+	return true
 end
 
 metatable.__lt = less_than
 
 function less_or_equal(v, w)
-    for k, v in pairs(v) do
-        if v > w[k] then return false end
-    end
-    return true
+	for k, v in pairs(v) do
+		if v > w[k] then return false end
+	end
+	return true
 end
 
 metatable.__le = less_or_equal
 
 function combine(v, w, f)
-    local new_vector = {}
-    for key, value in pairs(v) do
-        new_vector[key] = f(value, w[key])
-    end
-    return new(new_vector)
+	local new_vector = {}
+	for key, value in pairs(v) do
+		new_vector[key] = f(value, w[key])
+	end
+	return new(new_vector)
 end
 
 function apply(v, f, ...)
-    local new_vector = {}
-    for key, value in pairs(v) do
-        new_vector[key] = f(value, ...)
-    end
-    return new(new_vector)
+	local new_vector = {}
+	for key, value in pairs(v) do
+		new_vector[key] = f(value, ...)
+	end
+	return new(new_vector)
 end
 
 function combinator(f)
-    return function(v, w)
-        return combine(v, w, f)
-    end, function(v, ...)
-        return apply(v, f, ...)
-    end
+	return function(v, w)
+		return combine(v, w, f)
+	end, function(v, ...)
+		return apply(v, f, ...)
+	end
 end
 
 function invert(v)
-    for key, value in pairs(v) do
-        v[key] = -value
-    end
+	for key, value in pairs(v) do
+		v[key] = -value
+	end
 end
 
 add, add_scalar = combinator(function(v, w) return v + w end)
@@ -119,107 +119,107 @@ metatable.__div = divide
 --+ linear interpolation
 --: ratio number from 0 (all the first vector) to 1 (all the second vector)
 function interpolate(v, w, ratio)
-    return add(multiply(v, 1 - ratio), multiply(w,  ratio))
+	return add(multiply(v, 1 - ratio), multiply(w,  ratio))
 end
 
 function norm(v)
-    local sum = 0
-    for _, value in pairs(v) do
-        sum = sum + value ^ 2
-    end
-    return sum
+	local sum = 0
+	for _, value in pairs(v) do
+		sum = sum + value ^ 2
+	end
+	return sum
 end
 
 function length(v)
-    return math.sqrt(norm(v))
+	return math.sqrt(norm(v))
 end
 
 -- Minor code duplication for the sake of performance
 function distance(v, w)
-    local sum = 0
-    for key, value in pairs(v) do
-        sum = sum + (value - w[key]) ^ 2
-    end
-    return math.sqrt(sum)
+	local sum = 0
+	for key, value in pairs(v) do
+		sum = sum + (value - w[key]) ^ 2
+	end
+	return math.sqrt(sum)
 end
 
 function normalize(v)
-    return divide_scalar(v, length(v))
+	return divide_scalar(v, length(v))
 end
 
 function floor(v)
-    return apply(v, math.floor)
+	return apply(v, math.floor)
 end
 
 function ceil(v)
-    return apply(v, math.ceil)
+	return apply(v, math.ceil)
 end
 
 function clamp(v, min, max)
-    return apply(apply(v, math.max, min), math.min, max)
+	return apply(apply(v, math.max, min), math.min, max)
 end
 
 function cross3(v, w)
-    assert(#v == 3 and #w == 3)
-    return new{
-        v[2] * w[3] - v[3] * w[2],
-        v[3] * w[1] - v[1] * w[3],
-        v[1] * w[2] - v[2] * w[1]
-    }
+	assert(#v == 3 and #w == 3)
+	return new{
+		v[2] * w[3] - v[3] * w[2],
+		v[3] * w[1] - v[1] * w[3],
+		v[1] * w[2] - v[2] * w[1]
+	}
 end
 
 function dot(v, w)
-    local sum = 0
-    for i, c in pairs(v) do
-        sum = sum + c * w[i]
-    end
-    return sum
+	local sum = 0
+	for i, c in pairs(v) do
+		sum = sum + c * w[i]
+	end
+	return sum
 end
 
 --+ Angle between two vectors
 --> Signed angle in radians
 function angle(v, w)
-    -- Based on dot(v, w) = |v| * |w| * cos(x)
-    return math.acos(dot(v, w) / length(v) / length(w))
+	-- Based on dot(v, w) = |v| * |w| * cos(x)
+	return math.acos(dot(v, w) / length(v) / length(w))
 end
 
 function box_box_collision(diff, box, other_box)
-    for index, diff in pairs(diff) do
-        if box[index] + diff > other_box[index + 3] or other_box[index] > box[index + 3] + diff then
-            return false
-        end
-    end
-    return true
+	for index, diff in pairs(diff) do
+		if box[index] + diff > other_box[index + 3] or other_box[index] > box[index + 3] + diff then
+			return false
+		end
+	end
+	return true
 end
 
 --+ Möller-Trumbore
 function ray_triangle_intersection(origin, direction, triangle)
-    local point_1, point_2, point_3 = unpack(triangle)
-    local edge_1, edge_2 = subtract(point_2, point_1), subtract(point_3, point_1)
-    local h = cross3(direction, edge_2)
-    local a = dot(edge_1, h)
-    if math.abs(a) < 1e-9 then
-        return
-    end
-    local f = 1 / a
-    local diff = subtract(origin, point_1)
-    local u = f * dot(diff, h)
-    if u < 0 or u > 1 then
-        return
-    end
-    local q = cross3(diff, edge_1)
-    local v = f * dot(direction, q)
-    if v < 0 or u + v > 1 then
-        return
-    end
-    local pos_on_line = f * dot(edge_2, q)
-    if pos_on_line >= 0 then
-        return pos_on_line
-    end
+	local point_1, point_2, point_3 = unpack(triangle)
+	local edge_1, edge_2 = subtract(point_2, point_1), subtract(point_3, point_1)
+	local h = cross3(direction, edge_2)
+	local a = dot(edge_1, h)
+	if math.abs(a) < 1e-9 then
+		return
+	end
+	local f = 1 / a
+	local diff = subtract(origin, point_1)
+	local u = f * dot(diff, h)
+	if u < 0 or u > 1 then
+		return
+	end
+	local q = cross3(diff, edge_1)
+	local v = f * dot(direction, q)
+	if v < 0 or u + v > 1 then
+		return
+	end
+	local pos_on_line = f * dot(edge_2, q)
+	if pos_on_line >= 0 then
+		return pos_on_line
+	end
 end
 
 function triangle_normal(triangle)
-    local point_1, point_2, point_3 = unpack(triangle)
-    local edge_1, edge_2 = subtract(point_2, point_1), subtract(point_3, point_1)
-    return normalize(cross3(edge_1, edge_2))
+	local point_1, point_2, point_3 = unpack(triangle)
+	local edge_1, edge_2 = subtract(point_2, point_1), subtract(point_3, point_1)
+	return normalize(cross3(edge_1, edge_2))
 end
