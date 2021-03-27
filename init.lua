@@ -35,6 +35,8 @@ if _VERSION then
 end
 
 modlib = {
+    -- TODO bump on release
+    version = 54,
 	dir_delim = rawget(_G, "DIR_DELIM") or "/",
 	_RG = setmetatable({}, {
 		__index = function(_, index)
