@@ -217,6 +217,16 @@ function colorspec.from_number(number)
     }
 end
 
+function colorspec.from_number_rgb(number)
+    local floor = math.floor
+    return colorspec.from_table{
+        a = 0xFF,
+        b = number % 0x100,
+        g = floor(number / 0x100) % 0x100,
+        r = floor(number / 0x10000)
+    }
+end
+
 function colorspec.from_any(value)
     local type = type(value)
     if type == "table" then
