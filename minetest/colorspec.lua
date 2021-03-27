@@ -165,13 +165,15 @@ end
 colorspec.from_table = colorspec.new
 
 function colorspec.from_string(string)
-    local hex = "#([A-Fa-f%d])+"
+    local hex = "#([A-Fa-f%d]+)"
     local number, alpha = named_colors[string], 0xFF
     if not number then
-        local name, alpha_text = string:match("^([a-z])+" .. hex .. "$")
-        assert(alpha_text:len() == 2)
-        number = assert(named_colors[name])
-        alpha = tonumber(alpha_text, 16)
+        local name, alpha_text = string:match("^([a-z]+)" .. hex .. "$")
+		if name then
+			assert(alpha_text:len() == 2)
+			number = assert(named_colors[name])
+			alpha = tonumber(alpha_text, 16)
+		end
     end
     if number then
         return colorspec.from_number(number * 0x100 + alpha)

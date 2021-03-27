@@ -113,8 +113,19 @@ do
 end
 
 -- colorspec
-local colorspec = minetest.colorspec.from_number(0xDDCCBBAA)
-assertdump(table.equals(colorspec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD,}), colorspec)
+local colorspec = minetest.colorspec
+local function test_from_string(string, number)
+    local spec = colorspec.from_string(string)
+    local expected = colorspec.from_number(number)
+    assertdump(table.equals(spec, expected), {expected = expected, actual = spec})
+end
+local spec = colorspec.from_number(0xDDCCBBAA)
+assertdump(table.equals(spec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD}), spec)
+test_from_string("aliceblue", 0xf0f8ffff)
+test_from_string("aliceblue#42", 0xf0f8ff42)
+test_from_string("#333", 0x333333FF)
+test_from_string("#694269", 0x694269FF)
+test_from_string("#11223344", 0x11223344)
 
 -- k-d-tree
 local vectors = {}
