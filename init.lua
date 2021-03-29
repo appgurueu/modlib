@@ -34,9 +34,51 @@ if _VERSION then
 	end
 end
 
-modlib = {
+local modules = {}
+for _, file in pairs{
+	"schema",
+	"file",
+	"func",
+	"math",
+	"table",
+	"text",
+	"vector",
+	"quaternion",
+	"trie",
+	"kdtree",
+	"heap",
+	"ranked_set",
+	"binary",
+	"b3d",
+	"bluon"
+} do
+	modules[file] = file
+end
+if minetest then
+	modules.minetest = {
+		"misc",
+		"collisionboxes",
+		"liquid",
+		"raycast",
+		"wielditem_change",
+		"colorspec"
+	}
+	for _, file in pairs{
+		"data",
+		"log",
+		"player",
+		-- deprecated
+		"conf"
+	} do
+		modules[file] = file
+	end
+end
+
+local load_module, get_resource, loadfile_exports
+modlib = setmetatable({
 	-- TODO bump on release
 	version = 55,
+	modname = minetest and minetest.get_current_modname(),
 	dir_delim = rawget(_G, "DIR_DELIM") or "/",
 	_RG = setmetatable({}, {
 		__index = function(_, index)
@@ -51,9 +93,24 @@ modlib = {
 			error(dump(value), 2)
 		end
 	end
-}
+}, {
+	__index = function(self, module_name)
+		local files = modules[module_name]
+		local module
+		if type(files) == "string" then
+			module = load_module(files)
+		elseif files then
+			module = loadfile_exports(get_resource(self.modname, module_name, files[1] .. ".lua"))
+			for index = 2, #files do
+				self.mod.include_env(get_resource(self.modname, module_name, files[index] .. ".lua"), module)
+			end
+		end
+		self[module_name] = module
+		return module
+	end
+})
 
-local function get_resource(modname, resource, ...)
+function get_resource(modname, resource, ...)
 	if not resource then
 		resource = modname
 		modname = minetest.get_current_modname()
@@ -61,7 +118,7 @@ local function get_resource(modname, resource, ...)
 	return table.concat({minetest.get_modpath(modname), resource, ...}, modlib.dir_delim)
 end
 
-local function loadfile_exports(filename)
+function loadfile_exports(filename)
 	local env = setmetatable({}, {__index = _G})
 	local file = assert(loadfile(filename))
 	setfenv(file, env)
@@ -69,58 +126,14 @@ local function loadfile_exports(filename)
 	return env
 end
 
-local minetest_only = {
-	mod = true,
-	minetest = true,
-	data = true,
-	log = true,
-	player = true,
-	-- not actually minetest-only, but a deprecated component
-	conf = true
-}
-for _, component in ipairs{
-	"mod",
-	"conf",
-	"schema",
-	"data",
-	"file",
-	"func",
-	"log",
-	"math",
-	"player",
-	"table",
-	"text",
-	"vector",
-	"quaternion",
-	{
-		name = "minetest",
-		"misc",
-		"collisionboxes",
-		"liquid",
-		"raycast",
-		"wielditem_change",
-		"colorspec"
-	},
-	"trie",
-	"kdtree",
-	"heap",
-	"ranked_set",
-	"binary",
-	"b3d",
-	"bluon"
-} do
-	if component.name then
-		if minetest then
-			modlib[component.name] = loadfile_exports(get_resource(minetest.get_current_modname(), component.name, component[1] .. ".lua"))
-			for index = 2, #component do
-				modlib.mod.include_env(get_resource(minetest.get_current_modname(), component.name, component[index] .. ".lua"), modlib[component.name])
-			end
-		end
-	elseif minetest or not minetest_only[component] then
-		local path = minetest and get_resource(component .. ".lua") or component .. ".lua"
-		modlib[component] = loadfile_exports(path)
-	end
+local init_path = arg and arg[0]
+local parent_dir = init_path and init_path:match"^.[/\\]" or ""
+function load_module(module_name)
+	local file = module_name .. ".lua"
+	return loadfile_exports(minetest and get_resource(modlib.modname, file) or (parent_dir .. file))
 end
+
+modlib.mod = minetest and loadfile_exports(get_resource(modlib.modname, "mod.lua"))
 
 -- Aliases
 modlib.string = modlib.text
