@@ -163,3 +163,5 @@ assert(rope:to_text() == "\100userdata")
 
 * Fixes `math.fround`
 * Other minor fixes
+* Switch to lazy loading
+  * Do `_ = modlib.<module>` to avoid lag spikes at run time
