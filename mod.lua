@@ -127,4 +127,4 @@ function configuration(modname)
 		return schema:load({}, {error_message = true})
 	end
 	return conf
-end																														
+end
