@@ -159,6 +159,10 @@ assert(rope:to_text() == "\100userdata")
 
 ## Versions
 
+### `rolling-57`
+
+* Uses `minetest.safe_file_write` for `file.write`
+
 ### `rolling-56`
 
 * Fixes `math.fround`
