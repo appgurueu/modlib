@@ -156,3 +156,10 @@ assert(rope:to_text() == "\100userdata")
   * Minetest-like configuration files
 4. [`json`](https://json.org)
   * Not recommended
+
+## Versions
+
+### `rolling-56`
+
+* Fixes `math.fround`
+* Other minor fixes
