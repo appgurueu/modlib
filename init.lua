@@ -10,7 +10,7 @@ if _VERSION then
 		function setfenv(fn, env)
 			local i = 1
 			while true do
-				name = debug.getupvalue(fn, i)
+				local name = debug.getupvalue(fn, i)
 				if name == "_ENV" then
 					debug.setupvalue(fn, i, env)
 					break
