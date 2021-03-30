@@ -6,13 +6,15 @@ function read(filename)
 	return content
 end
 
-function write(filename, new_content)
+function write_unsafe(filename, new_content)
 	local file = io.open(filename, "w")
 	if file == nil then return false end
 	file:write(new_content)
 	file:close()
 	return true
 end
+
+write = minetest and minetest.safe_file_write or write_unsafe
 
 function ensure_content(filename, ensured_content)
 	local content = read(filename)
