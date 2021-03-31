@@ -36,6 +36,7 @@ function generate_settingtypes(self)
 			settings = {"[" .. table.concat(modlib.table.repetition("*", self._level)) .. self.name .. "]"}
 		end
 		local function setting(key, value_scheme)
+			key = tostring(key)
 			assert(not key:find("[=%.%s]"))
 			value_scheme.name = self.name .. "." .. key
 			value_scheme.title = value_scheme.title or self.title .. " " .. field_name_to_title(key)
