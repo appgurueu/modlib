@@ -55,6 +55,7 @@ function configuration(modname)
 	modname = modname or minetest.get_current_modname()
 	local schema = modlib.schema.new(assert(include(modname, "schema.lua")))
 	schema.name = schema.name or modname
+	local settingtypes = schema:generate_settingtypes()
 	assert(schema.type == "table")
 	local overrides = {}
 	local conf
@@ -105,7 +106,7 @@ function configuration(modname)
 		overrides = modlib.table.deep_add_all(overrides, minetest_conf)
 		conf = schema:load(overrides, {convert_strings = true, error_message = true})
 	end
-	modlib.file.ensure_content(get_resource(modname, "settingtypes.txt"), schema:generate_settingtypes())
+	modlib.file.ensure_content(get_resource(modname, "settingtypes.txt"), settingtypes)
 	local readme_path = get_resource(modname, "Readme.md")
 	local readme = modlib.file.read(readme_path)
 	if readme then

@@ -196,7 +196,7 @@ function load(self, override, params)
 			push(">=", "min")
 			push("<", "max_exclusive")
 			push("<=", "max")
-			return "out of range: expected value " .. table.concat(conditions, "and")
+			return "out of range: expected value" .. table.concat(conditions, " and")
 		end
 		if typ == "int" then
 			return "expected integer"
@@ -226,8 +226,7 @@ function load(self, override, params)
 	local function error(type, ...)
 		if params.error_message then
 			local formatted = format_error(type, ...)
-			settingtypes(self)
-			_error("Invalid value: " .. self.name .. ": " .. formatted)
+			_error("Invalid value: " .. (self.name and (self.name .. ": ") or "") .. formatted)
 		end
 		_error{
 			type = type,
