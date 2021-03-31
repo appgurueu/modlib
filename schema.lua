@@ -72,11 +72,23 @@ end
 
 function generate_markdown(self)
 	-- TODO address redundancies
+	local function description(lines)
+		local description = self.description
+		if description then
+			if type(description) ~= "table" then
+				table.insert(lines, description)
+			else
+				modlib.table.append(lines, description)
+			end
+		end
+	end
 	local typ = self.type
 	self.title = self.title or field_name_to_title(self._md_name)
 	self._md_level = self._md_level or 1
 	if typ == "table" then
 		local settings = {}
+		description(settings)
+		-- TODO generate Markdown for key/value-checks
 		local function setting(key, value_scheme)
 			value_scheme._md_name = key
 			value_scheme.title = value_scheme.title or self.title .. " " .. field_name_to_title(key)
@@ -102,14 +114,6 @@ function generate_markdown(self)
 	local lines = {}
 	local function line(text)
 		table.insert(lines, "* " .. text)
-	end
-	local description = self.description
-	if description then
-		if type(description) ~= "table" then
-			table.insert(lines, description)
-		else
-			modlib.table.append(lines, description)
-		end
 	end
 	table.insert(lines, "")
 	line("Type: " .. self.type)
