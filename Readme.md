@@ -207,6 +207,10 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 
 ## Versions
 
+### `rolling-61`
+
+* Fix `quaternion.to_euler_rotation`
+
 ### `rolling-60`
 
 * Fix `vector.interpolate`
