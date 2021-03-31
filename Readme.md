@@ -207,6 +207,10 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 
 ## Versions
 
+### `rolling-59`
+
+* Schema failing check handling fixes
+
 ### `rolling-58`
 
 * Schema improvements & docs
