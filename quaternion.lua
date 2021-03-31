@@ -84,16 +84,16 @@ function to_euler_rotation(self)
 
 	local sinp = 2 * (self[4] * self[2] - self[3] * self[1])
 	if sinp <= -1 then
-		rotation.z = -math.pi/2
+		rotation.y = -math.pi/2
 	elseif sinp >= 1 then
-		rotation.z = math.pi/2
+		rotation.y = math.pi/2
 	else
-		rotation.z = math.asin(sinp)
+		rotation.y = math.asin(sinp)
 	end
 
 	local siny_cosp = 2 * (self[4] * self[3] + self[1] * self[2])
 	local cosy_cosp = 1 - 2 * (self[2] ^ 2 + self[3] ^ 2)
-	rotation.y = math.atan2(siny_cosp, cosy_cosp)
+	rotation.z = math.atan2(siny_cosp, cosy_cosp)
 
 	return vector.apply(rotation, math.deg)
 end
