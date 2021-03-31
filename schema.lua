@@ -258,6 +258,16 @@ function load(self, override, params)
 			assert(self.nan or override == override, "nan")
 		end
 	elseif self.type == "table" then
+		if self.keys then
+			for key, value in pairs(override) do
+				override[load(self.keys, key, params)], override[key] = value, nil
+			end
+		end
+		if self.values then
+			for key, value in pairs(override) do
+				override[key] = load(self.values, value, params)
+			end
+		end
 		if self.entries then
 			for key, schema in pairs(self.entries) do
 				if schema.required and override[key] == nil then
@@ -271,16 +281,6 @@ function load(self, override, params)
 						error("additional", key)
 					end
 				end
-			end
-		end
-		if self.keys then
-			for key, value in pairs(override) do
-				override[load(self.keys, key, params)], override[key] = value, nil
-			end
-		end
-		if self.values then
-			for key, value in pairs(override) do
-				override[key] = load(self.values, value, params)
 			end
 		end
 		assert((not self.list) or modlib.table.count(override) == #override, "list")
