@@ -119,7 +119,7 @@ metatable.__div = divide
 --+ linear interpolation
 --: ratio number from 0 (all the first vector) to 1 (all the second vector)
 function interpolate(v, w, ratio)
-	return add(multiply(v, 1 - ratio), multiply(w,  ratio))
+	return add(multiply_scalar(v, 1 - ratio), multiply_scalar(w,  ratio))
 end
 
 function norm(v)
