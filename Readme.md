@@ -207,6 +207,10 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 
 ## Versions
 
+### `rolling-58`
+
+* Schema improvements & docs
+
 ### `rolling-57`
 
 * Uses `minetest.safe_file_write` for `file.write`
