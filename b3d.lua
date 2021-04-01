@@ -305,7 +305,7 @@ local binary_search_frame = modlib.table.binary_search_comparator(function(a, b)
 	return modlib.table.default_comparator(a, b.frame)
 end)
 
---> list of { bonename = string, position = vector, rotation = quaternion, scale = vector }
+--> list of { bone_name = string, parent_bone_name = string, position = vector, rotation = quaternion, scale = vector }
 function get_animated_bone_properties(self, keyframe, interpolate)
 	local function get_frame_values(keys)
 		local values = keys[keyframe]
@@ -334,8 +334,8 @@ function get_animated_bone_properties(self, keyframe, interpolate)
 		}
 	end
 	local bone_properties = {}
-	local function get_props(node)
-		local properties = {}
+	local function get_props(node, parent_bone_name)
+		local properties = {parent_bone_name = parent_bone_name}
 		if node.keys and next(node.keys) ~= nil then
 			properties = modlib.table.add_all(properties, get_frame_values(node.keys))
 		end
@@ -343,11 +343,11 @@ function get_animated_bone_properties(self, keyframe, interpolate)
 			properties[property] = properties[property] or modlib.table.copy(node[property])
 		end
 		if node.bone then
-			properties.bonename = node.name
+			properties.bone_name = node.name
 			table.insert(bone_properties, properties)
 		end
 		for _, child in pairs(node.children or {}) do
-			get_props(child)
+			get_props(child, properties.bone_name)
 		end
 	end
 	get_props(self.node)
