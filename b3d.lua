@@ -329,7 +329,7 @@ function get_animated_bone_properties(self, keyframe, interpolate)
 		local ratio = (keyframe - a.frame) / (b.frame - a.frame)
 		return {
 			position = (a.position and b.position and modlib.vector.interpolate(a.position, b.position, ratio)) or a.position or b.position,
-			rotation = (a.rotation and b.rotation and modlib.quaternion.interpolate(a.rotation, b.rotation, ratio)) or a.rotation or b.rotation,
+			rotation = (a.rotation and b.rotation and modlib.quaternion.slerp(a.rotation, b.rotation, ratio)) or a.rotation or b.rotation,
 			scale = (a.scale and b.scale and modlib.vector.interpolate(a.scale, b.scale, ratio)) or a.scale or b.scale,
 		}
 	end
