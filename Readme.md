@@ -207,6 +207,11 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 
 ## Versions
 
+### `rolling-62`
+
+* Fix `modlib.func.curry_tail`
+* Change `b3d:get_animated_bone_properties` to return a list according to hierarchy
+
 ### `rolling-61`
 
 * Fix `quaternion.to_euler_rotation`
