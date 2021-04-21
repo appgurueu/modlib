@@ -192,6 +192,15 @@ test_from_string("#333", 0x333333FF)
 test_from_string("#694269", 0x694269FF)
 test_from_string("#11223344", 0x11223344)
 
+local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {})
+logfile:init()
+logfile.root = {}
+logfile:rewrite()
+logfile:set_root({a = 1}, {b = 2, c = 3})
+logfile:close()
+logfile:init()
+assert(table.equals(logfile.root, {[{a = 1}] = {b = 2, c = 3}}))
+
 -- in-game tests & b3d testing
 local tests = {
 	-- depends on player_api

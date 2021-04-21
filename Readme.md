@@ -10,6 +10,23 @@ No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD
 
 Mostly self-documenting code. Mod namespace is `modlib` or `_ml`, containing all variables & functions.
 
+### Persistence
+
+#### Lua Log Files
+
+A data log file based on Lua statements. **Experimental.** High performance. Example from `test.lua`:
+
+```lua
+local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {})
+logfile:init()
+logfile.root = {}
+logfile:rewrite()
+logfile:set_root({a = 1}, {b = 2, c = 3})
+logfile:close()
+logfile:init()
+assert(table.equals(logfile.root, {[{a = 1}] = {b = 2, c = 3}}))
+```
+
 ### Bluon
 
 Binary Lua object notation. **Experimental.** Handling of subnormal numbers (very small floats) may be broken.
