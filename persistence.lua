@@ -2,11 +2,11 @@ lua_log_file = {}
 local files = {}
 local metatable = {__index = lua_log_file}
 
--- TODO register on shutdown
-
 function lua_log_file.new(file_path, root)
     local self = setmetatable({file_path = assert(file_path), root = root}, metatable)
-    files[self] = true
+    if minetest then
+        files[self] = true
+    end
     return self
 end
 
@@ -53,11 +53,13 @@ function lua_log_file:close()
     files[self] = nil
 end
 
-minetest.register_on_shutdown(function()
-    for self in pairs(files) do
-        self.file:close()
-    end
-end)
+if minetest then
+    minetest.register_on_shutdown(function()
+        for self in pairs(files) do
+            self.file:close()
+        end
+    end)
+end
 
 -- TODO use shorthand notations
 function lua_log_file:dump(value)
