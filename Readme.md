@@ -224,6 +224,10 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 
 ## Versions
 
+### `rolling-66`
+
+* Adds `modlib.persistence.lua_log_file`
+
 ### `rolling-62`
 
 * Fix `modlib.func.curry_tail`
