@@ -196,10 +196,10 @@ local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua",
 logfile:init()
 logfile.root = {}
 logfile:rewrite()
-logfile:set_root({a = 1}, {b = 2, c = 3})
+logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge})
 logfile:close()
 logfile:init()
-assert(table.equals(logfile.root, {[{a = 1}] = {b = 2, c = 3}}))
+assert(table.equals(logfile.root, {[{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge}}))
 
 -- in-game tests & b3d testing
 local tests = {

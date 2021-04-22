@@ -13,7 +13,8 @@ end
 function lua_log_file:load()
 	-- Bytecode is blocked by the engine
 	local read = assert(loadfile(self.file_path))
-	local env = {}
+	-- math.huge is serialized to inf
+	local env = {inf = math.huge}
 	setfenv(read, env)
 	read()
 	env.R = env.R or {{}}
