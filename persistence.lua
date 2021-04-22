@@ -139,5 +139,5 @@ function lua_log_file:rewrite()
 		self.file:close()
 	end
 	self:_rewrite()
-	self.file = io.open(self.file_path, "a+")
+	self:open()
 end
