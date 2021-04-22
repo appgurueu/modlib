@@ -127,8 +127,11 @@ function loadfile_exports(filename)
 	return env
 end
 
-local init_path = arg and arg[0]
-local parent_dir = init_path and init_path:match"^.[/\\]" or ""
+local parent_dir
+if not minetest then
+	local init_path = arg and arg[0]
+	parent_dir = init_path and init_path:match"^.[/\\]" or ""
+end
 function load_module(module_name)
 	local file = module_name .. ".lua"
 	return loadfile_exports(minetest and get_resource(modlib.modname, file) or (parent_dir .. file))
