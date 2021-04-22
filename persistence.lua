@@ -62,8 +62,7 @@ if minetest then
 	end)
 end
 
--- TODO use shorthand notations
-function lua_log_file:dump(value)
+function lua_log_file:_dump(value, is_key)
 	if value == nil then
 		return "nil"
 	end
@@ -86,25 +85,34 @@ function lua_log_file:dump(value)
 	end
 	self.reference_count = self.reference_count + 1
 	local reference = self.reference_count
+	local key = "R[" .. reference .."]"
 	self.references[value] = reference
 	local formatted
 	if _type == "string" then
+		if is_key and value:len() <= key:len() and value:match"[%a_][%a%d_]*" then
+			-- Short key
+			return value, true
+		end
 		formatted = ("%q"):format(value)
+		if formatted:len() <= key:len() then
+			-- Short string
+			return formatted
+		end
 	elseif _type == "table" then
 		local entries = {}
 		for _, value in ipairs(value) do
-			table.insert(entries, self:dump(value))
+			table.insert(entries, self:_dump(value))
 		end
 		for key, value in pairs(value) do
 			if type(key) ~= "number" or key % 1 ~= 0 or key < 1 or key > #value then
-				table.insert(entries, "[" .. self:dump(key) .. "]=" .. self:dump(value))
+				local dumped, short = self:_dump(key, true)
+				table.insert(entries, (short and dumped or ("[" .. dumped .. "]")) .. "=" .. self:_dump(value))
 			end
 		end
 		formatted = "{" .. table.concat(entries, ";") .. "}"
 	else
 		error("unsupported type: " .. _type)
 	end
-	local key = "R[" .. reference .."]"
 	self:log(key .. "=" .. formatted)
 	return key
 end
@@ -114,7 +122,9 @@ function lua_log_file:set(table, key, value)
 	if not self.references[table] then
 		error"orphan table"
 	end
-	self:log(self:dump(table) .. "[" .. self:dump(key) .. "]=" .. self:dump(value))
+	table = self:_dump(table)
+	local key, short_key = self:_dump(key, true)
+	self:log(table .. (short_key and ("." .. key) or ("[" .. key .. "]")) .. "=" .. self:_dump(value))
 end
 
 function lua_log_file:set_root(key, value)
@@ -125,7 +135,7 @@ function lua_log_file:_write()
 	self.references = {}
 	self.reference_count = 0
 	self:log"R={}"
-	self:dump(self.root)
+	self:_dump(self.root)
 end
 
 function lua_log_file:_rewrite()
