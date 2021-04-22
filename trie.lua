@@ -1,6 +1,9 @@
-local trie = getfenv(1)
+local class = getfenv(1)
+local metatable = {__index = function(_self, key)
+	return rawget(class, key)
+end}
 
-function new(table) return setmetatable(table or {}, trie) end
+function new(table) return setmetatable(table or {}, metatable) end
 
 function insert(self, word, value, overwrite)
 	for i = 1, word:len() do

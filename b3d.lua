@@ -1,4 +1,7 @@
-local metatable = {__index = getfenv(1)}
+local class = getfenv(1)
+local metatable = {__index = function(_self, key)
+	return rawget(class, key)
+end}
 
 --! experimental
 --+ Reads a single BB3D chunk from a stream
@@ -195,12 +198,17 @@ function read(stream)
 				flags = flags
 			}
 			while content() do
-				table.insert(bone, {
-					frame = int(),
-					position = position and vector3() or nil,
-					scale = scale and vector3() or nil,
-					rotation = rotation and quaternion() or nil
-				})
+				local frame = {frame = int()}
+				if position then
+					frame.position = vector3()
+				end
+				if scale then
+					frame.scale = vector3()
+				end
+				if rotation then
+					frame.rotation = quaternion()
+				end
+				table.insert(bone, frame)
 			end
 			-- Ensure frames are sorted ascending
 			table.sort(bone, function(a, b) return a.frame < b.frame end)

@@ -1,4 +1,7 @@
-local metatable = {__index = getfenv(1)}
+local class = getfenv(1)
+local metatable = {__index = function(_self, key)
+	return rawget(class, key)
+end}
 
 distance = modlib.vector.distance
 

@@ -1,8 +1,11 @@
-local schema = getfenv(1)
+local class = getfenv(1)
+local metatable = {__index = function(_self, key)
+	return rawget(class, key)
+end}
 
 function new(def)
 	-- TODO type inference, sanity checking etc.
-	return setmetatable(def, {__index = schema})
+	return setmetatable(def, metatable)
 end
 
 local function field_name_to_title(name)

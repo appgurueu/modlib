@@ -1,5 +1,5 @@
 local mt_vector = vector
-local vector = getfenv(1)
+local class = getfenv(1)
 
 index_aliases = {
 	x = 1,
@@ -16,7 +16,7 @@ metatable = {
 		if index ~= nil then
 			return table[index]
 		end
-		return vector[key]
+		return rawget(class, key)
 	end,
 	__newindex = function(table, key, value)
 		local index = letters[key]

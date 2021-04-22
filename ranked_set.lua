@@ -1,5 +1,7 @@
 local class = getfenv(1)
-local metatable = {__index = class}
+local metatable = {__index = function(_self, key)
+	return rawget(class, key)
+end}
 
 comparator = modlib.table.default_comparator
 
