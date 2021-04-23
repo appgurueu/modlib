@@ -224,6 +224,11 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 
 ## Versions
 
+### `rolling-67`
+
+* Fixes various things, **most importantly objects indexing the global table**
+  * Concerns `kdtree`, `trie`, `ranked_set`, `vector`, `schema`
+
 ### `rolling-66`
 
 * Adds `modlib.persistence.lua_log_file`

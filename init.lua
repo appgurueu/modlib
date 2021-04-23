@@ -1,3 +1,5 @@
+local rawget, rawset = rawget, rawset
+
 -- Lua version check
 if _VERSION then
 	if _VERSION < "Lua 5" then
@@ -78,7 +80,7 @@ end
 local load_module, get_resource, loadfile_exports
 modlib = setmetatable({
 	-- TODO bump on release
-	version = 66,
+	version = 67,
 	modname = minetest and minetest.get_current_modname(),
 	dir_delim = rawget(_G, "DIR_DELIM") or "/",
 	_RG = setmetatable({}, {
@@ -152,6 +154,8 @@ end
 
 _ml = modlib
 
+modlib.mod.include"test.lua"
+--modlib.mod.include"bench.lua"
 --[[
 --modlib.mod.include"test.lua"
 ]]
