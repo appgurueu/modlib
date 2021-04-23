@@ -222,7 +222,11 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 4. [`json`](https://json.org)
   * Not recommended
 
-## Versions
+## Release Notes
+
+### `rolling-68`
+
+* Replace changelog by release notes (see the commit log for changes)
 
 ### `rolling-67`
 
