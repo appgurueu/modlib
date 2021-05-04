@@ -154,8 +154,6 @@ end
 
 _ml = modlib
 
-modlib.mod.include"test.lua"
---modlib.mod.include"bench.lua"
 --[[
 --modlib.mod.include"test.lua"
 ]]
