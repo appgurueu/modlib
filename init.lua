@@ -53,7 +53,8 @@ for _, file in pairs{
 	"binary",
 	"b3d",
 	"bluon",
-	"persistence"
+	"persistence",
+	"debug"
 } do
 	modules[file] = file
 end
