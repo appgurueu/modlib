@@ -65,7 +65,8 @@ if minetest then
 		"liquid",
 		"raycast",
 		"wielditem_change",
-		"colorspec"
+		"colorspec",
+		"schematic"
 	}
 	for _, file in pairs{
 		"data",

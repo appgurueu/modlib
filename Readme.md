@@ -234,6 +234,12 @@ Dumps local variables, upvalues and the function environment of the function at 
 
 Dumps function info & variables for all functions in stack, starting with stacklevel (default `1`).
 
+## `minetest`
+
+### `schematic`
+
+A schematic format with support for metadata and baked light data. **Experimental.**
+
 ## Release Notes
 
 ### `rolling-68`
