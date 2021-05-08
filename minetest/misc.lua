@@ -14,7 +14,6 @@ local function get_gametime_init(dtime)
 		return
 	end
 	get_gametime_initialized = true
-	assert(dtime == 0)
 	local gametime = minetest.get_gametime()
 	assert(gametime)
 	function modlib.minetest.get_gametime()
