@@ -95,9 +95,14 @@ local function is_map_key(key, list_len)
 end
 
 function len(self, object)
+	if object == nil then
+		return 0
+	end
 	if constants[object] then
 		return 1
 	end
+	local object_ids = {}
+	local current_id = 0
 	local _type = type(object)
 	if _type == "number" then
 		if object ~= object then
@@ -126,7 +131,6 @@ function len(self, object)
 	if _type == "table" then
 		if next(object) == nil then
 			-- empty {} table
-			byte(type_ranges.string + 1)
 			return 1
 		end
 		local list_len = #object
@@ -138,14 +142,14 @@ function len(self, object)
 		end
 		local table_len = 1 + uint_len(list_len) + uint_len(kv_len)
 		for index = 1, list_len do
-			table_len = table_len + len(self, object[index])
+			table_len = table_len + self:len(object[index])
 		end
 		for key, value in pairs(object) do
 			if is_map_key(key, list_len) then
-				table_len = table_len + len(self, key) + len(self, value)
+				table_len = table_len + self:len(key) + self:len(value)
 			end
 		end
-		return len
+		return kv_len + table_len
 	end
 	return self.aux_len(object)
 end
