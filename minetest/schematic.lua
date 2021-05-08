@@ -23,6 +23,9 @@ function schematic.create(self, pos_min, pos_max)
     local data, light_data, param2_data = voxelmanip:get_data(), self.baked_light and voxelmanip:get_light_data() or {}, voxelmanip:get_param2_data()
     local nodes = {}
     for index in voxelarea:iterp(pos_min, pos_max) do
+        if data[index] == minetest.CONTENT_UNKNOWN or data[index] == minetest.CONTENT_IGNORE then
+            error("unknown or ignore node at " .. minetest.pos_to_string(voxelarea:position(index)))
+        end
         table.insert(nodes, {
             name = minetest.get_name_from_content_id(data[index]),
             light = light_data[index],
