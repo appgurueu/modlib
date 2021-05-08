@@ -1,6 +1,8 @@
 --! experimental
 local bluon = getfenv(1)
-local metatable = {__index = bluon}
+local metatable = {__index = function(_self, key)
+	return rawget(bluon, key)
+end}
 
 function new(self)
 	return setmetatable(self or {}, metatable)
