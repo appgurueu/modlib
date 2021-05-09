@@ -6,34 +6,49 @@ function schematic.setmetatable(self)
 end
 
 function schematic.create(self, pos_min, pos_max)
-    -- Don't use the metatable for the defaults to force a serialization
-    self.baked_light = self.backed_light or false
-    self.meta_data = self.meta_data or true
     self.size = vector.subtract(pos_max, pos_min)
     local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
     local emin, emax = voxelmanip:read_from_map(pos_min, pos_max)
     local voxelarea = VoxelArea:new{ MinEdge = emin, MaxEdge = emax }
-    local meta_data = {}
-    for _, pos in ipairs(minetest.find_nodes_with_meta(pos_min, pos_max)) do
-        local meta = minetest.get_meta(pos):to_table()
-        if next(meta.fields) ~= nil or next(meta.inventory) ~= nil then
-            meta_data[voxelarea:indexp(pos)] = meta
-        end
-    end
-    local data, light_data, param2_data = voxelmanip:get_data(), self.baked_light and voxelmanip:get_light_data() or {}, voxelmanip:get_param2_data()
-    local nodes = {}
+    local nodes, light_values, param2s = {}, self.light_values and {}, {}
+    local vm_nodes, vm_light_values, vm_param2s = voxelmanip:get_data(), light_values and voxelmanip:get_light_data(), voxelmanip:get_param2_data()
+    local node_names, node_ids = {}, {}
+    local i = 0
     for index in voxelarea:iterp(pos_min, pos_max) do
-        if data[index] == minetest.CONTENT_UNKNOWN or data[index] == minetest.CONTENT_IGNORE then
+        if nodes[index] == minetest.CONTENT_UNKNOWN or nodes[index] == minetest.CONTENT_IGNORE then
             error("unknown or ignore node at " .. minetest.pos_to_string(voxelarea:position(index)))
         end
-        table.insert(nodes, {
-            name = minetest.get_name_from_content_id(data[index]),
-            light = light_data[index],
-            param2 = param2_data[index],
-            meta = meta_data[index]
-        })
+        local name = minetest.get_name_from_content_id(vm_nodes[index])
+        local id = node_ids[name]
+        if not id then
+            table.insert(node_names, name)
+            id = #node_names
+            node_ids[name] = id
+        end
+        i = i + 1
+        nodes[i] = id
+        if self.light_values then
+            light_values[i] = vm_light_values[index]
+        end
+        param2s[i] = vm_param2s[index]
     end
+    local metas = self.metas
+    if metas or metas == nil then
+        local indexing = vector.add(self.size, 1)
+        metas = {}
+        for _, pos in ipairs(minetest.find_nodes_with_meta(pos_min, pos_max)) do
+            local meta = minetest.get_meta(pos):to_table()
+            if next(meta.fields) ~= nil or next(meta.inventory) ~= nil then
+                local relative = vector.subtract(pos, pos_min)
+                metas[((relative.z * indexing.y) + relative.y) * indexing.x + relative.x] = meta
+            end
+        end
+    end
+    self.node_names = node_names
     self.nodes = nodes
+    self.light_values = light_values
+    self.param2s = param2s
+    self.metas = metas
     return schematic.setmetatable(self)
 end
 
@@ -41,40 +56,49 @@ function schematic:write_to_voxelmanip(voxelmanip, pos_min)
     local pos_max = vector.add(pos_min, self.size)
     local emin, emax = voxelmanip:read_from_map(pos_min, pos_max)
     local voxelarea = VoxelArea:new{ MinEdge = emin, MaxEdge = emax }
-    local data, light_data, param2_data = voxelmanip:get_data(), self.baked_light and voxelmanip:get_light_data(), voxelmanip:get_param2_data()
+    local nodes, light_values, param2s, metas = self.nodes, self.light_values, self.param2s, self.metas
+    local vm_nodes, vm_lights, vm_param2s = voxelmanip:get_data(), light_values and voxelmanip:get_light_data(), voxelmanip:get_param2_data()
     for _, pos in ipairs(minetest.find_nodes_with_meta(pos_min, pos_max)) do
         -- Clear all metadata. Due to an engine bug, nodes will actually have empty metadata.
         minetest.get_meta(pos):from_table{}
     end
-    local i = 1
+    local content_ids = {}
+    for index, name in ipairs(self.node_names) do
+        content_ids[index] = assert(minetest.get_content_id(name), ("unknown node %q"):format(name))
+    end
+    local i = 0
     for index in voxelarea:iterp(pos_min, pos_max) do
-        local node = self.nodes[i]
         i = i + 1
-        data[index] = minetest.get_content_id(node.name)
-        if data[index] == nil then
-            error(("unknown node %q"):format(node.name))
+        vm_nodes[index] = content_ids[nodes[i]]
+        if light_values then
+            vm_lights[index] = light_values[i]
         end
-        if self.baked_light then
-            light_data[index] = node.light
-        end
-        param2_data[index] = node.param2
-        if node.meta then
-            -- TODO consider removing this check by using a separate table [index] = meta for node meta
-            minetest.get_meta(voxelarea:position(index)):from_table(node.meta)
+        vm_param2s[index] = param2s[i]
+    end
+    voxelmanip:set_data(vm_nodes)
+    if light_values then
+        voxelmanip:set_light_data(vm_lights)
+    end
+    voxelmanip:set_param2_data(vm_param2s)
+    if metas then
+        local indexing = vector.add(self.size, 1)
+        for index, meta in pairs(metas) do
+            local floored = math.floor(index / indexing.x)
+            local relative = {
+                x = index % indexing.x,
+                y = floored % indexing.y,
+                z = math.floor(floored / indexing.y)
+            }
+            minetest.get_meta(vector.add(relative, pos_min)):from_table(meta)
         end
     end
-    voxelmanip:set_data(data)
-    if self.baked_light then
-        voxelmanip:set_light_data(light_data)
-    end
-    voxelmanip:set_param2_data(param2_data)
 end
 
 function schematic:place(pos_min)
     local pos_max = vector.add(pos_min, self.size)
     local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
     self:write_to_voxelmanip(voxelmanip, pos_min)
-    voxelmanip:write_to_map(not self.baked_light)
+    voxelmanip:write_to_map(not self.light_data)
     return voxelmanip
 end
 
