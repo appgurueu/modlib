@@ -98,7 +98,7 @@ function schematic:place(pos_min)
     local pos_max = vector.add(pos_min, self.size)
     local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
     self:write_to_voxelmanip(voxelmanip, pos_min)
-    voxelmanip:write_to_map(not self.light_data)
+    voxelmanip:write_to_map(not self.light_values)
     return voxelmanip
 end
 
