@@ -1,3 +1,6 @@
+-- ensure modlib API isn't leaking into global environment
+assert(modlib.bluon.assert ~= assert)
+
 local random, huge = math.random, math.huge
 local parent_env = getfenv(1)
 setfenv(1, setmetatable({}, {

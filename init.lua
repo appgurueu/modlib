@@ -101,14 +101,21 @@ modlib = setmetatable({
 }, {
 	__index = function(self, module_name)
 		local files = modules[module_name]
-		local module
+		local environment
 		if type(files) == "string" then
-			module = load_module(files)
+			environment = load_module(files)
 		elseif files then
-			module = loadfile_exports(get_resource(self.modname, module_name, files[1] .. ".lua"))
+			environment = loadfile_exports(get_resource(self.modname, module_name, files[1] .. ".lua"))
 			for index = 2, #files do
-				self.mod.include_env(get_resource(self.modname, module_name, files[index] .. ".lua"), module)
+				self.mod.include_env(get_resource(self.modname, module_name, files[index] .. ".lua"), environment)
 			end
+		else
+			return
+		end
+		local module = {}
+		for key, value in pairs(environment) do
+			-- Shallow copy. Doesn't use `modlib.table.shallowcopy` as that is part of a module, too.
+			module[key] = value
 		end
 		self[module_name] = module
 		return module
