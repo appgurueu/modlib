@@ -80,13 +80,12 @@ function lua_log_file:_dump(value, is_key)
 	if _type == "number" then
 		return ("%.17g"):format(value)
 	end
-	if self.references[value] then
-		return "R[" .. self.references[value] .. "]"
+	local reference = self.references[value]
+	if reference then
+		return "R[" .. reference .."]"
 	end
-	self.reference_count = self.reference_count + 1
-	local reference = self.reference_count
+	reference = self.reference_count + 1
 	local key = "R[" .. reference .."]"
-	self.references[value] = reference
 	local formatted
 	if _type == "string" then
 		if is_key and value:len() <= key:len() and value:match"[%a_][%a%d_]*" then
@@ -114,6 +113,8 @@ function lua_log_file:_dump(value, is_key)
 	else
 		error("unsupported type: " .. _type)
 	end
+	self.reference_count = reference
+	self.references[value] = reference
 	self:log(key .. "=" .. formatted)
 	return key
 end
