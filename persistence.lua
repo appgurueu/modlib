@@ -103,8 +103,9 @@ function lua_log_file:_dump(value, is_key)
 		for _, value in ipairs(value) do
 			table.insert(entries, self:_dump(value))
 		end
+		local tablelen = #value
 		for key, value in pairs(value) do
-			if type(key) ~= "number" or key % 1 ~= 0 or key < 1 or key > #value then
+			if type(key) ~= "number" or key % 1 ~= 0 or key < 1 or key > tablelen then
 				local dumped, short = self:_dump(key, true)
 				table.insert(entries, (short and dumped or ("[" .. dumped .. "]")) .. "=" .. self:_dump(value))
 			end
