@@ -242,6 +242,10 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+### `rolling-69`
+
+* Fixes various things, **most importantly modules indexing the global table**
+
 ### `rolling-68`
 
 * Replace changelog by release notes (see the commit log for changes)

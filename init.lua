@@ -82,7 +82,7 @@ end
 local load_module, get_resource, loadfile_exports
 modlib = setmetatable({
 	-- TODO bump on release
-	version = 68,
+	version = 69,
 	modname = minetest and minetest.get_current_modname(),
 	dir_delim = rawget(_G, "DIR_DELIM") or "/",
 	_RG = setmetatable({}, {
