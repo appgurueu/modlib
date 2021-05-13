@@ -69,7 +69,6 @@ if minetest then
 		"schematic"
 	}
 	for _, file in pairs{
-		"data",
 		"log",
 		"player",
 		-- deprecated
