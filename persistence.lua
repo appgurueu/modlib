@@ -87,6 +87,10 @@ function lua_log_file:_dump(value, is_key)
 	reference = self.reference_count + 1
 	local key = "R[" .. reference .."]"
 	local formatted
+	local function create_reference()
+		self.reference_count = reference
+		self.references[value] = reference
+	end
 	if _type == "string" then
 		if is_key and value:len() <= key:len() and value:match"[%a_][%a%d_]*" then
 			-- Short key
@@ -97,7 +101,11 @@ function lua_log_file:_dump(value, is_key)
 			-- Short string
 			return formatted
 		end
+		-- Use reference
+		create_reference()
 	elseif _type == "table" then
+		-- Tables always need a reference before they are traversed to prevent infinite recursion
+		create_reference()
 		local entries = {}
 		for _, value in ipairs(value) do
 			table.insert(entries, self:_dump(value))
@@ -113,8 +121,6 @@ function lua_log_file:_dump(value, is_key)
 	else
 		error("unsupported type: " .. _type)
 	end
-	self.reference_count = reference
-	self.references[value] = reference
 	self:log(key .. "=" .. formatted)
 	return key
 end
