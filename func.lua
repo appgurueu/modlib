@@ -39,3 +39,75 @@ end
 function call_by_value(func, ...)
 	return func(unpack(modlib.table.deepcopy{...}))
 end
+
+-- Functional wrappers for Lua's builtin metatable operators (arithmetic, concatenation, length, comparison, indexing, call)
+
+function add(a, b)
+	return a + b
+end
+
+function mul(a, b)
+	return a * b
+end
+
+function div(a, b)
+	return a / b
+end
+
+function mod(a, b)
+	return a % b
+end
+
+function pow(a, b)
+	return a ^ b
+end
+
+function unm(a)
+	return -a
+end
+
+function concat(a, b)
+	return a .. b
+end
+
+function len(a)
+	return #a
+end
+
+function eq(a, b)
+	return a == b
+end
+
+function lt(a, b)
+	return a < b
+end
+
+function le(a, b)
+	return a <= b
+end
+
+function index(object, key)
+	return object[key]
+end
+
+function newindex(object, key, value)
+	object[key] = value
+end
+
+function call(object, ...)
+	object(...)
+end
+
+-- Functional wrappers for logical operators, suffixed with _ to avoid a syntax error
+
+function not_(a)
+	return not a
+end
+
+function and_(a, b)
+	return a and b
+end
+
+function or_(a, b)
+	return a or b
+end
