@@ -35,7 +35,7 @@ function stack(stacklevel)
 			break
 		end
 		info.func = tostring(info.func)
-		info.variables = variables(level)
+		info.variables = variables(stacklevel)
 		stack[stacklevel - 1] = info
 		stacklevel = stacklevel + 1
 	end
