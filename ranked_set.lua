@@ -214,7 +214,7 @@ local function _delete(self, key, is_rank)
 						sidemost = sidemost[other_side]
 					end
 					-- Replace deleted key
-					tree.key = rightmost.key
+					tree.key = sidemost.key
 					-- Replace the successor by it's single child
 					parents[len][sides[len]] = sidemost[side]
 				else
