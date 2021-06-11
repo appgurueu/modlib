@@ -1,5 +1,9 @@
 --! experimental
 local bluon = getfenv(1)
+
+local no_op = modlib.func.no_op
+local write_float = modlib.binary.write_float
+
 local metatable = {__index = function(_self, key)
 	return rawget(bluon, key)
 end}
@@ -108,17 +112,17 @@ function len(self, object)
 	local _type = type(object)
 	if _type == "number" then
 		if object ~= object then
-			stream:write(constant_nan)
-			return
+			return 1
 		end
 		if object % 1 == 0 then
 			return 1 + uint_len(object > 0 and object or -object)
 		end
-		-- TODO ensure this check is proper
-		if mantissa % 2^-23 > 0 then
-			return 9
-		end
-		return 5
+		-- HACK use write_float to get the length
+		local bytes = 4
+		write_float(no_op, object, function(double)
+			if double then bytes = 8 end
+		end)
+		return 1 + bytes
 	end
 	local id = object_ids[object]
 	if id then
@@ -175,7 +179,6 @@ function write(self, object, stream)
 		byte(base + type_offset)
 		uint(type_offset, _uint)
 	end
-	local write_float = modlib.binary.write_float
 	local function float_on_write(double)
 		byte(double and type_ranges.number or type_ranges.number_f32)
 	end
