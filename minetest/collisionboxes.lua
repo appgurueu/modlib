@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, ipairs, math, minetest, pairs, table, type, vector = assert, ipairs, math, minetest, pairs, table, type, vector
+
 -- Minetest allows shorthand collisionbox = {...} instead of {{...}}
 local function get_collisionboxes(box_or_boxes)
 	return type(box_or_boxes[1]) == "number" and {box_or_boxes} or box_or_boxes

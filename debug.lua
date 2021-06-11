@@ -1,3 +1,6 @@
+-- Localize globals
+local _G, debug, getfenv, table, tostring = _G, debug, getfenv, table, tostring
+
 function variables(stacklevel)
 	stacklevel = (stacklevel or 1) + 1
 	local locals = {}

@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, error, getfenv, ipairs, math, modlib, next, pairs, rawget, setmetatable, string, table, unpack = assert, error, getfenv, ipairs, math, modlib, next, pairs, rawget, setmetatable, string, table, unpack
+
 --! experimental
 local bluon = getfenv(1)
 

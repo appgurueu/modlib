@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, getfenv, math, modlib, pairs, rawget, rawset, setmetatable, unpack, vector = assert, getfenv, math, modlib, pairs, rawget, rawset, setmetatable, unpack, vector
+
 local mt_vector = vector
 local class = getfenv(1)
 

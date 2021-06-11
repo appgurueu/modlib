@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, math = assert, math
+
 -- All little endian
 
 --+ Reads doubles (f64) or floats (f32)

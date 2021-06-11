@@ -1,3 +1,6 @@
+-- Localize globals
+local getfenv, math, setmetatable, table = getfenv, math, setmetatable, table
+
 local metatable = {__index = getfenv(1)}
 
 function less_than(a, b) return a < b end

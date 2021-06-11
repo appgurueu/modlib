@@ -1,3 +1,6 @@
+-- Localize globals
+local VoxelArea, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, table, vector = VoxelArea, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, table, vector
+
 schematic = {}
 local metatable = {__index = schematic}
 

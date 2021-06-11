@@ -1,3 +1,6 @@
+-- Localize globals
+local io, minetest, modlib, string = io, minetest, modlib, string
+
 function read(filename)
 	local file = io.open(filename, "r")
 	if file == nil then return nil end

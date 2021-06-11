@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, minetest, modlib, next, pairs, string, table, type = assert, minetest, modlib, next, pairs, string, table, type
+
 max_wear = 2 ^ 16 - 1
 function override(function_name, function_builder)
 	local func = minetest[function_name]

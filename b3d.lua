@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, error, getfenv, math, modlib, next, pairs, rawget, setmetatable, table = assert, error, getfenv, math, modlib, next, pairs, rawget, setmetatable, table
+
 local class = getfenv(1)
 local metatable = {__index = function(_self, key)
 	return rawget(class, key)

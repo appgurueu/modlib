@@ -1,3 +1,6 @@
+-- Localize globals
+local Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, minetest, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type = Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, minetest, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type
+
 -- get resource + dofile
 function include(modname, file)
 	if not file then

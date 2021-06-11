@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type = assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type
+
 -- not deprecated
 function build_tree(dict)
 	local tree = {}

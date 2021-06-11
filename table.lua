@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, error, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type = assert, error, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type
+
 -- Table helpers
 
 function map_index(table, func)

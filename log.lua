@@ -1,3 +1,6 @@
+-- Localize globals
+local ipairs, minetest, modlib, os, pairs, table = ipairs, minetest, modlib, os, pairs, table
+
 -- Log helpers - write to log, force writing to file
 minetest.mkdir(minetest.get_worldpath() .. "/logs")
 channels = {}

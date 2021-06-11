@@ -1,3 +1,6 @@
+-- Localize globals
+local ipairs, minetest, modlib = ipairs, minetest, modlib
+
 forbidden_names = {}
 
 function register_forbidden_name(name) forbidden_names[name] = true end

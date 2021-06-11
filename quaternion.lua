@@ -1,3 +1,6 @@
+-- Localize globals
+local math, modlib, pairs, unpack, vector = math, modlib, pairs, unpack, vector
+
 -- TODO OOP, extend vector
 
 function from_euler_rotation(rotation)

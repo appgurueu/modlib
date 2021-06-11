@@ -1,4 +1,6 @@
-local rawget, rawset = rawget, rawset
+-- Localize globals
+local _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table, type = _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table, type
+
 
 -- Lua version check
 if _VERSION then

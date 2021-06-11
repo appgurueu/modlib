@@ -1,3 +1,6 @@
+-- Localize globals
+local error, modlib, unpack = error, modlib, unpack
+
 no_op = function() end
 
 function curry(func, ...)

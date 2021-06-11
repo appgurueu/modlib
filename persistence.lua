@@ -1,3 +1,6 @@
+-- Localize globals
+local assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type = assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type
+
 lua_log_file = {}
 local files = {}
 local metatable = {__index = lua_log_file}
