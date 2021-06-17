@@ -1,6 +1,10 @@
 -- Localize globals
 local _G, debug, getfenv, table, tostring = _G, debug, getfenv, table, tostring
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 function variables(stacklevel)
 	stacklevel = (stacklevel or 1) + 1
 	local locals = {}
@@ -44,3 +48,6 @@ function stack(stacklevel)
 	end
 	return stack
 end
+
+-- Export environment
+return _ENV

@@ -1,6 +1,10 @@
 -- Localize globals
 local assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type = assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 -- not deprecated
 function build_tree(dict)
 	local tree = {}
@@ -297,3 +301,6 @@ function check_constraints(value, constraints)
 		end
 	end
 end
+
+-- Export environment
+return _ENV

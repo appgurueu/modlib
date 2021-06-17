@@ -1,10 +1,11 @@
 -- Localize globals
-local assert, getfenv, math, modlib, rawget, setmetatable, table, unpack = assert, getfenv, math, modlib, rawget, setmetatable, table, unpack
+local assert, math, modlib, setmetatable, table, unpack = assert, math, modlib, setmetatable, table, unpack
 
-local class = getfenv(1)
-local metatable = {__index = function(_self, key)
-	return rawget(class, key)
-end}
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+local metatable = {__index = _ENV}
 
 distance = modlib.vector.distance
 
@@ -58,3 +59,6 @@ function get_nearest_neighbor(self, vector)
 end
 
 -- TODO insertion & deletion + rebalancing
+
+-- Export environment
+return _ENV

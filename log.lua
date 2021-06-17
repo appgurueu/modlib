@@ -1,6 +1,10 @@
 -- Localize globals
 local ipairs, minetest, modlib, os, pairs, table = ipairs, minetest, modlib, os, pairs, table
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 -- Log helpers - write to log, force writing to file
 minetest.mkdir(minetest.get_worldpath() .. "/logs")
 channels = {}
@@ -77,3 +81,7 @@ minetest.register_on_shutdown(
 		write_all_to_file()
 	end
 )
+
+
+-- Export environment
+return _ENV

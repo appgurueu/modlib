@@ -1,10 +1,11 @@
 -- Localize globals
-local getfenv, math, next, pairs, rawget, setmetatable, string, table, unpack = getfenv, math, next, pairs, rawget, setmetatable, string, table, unpack
+local math, next, pairs, setmetatable, string, table, unpack = math, next, pairs, setmetatable, string, table, unpack
 
-local class = getfenv(1)
-local metatable = {__index = function(_self, key)
-	return rawget(class, key)
-end}
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+local metatable = {__index = _ENV}
 
 function new(table) return setmetatable(table or {}, metatable) end
 
@@ -125,3 +126,6 @@ function find_longest(self, query, query_offset)
 	end
 	return last_leaf, leaf_pos
 end
+
+-- Export environment
+return _ENV

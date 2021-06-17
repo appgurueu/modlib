@@ -1,6 +1,10 @@
 -- Localize globals
 local assert, error, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type = assert, error, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 -- Table helpers
 
 function map_index(table, func)
@@ -590,3 +594,6 @@ function repetition(value, count)
 	end
 	return table
 end
+
+-- Export environment
+return _ENV

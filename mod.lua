@@ -1,6 +1,18 @@
 -- Localize globals
 local Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, minetest, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type = Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, minetest, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+function loadfile_exports(filename)
+	local env = setmetatable({}, {__index = _G})
+	local file = assert(loadfile(filename))
+	setfenv(file, env)
+	file()
+	return env
+end
+
 -- get resource + dofile
 function include(modname, file)
 	if not file then
@@ -132,3 +144,6 @@ function configuration(modname)
 	end
 	return conf
 end
+
+-- Export environment
+return _ENV

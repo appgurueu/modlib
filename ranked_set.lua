@@ -1,10 +1,11 @@
 -- Localize globals
-local assert, getfenv, modlib, pairs, rawget, setmetatable, table = assert, getfenv, modlib, pairs, rawget, setmetatable, table
+local assert, modlib, pairs, setmetatable, table = assert, modlib, pairs, setmetatable, table
 
-local class = getfenv(1)
-local metatable = {__index = function(_self, key)
-	return rawget(class, key)
-end}
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+local metatable = {__index = _ENV}
 
 comparator = modlib.table.default_comparator
 
@@ -315,3 +316,6 @@ function get_by_rank(self, rank)
 		end
 	until not tree
 end
+
+-- Export environment
+return _ENV

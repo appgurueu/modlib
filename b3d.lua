@@ -1,10 +1,11 @@
 -- Localize globals
-local assert, error, getfenv, math, modlib, next, pairs, rawget, setmetatable, table = assert, error, getfenv, math, modlib, next, pairs, rawget, setmetatable, table
+local assert, error, math, modlib, next, pairs, setmetatable, table = assert, error, math, modlib, next, pairs, setmetatable, table
 
-local class = getfenv(1)
-local metatable = {__index = function(_self, key)
-	return rawget(class, key)
-end}
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+local metatable = {__index = _ENV}
 
 --! experimental
 --+ Reads a single BB3D chunk from a stream
@@ -364,3 +365,6 @@ function get_animated_bone_properties(self, keyframe, interpolate)
 	get_props(self.node)
 	return bone_properties
 end
+
+-- Export environment
+return _ENV

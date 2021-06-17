@@ -1,6 +1,10 @@
 -- Localize globals
 local error, modlib, unpack = error, modlib, unpack
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 no_op = function() end
 
 function curry(func, ...)
@@ -114,3 +118,6 @@ end
 function or_(a, b)
 	return a or b
 end
+
+-- Export environment
+return _ENV

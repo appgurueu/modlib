@@ -1,6 +1,5 @@
 -- Localize globals
-local _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table, type = _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table, type
-
+local _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table = _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table
 
 -- Lua version check
 if _VERSION then
@@ -58,33 +57,40 @@ for _, file in pairs{
 	"persistence",
 	"debug"
 } do
-	modules[file] = file
+	modules[file] = true
 end
 if minetest then
-	modules.minetest = {
-		"misc",
-		"collisionboxes",
-		"liquid",
-		"raycast",
-		"wielditem_change",
-		"colorspec",
-		"schematic"
-	}
 	for _, file in pairs{
+		"minetest",
 		"log",
 		"player",
 		-- deprecated
 		"conf"
 	} do
-		modules[file] = file
+		modules[file] = true
 	end
 end
 
-local load_module, get_resource, loadfile_exports
+local parent_dir
+if not minetest then
+	local init_path = arg and arg[0]
+	parent_dir = init_path and init_path:match"^.[/\\]" or ""
+end
+
+-- only used if Minetest is available
+local function get_resource(modname, resource, ...)
+	if not resource then
+		resource = modname
+		modname = minetest.get_current_modname()
+	end
+	return table.concat({minetest.get_modpath(modname), resource, ...}, modlib.dir_delim)
+end
+
 modlib = setmetatable({
 	-- TODO bump on release
 	version = 69,
 	modname = minetest and minetest.get_current_modname(),
+	-- TODO
 	dir_delim = rawget(_G, "DIR_DELIM") or "/",
 	_RG = setmetatable({}, {
 		__index = function(_, index)
@@ -101,55 +107,19 @@ modlib = setmetatable({
 	end
 }, {
 	__index = function(self, module_name)
-		local files = modules[module_name]
-		local environment
-		if type(files) == "string" then
-			environment = load_module(files)
-		elseif files then
-			environment = loadfile_exports(get_resource(self.modname, module_name, files[1] .. ".lua"))
-			for index = 2, #files do
-				self.mod.include_env(get_resource(self.modname, module_name, files[index] .. ".lua"), environment)
-			end
-		else
+		if not modules[module_name] then
+			-- module not available, return nil
 			return
 		end
-		local module = {}
-		for key, value in pairs(environment) do
-			-- Shallow copy. Doesn't use `modlib.table.shallowcopy` as that is part of a module, too.
-			module[key] = value
-		end
-		self[module_name] = module
-		return module
+		local environment = dofile(minetest
+			and get_resource(self.modname, module_name .. ".lua")
+			or (parent_dir .. module_name .. ".lua"))
+		self[module_name] = environment
+		return environment
 	end
 })
 
-function get_resource(modname, resource, ...)
-	if not resource then
-		resource = modname
-		modname = minetest.get_current_modname()
-	end
-	return table.concat({minetest.get_modpath(modname), resource, ...}, modlib.dir_delim)
-end
-
-function loadfile_exports(filename)
-	local env = setmetatable({}, {__index = _G})
-	local file = assert(loadfile(filename))
-	setfenv(file, env)
-	file()
-	return env
-end
-
-local parent_dir
-if not minetest then
-	local init_path = arg and arg[0]
-	parent_dir = init_path and init_path:match"^.[/\\]" or ""
-end
-function load_module(module_name)
-	local file = module_name .. ".lua"
-	return loadfile_exports(minetest and get_resource(modlib.modname, file) or (parent_dir .. file))
-end
-
-modlib.mod = minetest and loadfile_exports(get_resource(modlib.modname, "mod.lua"))
+modlib.mod = minetest and dofile(get_resource(modlib.modname, "mod.lua"))
 
 -- Aliases
 modlib.string = modlib.text
@@ -157,15 +127,15 @@ modlib.number = modlib.math
 
 if minetest then
 	modlib.conf.build_setting_tree()
-
 	modlib.mod.get_resource = get_resource
-	modlib.mod.loadfile_exports = loadfile_exports
 end
 
 _ml = modlib
 
+modlib.mod.include"test.lua"
 --[[
 --modlib.mod.include"test.lua"
 ]]
 
+-- TODO verify localizations suffice
 return modlib

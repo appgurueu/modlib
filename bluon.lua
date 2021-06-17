@@ -1,15 +1,16 @@
 -- Localize globals
-local assert, error, getfenv, ipairs, math, modlib, next, pairs, rawget, setmetatable, string, table, unpack = assert, error, getfenv, ipairs, math, modlib, next, pairs, rawget, setmetatable, string, table, unpack
+local assert, error, ipairs, math, modlib, next, pairs, setmetatable, string, table, type, unpack = assert, error, ipairs, math, modlib, next, pairs, setmetatable, string, table, type, unpack
+
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
 
 --! experimental
-local bluon = getfenv(1)
 
 local no_op = modlib.func.no_op
 local write_float = modlib.binary.write_float
 
-local metatable = {__index = function(_self, key)
-	return rawget(bluon, key)
-end}
+local metatable = {__index = _ENV}
 
 function new(self)
 	return setmetatable(self or {}, metatable)
@@ -327,3 +328,6 @@ function read(self, stream)
 	end
 	return _read(type)
 end
+
+-- Export environment
+return _ENV

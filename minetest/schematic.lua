@@ -1,6 +1,10 @@
 -- Localize globals
 local VoxelArea, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, table, vector = VoxelArea, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, table, vector
 
+-- Set environment
+local _ENV = ...
+setfenv(1, _ENV)
+
 schematic = {}
 local metatable = {__index = schematic}
 

@@ -1,6 +1,10 @@
 -- Localize globals
 local assert, math = assert, math
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 -- All little endian
 
 --+ Reads doubles (f64) or floats (f32)
@@ -116,3 +120,6 @@ end
 function write_double(write_byte, number)
 	return write_float(write_byte, number, nil, true)
 end
+
+-- Export environment
+return _ENV

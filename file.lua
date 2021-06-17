@@ -1,6 +1,10 @@
 -- Localize globals
 local io, minetest, modlib, string = io, minetest, modlib, string
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 function read(filename)
 	local file = io.open(filename, "r")
 	if file == nil then return nil end
@@ -108,3 +112,6 @@ function process_bridge_start(name, command, os_execute)
 	local bridge = process_bridges[name]
 	os_execute(string.format(command, bridge.output, bridge.input, bridge.logs))
 end
+
+-- Export environment
+return _ENV

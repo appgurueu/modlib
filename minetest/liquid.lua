@@ -1,6 +1,10 @@
 -- Localize globals
 local minetest, modlib, pairs = minetest, modlib, pairs
 
+-- Set environment
+local _ENV = ...
+setfenv(1, _ENV)
+
 liquid_level_max = 8
 --+ Calculates the corner levels of a flowingliquid node
 --> 4 corner levels from -0.5 to 0.5 as list of `modlib.vector`

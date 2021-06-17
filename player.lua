@@ -1,6 +1,10 @@
 -- Localize globals
 local ipairs, minetest, modlib = ipairs, minetest, modlib
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 forbidden_names = {}
 
 function register_forbidden_name(name) forbidden_names[name] = true end
@@ -79,3 +83,6 @@ function datatable(table, default)
 	minetest.register_on_leaveplayer(function(player) table[player:get_player_name()] = nil end)
 	return table
 end
+
+-- Export environment
+return _ENV

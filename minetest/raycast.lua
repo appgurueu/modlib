@@ -1,6 +1,10 @@
 -- Localize globals
 local assert, math, minetest, modlib, pairs, setmetatable, vector = assert, math, minetest, modlib, pairs, setmetatable, vector
 
+-- Set environment
+local _ENV = ...
+setfenv(1, _ENV)
+
 --+ Raycast wrapper with proper flowingliquid intersections
 function raycast(_pos1, _pos2, objects, liquids)
 	local raycast = minetest.raycast(_pos1, _pos2, objects, liquids)

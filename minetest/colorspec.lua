@@ -1,6 +1,10 @@
 -- Localize globals
 local assert, error, math, minetest, setmetatable, tonumber, type = assert, error, math, minetest, setmetatable, tonumber, type
 
+-- Set environment
+local _ENV = ...
+setfenv(1, _ENV)
+
 -- As in src/util/string.cpp
 named_colors = {
 	aliceblue = 0xf0f8ff,

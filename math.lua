@@ -1,6 +1,10 @@
 -- Localize globals
 local math, minetest, modlib, os, string, table = math, minetest, modlib, os, string, table
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 -- Make random random
 math.randomseed(minetest and minetest.get_us_time() or os.time() + os.clock())
 for _ = 1, 100 do math.random() end
@@ -72,3 +76,6 @@ function fround(number)
 	end
 	return sign * powexp * (leading - mantissa / 0x800000)
 end
+
+-- Export environment
+return _ENV

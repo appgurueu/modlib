@@ -1,6 +1,10 @@
 -- Localize globals
 local minetest, modlib, pairs, table = minetest, modlib, pairs, table
 
+-- Set environment
+local _ENV = ...
+setfenv(1, _ENV)
+
 players = {}
 
 registered_on_wielditem_changes = {function(...)

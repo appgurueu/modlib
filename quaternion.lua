@@ -1,6 +1,10 @@
 -- Localize globals
 local math, modlib, pairs, unpack, vector = math, modlib, pairs, unpack, vector
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 -- TODO OOP, extend vector
 
 function from_euler_rotation(rotation)
@@ -130,3 +134,6 @@ function to_euler_rotation_irrlicht(self)
 
 	return vector.apply(_calc(), math.deg)
 end
+
+-- Export environment
+return _ENV

@@ -1,8 +1,11 @@
 -- Localize globals
-local assert, getfenv, math, modlib, pairs, rawget, rawset, setmetatable, unpack, vector = assert, getfenv, math, modlib, pairs, rawget, rawset, setmetatable, unpack, vector
+local assert, math, modlib, pairs, rawset, setmetatable, unpack, vector = assert, math, modlib, pairs, rawset, setmetatable, unpack, vector
+
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
 
 local mt_vector = vector
-local class = getfenv(1)
 
 index_aliases = {
 	x = 1,
@@ -19,9 +22,10 @@ metatable = {
 		if index ~= nil then
 			return table[index]
 		end
-		return rawget(class, key)
+		return _ENV[key]
 	end,
 	__newindex = function(table, key, value)
+		-- TODO
 		local index = letters[key]
 		if index ~= nil then
 			return rawset(table, index, value)
@@ -226,3 +230,6 @@ function triangle_normal(triangle)
 	local edge_1, edge_2 = subtract(point_2, point_1), subtract(point_3, point_1)
 	return normalize(cross3(edge_1, edge_2))
 end
+
+-- Export environment
+return _ENV

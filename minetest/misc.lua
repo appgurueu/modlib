@@ -1,6 +1,10 @@
 -- Localize globals
 local assert, minetest, modlib, next, pairs, string, table, type = assert, minetest, modlib, next, pairs, string, table, type
 
+-- Set environment
+local _ENV = ...
+setfenv(1, _ENV)
+
 max_wear = 2 ^ 16 - 1
 function override(function_name, function_builder)
 	local func = minetest[function_name]

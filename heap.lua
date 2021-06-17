@@ -1,7 +1,11 @@
 -- Localize globals
-local getfenv, math, setmetatable, table = getfenv, math, setmetatable, table
+local math, setmetatable, table = math, setmetatable, table
 
-local metatable = {__index = getfenv(1)}
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+local metatable = {__index = _ENV}
 
 function less_than(a, b) return a < b end
 
@@ -51,3 +55,6 @@ function pop(self)
 	heapify(1)
 	return value
 end
+
+-- Export environment
+return _ENV

@@ -1,5 +1,9 @@
 -- Localize globals
-local assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type = assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type
+local assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, table, type = assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, table, type
+
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
 
 lua_log_file = {}
 local files = {}
@@ -162,3 +166,6 @@ function lua_log_file:rewrite()
 	self:_rewrite()
 	self:open()
 end
+
+-- Export environment
+return _ENV

@@ -1,10 +1,11 @@
 -- Localize globals
-local assert, error, getfenv, ipairs, math, minetest, modlib, pairs, rawget, setmetatable, table, tonumber, tostring, type = assert, error, getfenv, ipairs, math, minetest, modlib, pairs, rawget, setmetatable, table, tonumber, tostring, type
+local assert, error, ipairs, math, minetest, modlib, pairs, setmetatable, table, tonumber, tostring, type = assert, error, ipairs, math, minetest, modlib, pairs, setmetatable, table, tonumber, tostring, type
 
-local class = getfenv(1)
-local metatable = {__index = function(_self, key)
-	return rawget(class, key)
-end}
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
+local metatable = {__index = _ENV}
 
 function new(def)
 	-- TODO type inference, sanity checking etc.
@@ -299,3 +300,6 @@ function load(self, override, params)
 	if self.func then self.func(override) end
 	return override
 end
+
+-- Export environment
+return _ENV

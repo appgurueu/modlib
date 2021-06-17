@@ -1,6 +1,10 @@
 -- Localize globals
 local math, modlib, pairs, setmetatable, string, table = math, modlib, pairs, setmetatable, string, table
 
+-- Set environment
+local _ENV = {}
+setfenv(1, _ENV)
+
 function upper_first(text) return text:sub(1, 1):upper() .. text:sub(2) end
 
 function lower_first(text) return text:sub(1, 1):lower() .. text:sub(2) end
@@ -167,3 +171,6 @@ function handle_ifdefs(code, vars)
 	table.insert(finalcode, string.sub(code, after_endif + 2))
 	return table.concat(finalcode, "")
 end
+
+-- Export environment
+return _ENV
