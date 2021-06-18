@@ -1,6 +1,3 @@
--- Localize globals
-local _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table = _G, _VERSION, assert, debug, dump, error, load, loadfile, minetest, pairs, rawget, rawset, setmetatable, table
-
 -- Lua version check
 if _VERSION then
 	if _VERSION < "Lua 5" then
@@ -86,6 +83,7 @@ local function get_resource(modname, resource, ...)
 	return table.concat({minetest.get_modpath(modname), resource, ...}, modlib.dir_delim)
 end
 
+local rawget, rawset = rawget, rawset
 modlib = setmetatable({
 	-- TODO bump on release
 	version = 69,
