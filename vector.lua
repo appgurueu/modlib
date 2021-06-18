@@ -26,7 +26,7 @@ metatable = {
 	end,
 	__newindex = function(table, key, value)
 		-- TODO
-		local index = letters[key]
+		local index = index_aliases[key]
 		if index ~= nil then
 			return rawset(table, index, value)
 		end
