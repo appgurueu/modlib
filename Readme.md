@@ -242,6 +242,12 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+### `rolling-70`
+
+* Fixes module environments once and for all
+* Fixes vector aliases
+* Presumably boosts performance
+
 ### `rolling-69`
 
 * Fixes various things, **most importantly modules indexing the global table**
