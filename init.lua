@@ -54,7 +54,7 @@ for _, file in pairs{
 	"persistence",
 	"debug"
 } do
-	modules[file] = true
+	modules[file] = file
 end
 if minetest then
 	for _, file in pairs{
@@ -64,9 +64,12 @@ if minetest then
 		-- deprecated
 		"conf"
 	} do
-		modules[file] = true
+		modules[file] = file
 	end
 end
+-- aliases
+modules.string = "text"
+modules.number = "math"
 
 local parent_dir
 if not minetest then
@@ -104,24 +107,27 @@ modlib = setmetatable({
 		end
 	end
 }, {
-	__index = function(self, module_name)
-		if not modules[module_name] then
+	__index = function(self, module_name_or_alias)
+		local module_name = modules[module_name_or_alias]
+		if not module_name then
 			-- module not available, return nil
 			return
 		end
-		local environment = dofile(minetest
-			and get_resource(self.modname, module_name .. ".lua")
-			or (parent_dir .. module_name .. ".lua"))
-		self[module_name] = environment
+		local environment
+		if module_name ~= module_name_or_alias then
+			-- alias handling
+			environment = self[module_name]
+		else
+			environment = dofile(minetest
+				and get_resource(self.modname, module_name .. ".lua")
+				or (parent_dir .. module_name .. ".lua"))
+		end
+		self[module_name_or_alias] = environment
 		return environment
 	end
 })
 
 modlib.mod = minetest and dofile(get_resource(modlib.modname, "mod.lua"))
-
--- Aliases
-modlib.string = modlib.text
-modlib.number = modlib.math
 
 if minetest then
 	modlib.conf.build_setting_tree()
@@ -130,7 +136,6 @@ end
 
 _ml = modlib
 
-modlib.mod.include"test.lua"
 --[[
 --modlib.mod.include"test.lua"
 ]]
