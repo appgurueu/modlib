@@ -61,6 +61,24 @@ do
 	rope:write" "
 	rope:write"world"
 	assert(rope:to_text() == "hello world", rope:to_text())
+	tab = {a = 1, b = {2}}
+	tab[3] = tab
+	local contents = {
+		a = 1,
+		[1] = 1,
+		b = 1,
+		[tab.b] = 1,
+		[2] = 1,
+		[tab] = 1,
+		[3] = 1
+	}
+	table.deep_foreach_any(tab, function(content)
+		assert(contents[content], content)
+		contents[content] = 2
+	end)
+	for _, value in pairs(contents) do
+		assert(value == 2)
+	end
 end
 
 -- heap

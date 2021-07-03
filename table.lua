@@ -321,6 +321,22 @@ function foreach(table, func)
 	end
 end
 
+function deep_foreach_any(table, func)
+	local seen = {}
+	local function visit(value)
+		func(value)
+		if type(value) == "table" then
+			if seen[value] then return end
+			seen[value] = true
+			for k, v in pairs(value) do
+				visit(k)
+				visit(v)
+			end
+		end
+	end
+	visit(table)
+end
+
 function foreach_value(table, func)
 	for _, v in pairs(table) do
 		func(v)
