@@ -190,6 +190,14 @@ function angle(v, w)
 	return math.acos(dot(v, w) / length(v) / length(w))
 end
 
+-- Uses Rodrigues' rotation formula
+function rotate3(v, axis, angle)
+	local cos = math.cos(angle)
+	return multiply_scalar(v, cos)
+		+ multiply_scalar(cross3(axis, v), math.sin(angle))
+		+ multiply_scalar(axis, dot(axis, v) * (1 - cos))
+end
+
 function box_box_collision(diff, box, other_box)
 	for index, diff in pairs(diff) do
 		if box[index] + diff > other_box[index + 3] or other_box[index] > box[index + 3] + diff then
