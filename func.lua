@@ -17,7 +17,7 @@ function curry_tail(func, ...)
 	return function(...) return func(unpack(modlib.table.concat({...}, args))) end
 end
 
-function call(...)
+function args(...)
 	local args = { ... }
 	return function(func) return func(unpack(args)) end
 end
