@@ -224,14 +224,23 @@ test_from_string("#333", 0x333333FF)
 test_from_string("#694269", 0x694269FF)
 test_from_string("#11223344", 0x11223344)
 
-local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {})
-logfile:init()
-logfile.root = {}
-logfile:rewrite()
-logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge})
-logfile:close()
-logfile:init()
-assert(table.equals(logfile.root, {[{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge}}))
+local function test_logfile(reference_strings)
+	local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {}, reference_strings)
+	logfile:init()
+	logfile.root = {a_longer_string = "test"}
+	logfile:rewrite()
+	logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge})
+	logfile:close()
+	logfile:init()
+	assert(table.equals(logfile.root, {a_longer_string = "test", [{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge}}))
+	if not reference_strings then
+		for key in pairs(logfile.references) do
+			assert(type(key) ~= "string")
+		end
+	end
+end
+test_logfile(true)
+test_logfile(false)
 
 -- in-game tests & b3d testing
 local tests = {

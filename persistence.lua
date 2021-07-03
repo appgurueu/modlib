@@ -5,16 +5,29 @@ local assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfen
 local _ENV = {}
 setfenv(1, _ENV)
 
-lua_log_file = {}
+lua_log_file = {
+	-- default value
+	reference_strings = true
+}
 local files = {}
 local metatable = {__index = lua_log_file}
 
-function lua_log_file.new(file_path, root)
-	local self = setmetatable({file_path = assert(file_path), root = root}, metatable)
+function lua_log_file.new(file_path, root, reference_strings)
+	local self = setmetatable({
+		file_path = assert(file_path),
+		root = root,
+		reference_strings = reference_strings
+	}, metatable)
 	if minetest then
 		files[self] = true
 	end
 	return self
+end
+
+local function set_references(self, table)
+	-- Weak table keys to allow the collection of dead reference tables
+	-- TODO garbage collect strings in the references table
+	self.references = setmetatable(table, {__mode = "k"})
 end
 
 function lua_log_file:load()
@@ -27,7 +40,7 @@ function lua_log_file:load()
 	env.R = env.R or {{}}
 	self.reference_count = #env.R
 	self.root = env.R[1]
-	self.references = modlib.table.flip(env.R)
+	set_references(self, {})
 end
 
 function lua_log_file:open()
@@ -99,12 +112,13 @@ function lua_log_file:_dump(value, is_key)
 		self.references[value] = reference
 	end
 	if _type == "string" then
-		if is_key and value:len() <= key:len() and value:match"[%a_][%a%d_]*" then
+		local reference_strings = self.reference_strings
+		if is_key and ((not reference_strings) or value:len() <= key:len()) and value:match"[%a_][%a%d_]*" then
 			-- Short key
 			return value, true
 		end
 		formatted = ("%q"):format(value)
-		if formatted:len() <= key:len() then
+		if (not reference_strings) or formatted:len() <= key:len()  then
 			-- Short string
 			return formatted
 		end
@@ -133,10 +147,14 @@ function lua_log_file:_dump(value, is_key)
 end
 
 function lua_log_file:set(table, key, value)
-	table[key] = value
 	if not self.references[table] then
 		error"orphan table"
 	end
+	if table[key] == value then
+		-- No change
+		return
+	end
+	table[key] = value
 	table = self:_dump(table)
 	local key, short_key = self:_dump(key, true)
 	self:log(table .. (short_key and ("." .. key) or ("[" .. key .. "]")) .. "=" .. self:_dump(value))
@@ -147,7 +165,7 @@ function lua_log_file:set_root(key, value)
 end
 
 function lua_log_file:_write()
-	self.references = {}
+	set_references(self, {})
 	self.reference_count = 0
 	self:log"R={}"
 	self:_dump(self.root)
