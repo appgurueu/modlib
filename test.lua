@@ -16,6 +16,17 @@ setfenv(1, setmetatable({}, {
 	end
 }))
 
+-- func
+do
+	local tab = {a = 1, b = 2}
+	func.iterate(function(key, value)
+		assert(tab[key] == value)
+		tab[key] = nil
+	end, pairs, tab)
+	assert(next(tab) == nil)
+	assert(func.aggregate(func.add, 1, 2, 3) == 6)
+end
+
 -- string
 assert(string.escape_magic_chars"%" == "%%")
 
