@@ -106,7 +106,6 @@ function lua_log_file:_dump(value, is_key)
 	end
 	reference = self.reference_count + 1
 	local key = "R[" .. reference .."]"
-	local formatted
 	local function create_reference()
 		self.reference_count = reference
 		self.references[value] = reference
@@ -117,32 +116,29 @@ function lua_log_file:_dump(value, is_key)
 			-- Short key
 			return value, true
 		end
-		formatted = ("%q"):format(value)
+		local formatted = ("%q"):format(value)
 		if (not reference_strings) or formatted:len() <= key:len()  then
 			-- Short string
 			return formatted
 		end
 		-- Use reference
 		create_reference()
+		self:log(key .. "=" .. formatted)
 	elseif _type == "table" then
 		-- Tables always need a reference before they are traversed to prevent infinite recursion
 		create_reference()
-		local entries = {}
-		for _, value in ipairs(value) do
-			table.insert(entries, self:_dump(value))
-		end
+		-- TODO traverse tables to determine whether this is actually needed
+		self:log(key .. "={}")
 		local tablelen = #value
-		for key, value in pairs(value) do
-			if type(key) ~= "number" or key % 1 ~= 0 or key < 1 or key > tablelen then
-				local dumped, short = self:_dump(key, true)
-				table.insert(entries, (short and dumped or ("[" .. dumped .. "]")) .. "=" .. self:_dump(value))
+		for k, v in pairs(value) do
+			if type(k) ~= "number" or k % 1 ~= 0 or k < 1 or k > tablelen then
+				local dumped, short = self:_dump(k, true)
+				self:log(key .. (short and ("." .. dumped) or ("[" .. dumped .. "]")) .. "=" .. self:_dump(v))
 			end
 		end
-		formatted = "{" .. table.concat(entries, ";") .. "}"
 	else
 		error("unsupported type: " .. _type)
 	end
-	self:log(key .. "=" .. formatted)
 	return key
 end
 
