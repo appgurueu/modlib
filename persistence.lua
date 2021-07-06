@@ -112,7 +112,7 @@ function lua_log_file:_dump(value, is_key)
 	end
 	if _type == "string" then
 		local reference_strings = self.reference_strings
-		if is_key and ((not reference_strings) or value:len() <= key:len()) and value:match"[%a_][%a%d_]*" then
+		if is_key and ((not reference_strings) or value:len() <= key:len()) and value:match"^[%a_][%a%d_]*$" then
 			-- Short key
 			return value, true
 		end

@@ -185,7 +185,7 @@ function colorspec.from_string(string)
 	if number then
 		return colorspec.from_number(number * 0x100 + alpha)
 	end
-	local hex_text = string:match(hex)
+	local hex_text = string:match("^" .. hex .. "$")
 	local len, num = hex_text:len(), tonumber(hex_text, 16)
 	if len == 8 then
 		return colorspec.from_number(num)
