@@ -1,5 +1,5 @@
-local assert, next, pairs, pcall, error, type, table_insert, table_concat, string_format, setfenv, math_huge, loadfile, loadstring
-    = assert, next, pairs, pcall, error, type, table.insert, table.concat, string.format, setfenv, math.huge, loadfile, loadstring
+local assert, next, pairs, pcall, error, type, table_insert, table_concat, string_format, string_match, setfenv, math_huge, loadfile, loadstring
+    = assert, next, pairs, pcall, error, type, table.insert, table.concat, string.format, string.match, setfenv, math.huge, loadfile, loadstring
 local count_values = modlib.table.count_values
 
 -- Build a table with the succeeding character from A-Z
@@ -45,7 +45,7 @@ function serialize(object, write)
         end
     end
     local function is_short_key(key)
-        return not references[key] and type(key) == "string" and key:match"^[%a_][%a%d_]*$"
+        return not references[key] and type(key) == "string" and string_match(key, "^[%a_][%a%d_]*$")
     end
     local function dump(value)
         -- Primitive types
@@ -60,7 +60,7 @@ function serialize(object, write)
         end
         local type_ = type(value)
         if type_ == "number" then
-            return write(("%.17g"):format(value))
+            return write(string_format("%.17g", value))
         end
         -- Reference types: table and string
         local ref = references[value]

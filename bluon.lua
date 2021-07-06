@@ -1,5 +1,6 @@
 -- Localize globals
-local assert, error, ipairs, math, modlib, next, pairs, setmetatable, string, table, type, unpack = assert, error, ipairs, math, modlib, next, pairs, setmetatable, string, table, type, unpack
+local assert, error, ipairs, math_floor, math_huge, modlib, next, pairs, setmetatable, string, table_insert, type, unpack
+	= assert, error, ipairs, math.floor, math.huge, modlib, next, pairs, setmetatable, string, table.insert, type, unpack
 
 -- Set environment
 local _ENV = {}
@@ -61,8 +62,8 @@ local constants = {
 	[0] = "\2",
 	-- not possible as table entry as Lua doesn't allow +/-nan as table key
 	-- [0/0] = "\3",
-	[math.huge] = "\4",
-	[-math.huge] = "\5",
+	[math_huge] = "\4",
+	[-math_huge] = "\5",
 	[""] = "\20"
 }
 
@@ -297,18 +298,18 @@ function read(self, stream)
 		end
 		if type <= type_ranges.string then
 			local string = stream_read(uint(type - type_ranges.number))
-			table.insert(references, string)
+			table_insert(references, string)
 			return string
 		end
 		if type <= type_ranges.table then
 			type = type - type_ranges.string - 1
 			local tab = {}
-			table.insert(references, tab)
+			table_insert(references, tab)
 			if type == 0 then
 				return tab
 			end
 			local list_len = uint(type % 5)
-			local kv_len = uint(math.floor(type / 5))
+			local kv_len = uint(math_floor(type / 5))
 			for index = 1, list_len do
 				tab[index] = _read(stream_read(1))
 			end
