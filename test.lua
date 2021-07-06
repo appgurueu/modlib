@@ -207,6 +207,20 @@ do
 	assert_preserves(a)
 end
 
+-- luon
+do
+	local function assert_preserves(object)
+		local serialized = luon.serialize_string(object)
+		assert(table.equals_references(object, luon.deserialize_string(serialized)), serialized)
+	end
+	local tab = {}
+	tab[tab] = tab
+	tab.vec = {x = 1, y = 2, z = 3}
+	tab.vec2 = modlib.table.copy(tab.vec)
+	tab.blah = "blah"
+	assert_preserves(tab)
+end
+
 if not _G.minetest then return end
 
 -- colorspec

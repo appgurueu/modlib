@@ -50,6 +50,7 @@ for _, file in pairs{
 	"ranked_set",
 	"binary",
 	"b3d",
+	"luon",
 	"bluon",
 	"persistence",
 	"debug"
