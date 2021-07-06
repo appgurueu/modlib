@@ -337,6 +337,24 @@ function deep_foreach_any(table, func)
 	visit(table)
 end
 
+-- Recursively counts occurences of values in a table
+-- Also counts primitive values like boolean and number
+function count_values(value)
+    local counts = {}
+    local function count_values_(value)
+        local count = counts[value]
+        counts[value] = (count or 0) + 1
+        if not count and type(value) == "table" then
+            for k, v in pairs(value) do
+                count_values_(k)
+                count_values_(v)
+            end
+        end
+    end
+    count_values_(value)
+    return counts
+end
+
 function foreach_value(table, func)
 	for _, v in pairs(table) do
 		func(v)
