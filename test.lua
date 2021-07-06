@@ -230,9 +230,16 @@ local function test_logfile(reference_strings)
 	logfile.root = {a_longer_string = "test"}
 	logfile:rewrite()
 	logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge})
+	local circular = {}
+	circular[circular] = circular
+	logfile:set_root(circular, circular)
 	logfile:close()
 	logfile:init()
-	assert(table.equals(logfile.root, {a_longer_string = "test", [{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge}}))
+	assert(table.equals_references(logfile.root, {
+		a_longer_string = "test",
+		[{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge},
+		[circular] = circular,
+	}))
 	if not reference_strings then
 		for key in pairs(logfile.references) do
 			assert(type(key) ~= "string")
