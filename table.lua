@@ -339,9 +339,12 @@ end
 
 -- Recursively counts occurences of values in a table
 -- Also counts primitive values like boolean and number
+-- Does not count NaN, because that doesn't work as a table index
 function count_values(value)
     local counts = {}
     local function count_values_(value)
+		-- Ignore NaN
+		if value ~= value then return end
         local count = counts[value]
         counts[value] = (count or 0) + 1
         if not count and type(value) == "table" then
