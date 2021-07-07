@@ -1,6 +1,7 @@
 local assert, next, pairs, pcall, error, type, table_insert, table_concat, string_format, string_match, setfenv, math_huge, loadfile, loadstring
     = assert, next, pairs, pcall, error, type, table.insert, table.concat, string.format, string.match, setfenv, math.huge, loadfile, loadstring
-local count_values = modlib.table.count_values
+
+local count_objects = modlib.table.count_objects
 
 -- Build a table with the succeeding character from A-Z
 local succ = {}
@@ -15,7 +16,7 @@ end
 local _ENV = {}
 setfenv(1, _ENV)
 
-function write(object, write)
+function write(value, write)
     local reference = {"A"}
     local function increment_reference(place)
         if not reference[place] then
@@ -29,9 +30,9 @@ function write(object, write)
     end
     local references = {}
     local to_fill = {}
-    for value, count in pairs(count_values(object)) do
+    for value, count in pairs(count_objects(value)) do
         local type_ = type(value)
-        if count >= 2 and ((type_ == "string" and #reference + 2 >= #value) or type_ == "table") then
+        if count >= 2 and (type_ ~= "string" or #reference + 2 >= #value) then
             local ref = table_concat(reference)
             write(ref)
             write"="
@@ -116,28 +117,28 @@ function write(object, write)
             error("unsupported type: " .. type_)
         end
     end
-    local fill_root = to_fill[object]
+    local fill_root = to_fill[value]
     if fill_root then
         -- Root table is circular, must return by named reference
-        dump(object)
+        dump(value)
         write"return "
-        write(references[object])
+        write(references[value])
     else
         -- Root table is not circular, can directly start writing
         write"return "
-        dump(object)
+        dump(value)
     end
 end
 
-function write_file(object, file)
-    return write(object, function(text)
+function write_file(value, file)
+    return write(value, function(text)
         file:write(text)
     end)
 end
 
-function write_string(object)
+function write_string(value)
     local rope = {}
-    write(object, function(text)
+    write(value, function(text)
         table_insert(rope, text)
     end)
     return table_concat(rope)

@@ -337,24 +337,26 @@ function deep_foreach_any(table, func)
 	visit(table)
 end
 
--- Recursively counts occurences of values in a table
--- Also counts primitive values like boolean and number
--- Does not count NaN, because that doesn't work as a table index
-function count_values(value)
+-- Recursively counts occurences of objects (non-primitives including strings) in a table.
+function count_objects(value)
     local counts = {}
-    local function count_values_(value)
-		-- Ignore NaN
-		if value ~= value then return end
+	if value == nil then
+		-- Early return for nil
+		return counts
+	end
+    local function count_values(value)
+		local type_ = type(value)
+		if type_ == "boolean" or type_ == "number" then return end
         local count = counts[value]
         counts[value] = (count or 0) + 1
-        if not count and type(value) == "table" then
+        if not count and type_ == "table" then
             for k, v in pairs(value) do
-                count_values_(k)
-                count_values_(v)
+                count_values(k)
+                count_values(v)
             end
         end
     end
-    count_values_(value)
+    count_values(value)
     return counts
 end
 
