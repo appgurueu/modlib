@@ -81,20 +81,20 @@ local function uint_type(uint)
 end
 
 local valid_types = modlib.table.set{"nil", "boolean", "number", "string"}
-function is_valid(self, object)
-	local _type = type(object)
+function is_valid(self, value)
+	local _type = type(value)
 	if valid_types[_type] then
 		return true
 	end
 	if _type == "table" then
-		for key, value in pairs(object) do
+		for key, value in pairs(value) do
 			if not (is_valid(self, key) and is_valid(self, value)) then
 				return false
 			end
 		end
 		return true
 	end
-	return self.aux_is_valid(object)
+	return self.aux_is_valid(value)
 end
 
 local function uint_len(uint)
@@ -105,69 +105,69 @@ local function is_map_key(key, list_len)
 	return type(key) ~= "number" or (key < 1 or key > list_len or key % 1 ~= 0)
 end
 
-function len(self, object)
-	if object == nil then
+function len(self, value)
+	if value == nil then
 		return 0
 	end
-	if constants[object] then
+	if constants[value] then
 		return 1
 	end
 	local object_ids = {}
 	local current_id = 0
-	local _type = type(object)
+	local _type = type(value)
 	if _type == "number" then
-		if object ~= object then
+		if value ~= value then
 			return 1
 		end
-		if object % 1 == 0 then
-			return 1 + uint_len(object > 0 and object or -object)
+		if value % 1 == 0 then
+			return 1 + uint_len(value > 0 and value or -value)
 		end
 		-- HACK use write_float to get the length
 		local bytes = 4
-		write_float(no_op, object, function(double)
+		write_float(no_op, value, function(double)
 			if double then bytes = 8 end
 		end)
 		return 1 + bytes
 	end
-	local id = object_ids[object]
+	local id = object_ids[value]
 	if id then
 		return 1 + uint_len(id)
 	end
 	current_id = current_id + 1
-	object_ids[object] = current_id
+	object_ids[value] = current_id
 	if _type == "string" then
-		local object_len = object:len()
+		local object_len = value:len()
 		return 1 + uint_len(object_len) + object_len
 	end
 	if _type == "table" then
-		if next(object) == nil then
+		if next(value) == nil then
 			-- empty {} table
 			return 1
 		end
-		local list_len = #object
+		local list_len = #value
 		local kv_len = 0
-		for key, _ in pairs(object) do
+		for key, _ in pairs(value) do
 			if is_map_key(key, list_len) then
 				kv_len = kv_len + 1
 			end
 		end
 		local table_len = 1 + uint_len(list_len) + uint_len(kv_len)
 		for index = 1, list_len do
-			table_len = table_len + self:len(object[index])
+			table_len = table_len + self:len(value[index])
 		end
-		for key, value in pairs(object) do
+		for key, value in pairs(value) do
 			if is_map_key(key, list_len) then
 				table_len = table_len + self:len(key) + self:len(value)
 			end
 		end
 		return kv_len + table_len
 	end
-	return self.aux_len(object)
+	return self.aux_len(value)
 end
 
 --: stream any object implementing :write(text)
-function write(self, object, stream)
-	if object == nil then
+function write(self, value, stream)
+	if value == nil then
 		return
 	end
 	local object_ids = {}
@@ -191,49 +191,49 @@ function write(self, object, stream)
 		write_float(byte, number, float_on_write)
 	end
 	local aux_write = self.aux_write
-	local function _write(object)
-		local constant = constants[object]
+	local function _write(value)
+		local constant = constants[value]
 		if constant then
 			stream:write(constant)
 			return
 		end
-		local _type = type(object)
+		local _type = type(value)
 		if _type == "number" then
-			if object ~= object then
+			if value ~= value then
 				stream:write(constant_nan)
 				return
 			end
-			if object % 1 == 0 then
-				uint_with_type(object > 0 and type_ranges.number_constant or type_ranges.number_negative, object > 0 and object or -object)
+			if value % 1 == 0 then
+				uint_with_type(value > 0 and type_ranges.number_constant or type_ranges.number_negative, value > 0 and value or -value)
 				return
 			end
-			float(object)
+			float(value)
 			return
 		end
-		local id = object_ids[object]
+		local id = object_ids[value]
 		if id then
 			uint_with_type(type_ranges.table, id)
 			return
 		end
 		if _type == "string" then
-			local len = object:len()
+			local len = value:len()
 			current_id = current_id + 1
-			object_ids[object] = current_id
+			object_ids[value] = current_id
 			uint_with_type(type_ranges.number, len)
-			stream:write(object)
+			stream:write(value)
 			return
 		end
 		if _type == "table" then
 			current_id = current_id + 1
-			object_ids[object] = current_id
-			if next(object) == nil then
+			object_ids[value] = current_id
+			if next(value) == nil then
 				-- empty {} table
 				byte(type_ranges.string + 1)
 				return
 			end
-			local list_len = #object
+			local list_len = #value
 			local kv_len = 0
-			for key, _ in pairs(object) do
+			for key, _ in pairs(value) do
 				if is_map_key(key, list_len) then
 					kv_len = kv_len + 1
 				end
@@ -244,9 +244,9 @@ function write(self, object, stream)
 			uint(list_len_sig, list_len)
 			uint(kv_len_sig, kv_len)
 			for index = 1, list_len do
-				_write(object[index])
+				_write(value[index])
 			end
-			for key, value in pairs(object) do
+			for key, value in pairs(value) do
 				if is_map_key(key, list_len) then
 					_write(key)
 					_write(value)
@@ -254,9 +254,9 @@ function write(self, object, stream)
 			end
 			return
 		end
-		aux_write(object, object_ids)
+		aux_write(value, object_ids)
 	end
-	_write(object)
+	_write(value)
 end
 
 local constants_flipped = modlib.table.flip(constants)
