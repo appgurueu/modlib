@@ -30,17 +30,17 @@ function write(value, write)
     end
     local references = {}
     local to_fill = {}
-    for value, count in pairs(count_objects(value)) do
-        local type_ = type(value)
-        if count >= 2 and (type_ ~= "string" or #reference + 2 >= #value) then
+    for object, count in pairs(count_objects(value)) do
+        local type_ = type(object)
+        if count >= 2 and (type_ ~= "string" or #reference + 2 >= #object) then
             local ref = table_concat(reference)
             write(ref)
             write"="
-            write(type_ == "table" and "{}" or quote(value))
+            write(type_ == "table" and "{}" or quote(object))
             write";"
-            references[value] = ref
+            references[object] = ref
             if type_ == "table" then
-                to_fill[value] = true
+                to_fill[object] = true
             end
             increment_reference(1)
         end
