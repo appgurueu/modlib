@@ -195,6 +195,12 @@ local function serializer_test(assert_preserves)
 	mixed.vec2 = modlib.table.copy(mixed.vec)
 	mixed.blah = "blah"
 	assert_preserves(mixed)
+	local a, b, c = {}, {}, {}
+	a[a] = a; a[b] = b; a[c] = c;
+	b[a] = a; b[b] = b; b[c] = c;
+	c[a] = a; c[b] = b; c[c] = c;
+	a.a = {"a", a = a}
+	assert_preserves(a)
 end
 
 -- bluon

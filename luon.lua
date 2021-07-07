@@ -40,7 +40,7 @@ function write(value, write)
             write";"
             references[object] = ref
             if type_ == "table" then
-                to_fill[object] = true
+                to_fill[object] = ref
             end
             increment_reference(1)
         end
@@ -67,25 +67,7 @@ function write(value, write)
         local ref = references[value]
         if ref then
             -- Referenced
-            if not to_fill[value] then
-                return write(ref)
-            end
-            -- Fill table
-            to_fill[value] = false
-            for k, v in pairs(value) do
-                write(ref)
-                if is_short_key(k) then
-                    write"."
-                    write(k)
-                else
-                    write"["
-                    dump(k)
-                    write"]"
-                end
-                write"="
-                dump(v)
-                write";"
-            end
+            return write(ref)
         elseif type_ == "string" then
             return write(quote(value))
         elseif type_ == "table" then
@@ -117,17 +99,24 @@ function write(value, write)
             error("unsupported type: " .. type_)
         end
     end
-    local fill_root = to_fill[value]
-    if fill_root then
-        -- Root table is circular, must return by named reference
-        dump(value)
-        write"return "
-        write(references[value])
-    else
-        -- Root table is not circular, can directly start writing
-        write"return "
-        dump(value)
+    for table, ref in pairs(to_fill) do
+        for k, v in pairs(table) do
+            write(ref)
+            if is_short_key(k) then
+                write"."
+                write(k)
+            else
+                write"["
+                dump(k)
+                write"]"
+            end
+            write"="
+            dump(v)
+            write";"
+        end
     end
+    write"return "
+    dump(value)
 end
 
 function write_file(value, file)
