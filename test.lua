@@ -166,10 +166,41 @@ for _ = 1, 1000 do
 	assert(distance == min_distance)
 end
 
+local function serializer_test(assert_preserves)
+	-- TODO nan
+	for _, constant in pairs{true, false, huge, -huge} do
+		assert_preserves(constant)
+	end
+	-- Strings
+	for i = 1, 1000 do
+		assert_preserves(_G.table.concat(table.repetition(_G.string.char(i % 256), i)))
+	end
+	-- Numbers
+	for _ = 1, 1000 do
+		local int = random(-2^50, 2^50)
+		assert(int % 1 == 0)
+		assert_preserves(int)
+		assert_preserves((random() - 0.5) * 2^random(-20, 20))
+	end
+	-- Simple tables
+	assert_preserves{hello = "world", welt = "hallo"}
+	assert_preserves{"hello", "hello", "hello"}
+	local circular = {}
+	circular[circular] = circular
+	circular[1] = circular
+	assert_preserves(circular)
+	local mixed = {1, 2, 3}
+	mixed[mixed] = mixed
+	mixed.vec = {x = 1, y = 2, z = 3}
+	mixed.vec2 = modlib.table.copy(mixed.vec)
+	mixed.blah = "blah"
+	assert_preserves(mixed)
+end
+
 -- bluon
 do
 	local bluon = bluon
-	local function assert_preserves(object)
+	serializer_test(function(object)
 		local rope = table.rope{}
 		local written, read, input
 		local _, err = pcall(function()
@@ -186,39 +217,17 @@ do
 			written = written and text.hexdump(written),
 			err = err
 		})
-	end
-	for _, constant in pairs{true, false, huge, -huge} do
-		assert_preserves(constant)
-	end
-	for i = 1, 1000 do
-		assert_preserves(_G.table.concat(table.repetition(_G.string.char(i % 256), i)))
-	end
-	for _ = 1, 1000 do
-		local int = random(-2^50, 2^50)
-		assert(int % 1 == 0)
-		assert_preserves(int)
-		assert_preserves((random() - 0.5) * 2^random(-20, 20))
-	end
-	assert_preserves{hello = "world", welt = "hallo"}
-	assert_preserves{"hello", "hello", "hello"}
-	local a = {}
-	a[a] = a
-	a[1] = a
-	assert_preserves(a)
+	end)
 end
 
 -- luon
 do
-	local function assert_preserves(object)
-		local serialized = luon.serialize_string(object)
-		assert(table.equals_references(object, luon.deserialize_string(serialized)), serialized)
-	end
-	local tab = {}
-	tab[tab] = tab
-	tab.vec = {x = 1, y = 2, z = 3}
-	tab.vec2 = modlib.table.copy(tab.vec)
-	tab.blah = "blah"
-	assert_preserves(tab)
+	serializer_test(function(object)
+		local serialized = luon.write_string(object)
+		assert(table.equals_references(object, luon.read_string(serialized)), serialized)
+	end)
+	local nan = luon.read_string(luon.write_string(0/0))
+	assert(nan ~= nan)
 end
 
 if not _G.minetest then return end

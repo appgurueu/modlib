@@ -15,7 +15,7 @@ end
 local _ENV = {}
 setfenv(1, _ENV)
 
-function serialize(object, write)
+function write(object, write)
     local reference = {"A"}
     local function increment_reference(place)
         if not reference[place] then
@@ -129,21 +129,21 @@ function serialize(object, write)
     end
 end
 
-function serialize_file(object, file)
-    return serialize(object, function(text)
+function write_file(object, file)
+    return write(object, function(text)
         file:write(text)
     end)
 end
 
-function serialize_string(object)
+function write_string(object)
     local rope = {}
-    serialize(object, function(text)
+    write(object, function(text)
         table_insert(rope, text)
     end)
     return table_concat(rope)
 end
 
-function deserialize(...)
+function read(...)
 	local read = assert(...)
 	-- math.huge is serialized to inf, 0/0 is serialized to -nan
 	setfenv(read, {inf = math_huge, nan = 0/0})
@@ -154,12 +154,12 @@ function deserialize(...)
     return nil, value_or_err
 end
 
-function deserialize_file(path)
-    return deserialize(loadfile(path))
+function read_file(path)
+    return read(loadfile(path))
 end
 
-function deserialize_string(string)
-    return deserialize(loadstring(string))
+function read_string(string)
+    return read(loadstring(string))
 end
 
 return _ENV
