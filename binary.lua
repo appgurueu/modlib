@@ -1,5 +1,6 @@
 -- Localize globals
-local assert, math = assert, math
+local assert, math_huge, math_frexp, math_floor
+	= assert, math.huge, math.frexp, math.floor
 
 -- Set environment
 local _ENV = {}
@@ -30,7 +31,7 @@ function read_float(read_byte, double)
 	mantissa = (mantissa + byte_2) / 0x80
 	if exponent == 0xFF then
 		if mantissa == 0 then
-			return sign * math.huge
+			return sign * math_huge
 		end
 		-- Differentiating quiet and signalling nan is not possible in Lua, hence we don't have to do it
 		-- HACK ((0/0)^1) yields nan, 0/0 yields -nan
@@ -67,7 +68,7 @@ end
 function write_uint(write_byte, uint, bytes)
 	for _ = 1, bytes do
 		write_byte(uint % 0x100)
-		uint = math.floor(uint / 0x100)
+		uint = math_floor(uint / 0x100)
 	end
 	assert(uint == 0)
 end
@@ -80,16 +81,16 @@ function write_float(write_byte, number, on_write, double)
 		number = -number
 		sign = 0x80
 	end
-	local mantissa, exponent = math.frexp(number)
+	local mantissa, exponent = math_frexp(number)
 	exponent = exponent + 127
 	if exponent > 1 then
 		-- TODO ensure this deals properly with subnormal numbers
 		mantissa = mantissa * 2 - 1
 		exponent = exponent - 1
 	end
-	local sign_byte = sign + math.floor(exponent / 2)
+	local sign_byte = sign + math_floor(exponent / 2)
 	mantissa = mantissa * 0x80
-	local exponent_byte = (exponent % 2) * 0x80 + math.floor(mantissa)
+	local exponent_byte = (exponent % 2) * 0x80 + math_floor(mantissa)
 	mantissa = mantissa % 1
 	local mantissa_bytes = {}
 	-- TODO ensure this check is proper
@@ -102,7 +103,7 @@ function write_float(write_byte, number, on_write, double)
 	local len = double and 6 or 2
 	for index = len, 1, -1 do
 		mantissa = mantissa * 0x100
-		mantissa_bytes[index] = math.floor(mantissa)
+		mantissa_bytes[index] = math_floor(mantissa)
 		mantissa = mantissa % 1
 	end
 	assert(mantissa == 0)
