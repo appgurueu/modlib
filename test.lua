@@ -229,10 +229,10 @@ end
 -- luon
 do
 	serializer_test(function(object)
-		local serialized = luon.write_string(object)
-		assert(table.equals_references(object, luon.read_string(serialized)), serialized)
+		local serialized = luon:write_string(object)
+		assert(table.equals_references(object, luon:read_string(serialized)), serialized)
 	end)
-	local nan = luon.read_string(luon.write_string(0/0))
+	local nan = luon:read_string(luon:write_string(0/0))
 	assert(nan ~= nan)
 end
 

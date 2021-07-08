@@ -1,5 +1,5 @@
-local assert, next, pairs, pcall, error, type, table_insert, table_concat, string_format, string_match, setfenv, math_huge, loadfile, loadstring
-    = assert, next, pairs, pcall, error, type, table.insert, table.concat, string.format, string.match, setfenv, math.huge, loadfile, loadstring
+local assert, next, pairs, pcall, error, type, table_insert, table_concat, string_format, string_match, setmetatable, select, setfenv, math_huge, loadfile, loadstring
+    = assert, next, pairs, pcall, error, type, table.insert, table.concat, string.format, string.match, setmetatable, select, setfenv, math.huge, loadfile, loadstring
 
 local count_objects = modlib.table.count_objects
 
@@ -15,8 +15,21 @@ end
 
 local _ENV = {}
 setfenv(1, _ENV)
+local metatable = {__index = _ENV}
+_ENV.metatable = metatable
 
-function write(value, write)
+function new(self)
+    return setmetatable(self, metatable)
+end
+
+function aux_write(_self, _object)
+    -- returns reader, arguments
+    return
+end
+
+aux_read = {}
+
+function write(self, value, write)
     local reference = {"A"}
     local function increment_reference(place)
         if not reference[place] then
@@ -30,6 +43,7 @@ function write(value, write)
     end
     local references = {}
     local to_fill = {}
+    -- TODO sort objects by count, give frequently referenced objects shorter references
     for object, count in pairs(count_objects(value)) do
         local type_ = type(object)
         if count >= 2 and (type_ ~= "string" or #reference + 2 < #object) then
@@ -96,7 +110,25 @@ function write(value, write)
             end
             write"}"
         else
-            error("unsupported type: " .. type_)
+            -- TODO move aux_write to start, to allow dealing with metatables etc.?
+            (function(func, ...)
+                -- functions are the only way to deal with varargs
+                if not func then
+                    return error("unsupported type: " .. type_)
+                end
+                write(func)
+                write"("
+                local n = select("#", ...)
+                local args = {...}
+                for i = 1, n - 1 do
+                    dump(args[i])
+                    write","
+                end
+                if n > 0 then
+                    write(args[n])
+                end
+                write")"
+            end)(self:aux_write(value))
         end
     end
     for table, ref in pairs(to_fill) do
@@ -119,24 +151,24 @@ function write(value, write)
     dump(value)
 end
 
-function write_file(value, file)
-    return write(value, function(text)
+function write_file(self, value, file)
+    return self:write(value, function(text)
         file:write(text)
     end)
 end
 
-function write_string(value)
+function write_string(self, value)
     local rope = {}
-    write(value, function(text)
+    self:write(value, function(text)
         table_insert(rope, text)
     end)
     return table_concat(rope)
 end
 
-function read(...)
+function read(self, ...)
 	local read = assert(...)
 	-- math.huge is serialized to inf, 0/0 is serialized to -nan
-	setfenv(read, {inf = math_huge, nan = 0/0})
+	setfenv(read, setmetatable({inf = math_huge, nan = 0/0}, {__index = self.aux_read}))
 	local success, value_or_err = pcall(read)
     if success then
         return value_or_err
@@ -144,12 +176,12 @@ function read(...)
     return nil, value_or_err
 end
 
-function read_file(path)
-    return read(loadfile(path))
+function read_file(self, path)
+    return self:read(loadfile(path))
 end
 
-function read_string(string)
-    return read(loadstring(string))
+function read_string(self, string)
+    return self:read(loadstring(string))
 end
 
 return _ENV
