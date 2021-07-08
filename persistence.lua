@@ -44,7 +44,15 @@ function lua_log_file:load()
 	setfenv(read, env)
 	read()
 	env.R = env.R or {{}}
-	self.reference_count = #env.R
+	local reference_count = #env.R
+	for ref in pairs(env.R) do
+		if ref > reference_count then
+			-- Ensure reference count always has the value of the largest reference
+			-- in case of "holes" (nil values) in the reference list
+			reference_count = ref
+		end
+	end
+	self.reference_count = reference_count
 	self.root = env.R[1]
 	set_references(self, {})
 end
