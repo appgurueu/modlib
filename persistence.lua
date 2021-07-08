@@ -1,5 +1,6 @@
 -- Localize globals
-local assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, table, type = assert, error, io, ipairs, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, table, type
+local assert, error, io, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type
+	= assert, error, io, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type
 
 -- Set environment
 local _ENV = {}
@@ -9,6 +10,11 @@ lua_log_file = {
 	-- default value
 	reference_strings = true
 }
+
+-- Note: keys may not be marked as weak references: garbage collected log files wouldn't close the file:
+-- The `__gc` metamethod doesn't work for tables in Lua 5.1; a hack using `newproxy` would be needed
+-- See https://stackoverflow.com/questions/27426704/lua-5-1-workaround-for-gc-metamethod-for-tables)
+-- Therefore, :close() must be called on log files to remove them from the `files` table
 local files = {}
 local metatable = {__index = lua_log_file}
 
