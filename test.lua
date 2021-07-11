@@ -99,6 +99,19 @@ do
 	end
 end
 
+-- hashlist
+do
+	local n = 100
+	local list = hashlist.new{}
+	for i = 1, n do
+		list:push_tail(i)
+	end
+	for i = 1, n do
+		local head = list:get_head()
+		assert(head == list:pop_head(i) and head == i)
+	end
+end
+
 -- ranked set
 do
 	local n = 100
