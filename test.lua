@@ -238,6 +238,8 @@ end
 
 if not _G.minetest then return end
 
+assert(minetest.luon:read_string(minetest.luon:write_string(ItemStack"")))
+
 -- colorspec
 local colorspec = minetest.colorspec
 local function test_from_string(string, number)
