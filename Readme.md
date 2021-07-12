@@ -251,6 +251,30 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+### `rolling-71`
+
+* Fixes
+  * Colorspec
+    * Stricter patterns in `colorspec:from_string`
+    * `colorspec:to_string` works now
+  * Lua log file
+    * Patched memory leaks
+      * Added option to not reference strings
+    * Handling of circular tables
+* Additions
+  * `luon`: Configurable serialization to and from Lua with circular and string reference support
+    * `minetest.luon` even supports `ItemStack` and `AreaStore`
+  * `vector.rotate3`
+  * `table.deep_foreach_any`
+  * `func`:
+    * `func.iterate`
+    * `func.aggregate`
+    * Functional wrappers for operators
+* Improvements
+  * Code quality
+  * Performance
+* Proper license file
+
 ### `rolling-70`
 
 * Fixes module environments once and for all
