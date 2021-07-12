@@ -46,6 +46,7 @@ for _, file in pairs{
 	"quaternion",
 	"trie",
 	"kdtree",
+	"hashlist",
 	"heap",
 	"ranked_set",
 	"binary",
