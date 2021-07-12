@@ -267,6 +267,7 @@ test_from_string("aliceblue#42", 0xf0f8ff42)
 test_from_string("#333", 0x333333FF)
 test_from_string("#694269", 0x694269FF)
 test_from_string("#11223344", 0x11223344)
+assert(colorspec.from_string"#694269":to_string() == "694269")
 
 local function test_logfile(reference_strings)
 	local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {}, reference_strings)

@@ -255,9 +255,9 @@ end
 --> hex string, omits alpha if possible (if opaque)
 function colorspec:to_string()
 	if self.a == 255 then
-		return ("%02X02X02X"):format(self.r, self.g, self.b)
+		return ("%02X%02X%02X"):format(self.r, self.g, self.b)
 	end
-	return ("%02X02X02X02X"):format(self.r, self.g, self.b, self.a)
+	return ("%02X%02X%02X%02X"):format(self.r, self.g, self.b, self.a)
 end
 
 function colorspec:to_number()
