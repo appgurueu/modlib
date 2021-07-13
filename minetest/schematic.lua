@@ -1,5 +1,6 @@
 -- Localize globals
-local VoxelArea, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, table, vector = VoxelArea, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, table, vector
+local VoxelArea, ItemStack, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, string, table, type, vector
+    = VoxelArea, ItemStack, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, string, table, type, vector
 
 -- Set environment
 local _ENV = ...
@@ -109,20 +110,64 @@ function schematic:place(pos_min)
     return voxelmanip
 end
 
+local function table_to_byte_string(tab)
+    if not tab then return end
+    return table.concat(modlib.table.map(tab, string.char))
+end
+
+local function write_bluon(self, stream)
+    local metas, light_values, param2s = self.metas, self.light_values, self.param2s
+    self.metas = modlib.table.copy(metas)
+    for _, meta in pairs(self.metas) do
+        for _, list in pairs(meta.inventory) do
+            for index, stack in pairs(list) do
+                list[index] = stack:to_string()
+            end
+        end
+    end
+    self.light_values, self.param2s = table_to_byte_string(light_values), table_to_byte_string(param2s)
+    modlib.bluon:write(self, stream)
+    self.metas, self.light_values, self.param2s = metas, light_values, param2s
+end
+
 function schematic:write_bluon(path)
     local file = io.open(path, "w")
     -- Header, short for "ModLib Bluon Schematic"
     file:write"MLBS"
-    modlib.bluon:write(self, file)
+    write_bluon(self, file)
     file:close()
+end
+
+local function byte_string_to_table(self, field)
+    local byte_string = self[field]
+    if not byte_string then return end
+    local tab = {}
+    for i = 1, #byte_string do
+        tab[i] = byte_string:byte(i)
+    end
+    self[field] = tab
+end
+
+local function read_bluon(file)
+    local self = modlib.bluon:read(file)
+    assert(not file:read(1), "expected EOF")
+    for _, meta in pairs(self.metas) do
+        for _, list in pairs(meta.inventory) do
+            for index, itemstring in pairs(list) do
+                assert(type(itemstring) == "string")
+                list[index] = ItemStack(itemstring)
+            end
+        end
+    end
+    byte_string_to_table(self, "light_values")
+    byte_string_to_table(self, "param2s")
+    return self
 end
 
 function schematic.read_bluon(path)
     local file = io.open(path, "r")
     assert(file:read(4) == "MLBS", "not a modlib bluon schematic")
-    local self = modlib.bluon:read(file)
-    assert(not file:read(), "expected EOF")
-    return schematic.setmetatable(self)
+    return schematic.setmetatable(read_bluon(file))
 end
 
 function schematic:write_zlib_bluon(path, compression)
@@ -130,7 +175,7 @@ function schematic:write_zlib_bluon(path, compression)
     -- Header, short for "ModLib Zlib-compressed-bluon Schematic"
     file:write"MLZS"
     local rope = modlib.table.rope{}
-    modlib.bluon:write(self, rope)
+    write_bluon(self, rope)
     local text = rope:to_text()
     file:write(minetest.compress(text, "deflate", compression or 9))
     file:close()
@@ -139,6 +184,5 @@ end
 function schematic.read_zlib_bluon(path)
     local file = io.open(path, "r")
     assert(file:read(4) == "MLZS", "not a modlib zlib compressed bluon schematic")
-    local self = modlib.bluon:read(modlib.text.inputstream(minetest.decompress(file:read"*a", "deflate")))
-    return schematic.setmetatable(self)
+    return schematic.setmetatable(read_bluon(modlib.text.inputstream(minetest.decompress(file:read"*a", "deflate"))))
 end
