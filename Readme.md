@@ -111,7 +111,7 @@ Checking whether the stream has been fully consumed by doing `assert(not stream:
 ```lua
 local object = ...
 -- Write to file
-local file = io.open(..., "w")
+local file = io.open(..., "wb")
 modlib.bluon:write(object, file)
 file:close()
 -- Write to text

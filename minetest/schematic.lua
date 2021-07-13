@@ -131,7 +131,7 @@ local function write_bluon(self, stream)
 end
 
 function schematic:write_bluon(path)
-    local file = io.open(path, "w")
+    local file = io.open(path, "wb")
     -- Header, short for "ModLib Bluon Schematic"
     file:write"MLBS"
     write_bluon(self, file)
@@ -165,13 +165,13 @@ local function read_bluon(file)
 end
 
 function schematic.read_bluon(path)
-    local file = io.open(path, "r")
+    local file = io.open(path, "rb")
     assert(file:read(4) == "MLBS", "not a modlib bluon schematic")
     return schematic.setmetatable(read_bluon(file))
 end
 
 function schematic:write_zlib_bluon(path, compression)
-    local file = io.open(path, "w")
+    local file = io.open(path, "wb")
     -- Header, short for "ModLib Zlib-compressed-bluon Schematic"
     file:write"MLZS"
     local rope = modlib.table.rope{}
@@ -182,7 +182,7 @@ function schematic:write_zlib_bluon(path, compression)
 end
 
 function schematic.read_zlib_bluon(path)
-    local file = io.open(path, "r")
+    local file = io.open(path, "rb")
     assert(file:read(4) == "MLZS", "not a modlib zlib compressed bluon schematic")
     return schematic.setmetatable(read_bluon(modlib.text.inputstream(minetest.decompress(file:read"*a", "deflate"))))
 end
