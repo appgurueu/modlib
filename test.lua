@@ -19,10 +19,22 @@ setfenv(1, setmetatable({}, {
 -- func
 do
 	local tab = {a = 1, b = 2}
-	func.iterate(function(key, value)
+	local function check_entry(key, value)
 		assert(tab[key] == value)
 		tab[key] = nil
-	end, pairs, tab)
+	end
+	func.iterate(check_entry, pairs, tab)
+	assert(next(tab) == nil)
+
+	tab = {a = 1, b = 2}
+	local function pairs_callback(callback, tab)
+		for k, v in pairs(tab) do
+			callback(k, v)
+		end
+	end
+	for k, v in func.for_generator(pairs_callback, tab) do
+		check_entry(k, v)
+	end
 	assert(next(tab) == nil)
 	assert(func.aggregate(func.add, 1, 2, 3) == 6)
 end

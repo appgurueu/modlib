@@ -1,5 +1,6 @@
 -- Localize globals
-local error, modlib, unpack = error, modlib, unpack
+local error, coroutine, modlib, unpack
+	= error, coroutine, modlib, unpack
 
 -- Set environment
 local _ENV = {}
@@ -45,6 +46,27 @@ function iterate(callback, iterator, ...)
 		return loop(iterable(state, ...))
 	end
 	return _iterate(iterator(...))
+end
+
+function for_generator(caller, ...)
+	local co = coroutine.create(function(...)
+		return caller(function(...)
+			return coroutine.yield(...)
+		end, ...)
+	end)
+	local args = {...}
+	return function()
+		if coroutine.status(co) == "dead" then
+			return
+		end
+		local function _iterate(status, ...)
+			if not status then
+				error((...))
+			end
+			return ...
+		end
+		return _iterate(coroutine.resume(co, unpack(args)))
+	end
 end
 
 -- Does not use select magic, stops at the first nil value
