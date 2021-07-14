@@ -281,6 +281,7 @@ test_from_string("#694269", 0x694269FF)
 test_from_string("#11223344", 0x11223344)
 assert(colorspec.from_string"#694269":to_string() == "694269")
 
+-- Persistence
 local function test_logfile(reference_strings)
 	local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {}, reference_strings)
 	logfile:init()
@@ -305,6 +306,51 @@ local function test_logfile(reference_strings)
 end
 test_logfile(true)
 test_logfile(false)
+-- SQLite3
+do
+	local sqlite3 = persistence.sqlite3(require"lsqlite3")
+	local p = sqlite3.new("database.test.sqlite3", {})
+    p:init()
+    p:rewrite()
+	p:set_root("key", "value")
+    assert(p.root.key == "value")
+	p:set_root("other key", "other value")
+	p:set_root("key", "other value")
+	p:set_root("key", nil)
+	local x = {x = 1, y = 2}
+	p:set_root("x1", x)
+	p:set_root("x2", x)
+	p:set_root("x2", nil)
+	p:set_root("x1", nil)
+	p:set_root("key", {a = 1, b = 2, c = {a = 1}})
+	p:set_root("key", nil)
+	p:set_root("key", {a = 1, b = 2, c = 3})
+	local cyclic = {}
+	cyclic.cycle = cyclic
+	p:set_root("cyclic", cyclic)
+	p:set_root("cyclic", nil)
+	p:collectgarbage()
+	p:defragment_ids()
+	local rows = {}
+	for row in p.database:rows"SELECT * FROM table_entries ORDER BY table_id, key_type, key" do
+		_G.table.insert(rows, row)
+	end
+	assert(modlib.table.equals(rows, {
+		{1, 3, "key", 4, 2},
+		{1, 3, "other key", 3, "other value"},
+		{2, 3, "a", 2, 1},
+		{2, 3, "b", 2, 2},
+		{2, 3, "c", 2, 3}
+	}))
+	p:close()
+	p = sqlite3.new("database.test.sqlite3", {})
+	p:init()
+	assert(modlib.table.equals(p.root, {
+		key = {a = 1, b = 2, c = 3},
+		["other key"] = "other value"
+	}))
+	p:close()
+end
 
 -- in-game tests & b3d testing
 local tests = {
