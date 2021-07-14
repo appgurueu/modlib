@@ -339,25 +339,25 @@ end
 
 -- Recursively counts occurences of objects (non-primitives including strings) in a table.
 function count_objects(value)
-    local counts = {}
+	local counts = {}
 	if value == nil then
 		-- Early return for nil
 		return counts
 	end
-    local function count_values(value)
+	local function count_values(value)
 		local type_ = type(value)
 		if type_ == "boolean" or type_ == "number" then return end
-        local count = counts[value]
-        counts[value] = (count or 0) + 1
-        if not count and type_ == "table" then
-            for k, v in pairs(value) do
-                count_values(k)
-                count_values(v)
-            end
-        end
-    end
-    count_values(value)
-    return counts
+		local count = counts[value]
+		counts[value] = (count or 0) + 1
+		if not count and type_ == "table" then
+			for k, v in pairs(value) do
+				count_values(k)
+				count_values(v)
+			end
+		end
+	end
+	count_values(value)
+	return counts
 end
 
 function foreach_value(table, func)

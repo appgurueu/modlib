@@ -44,21 +44,21 @@ Binary Lua object notation. **Experimental.** Handling of subnormal numbers (ver
 
 ```lua
 def = {
-    aux_is_valid = function(object)
-        return is_valid
-    end,
-    aux_len = function(object)
-        return length_in_bytes
-    end,
-    -- read type byte, stream providing :read(count), map of references -> id
-    aux_read = function(type, stream, references)
-        ... = stream:read(...)
-        return object
-    end,
-    -- object to be written, stream providing :write(text), list of references
-    aux_write = function(object, stream, references)
-        stream:write(...)
-    end
+	aux_is_valid = function(object)
+		return is_valid
+	end,
+	aux_len = function(object)
+		return length_in_bytes
+	end,
+	-- read type byte, stream providing :read(count), map of references -> id
+	aux_read = function(type, stream, references)
+		... = stream:read(...)
+		return object
+	end,
+	-- object to be written, stream providing :write(text), list of references
+	aux_write = function(object, stream, references)
+		stream:write(...)
+	end
 }
 ```
 
@@ -128,22 +128,22 @@ assert(modlib.bluon:read(object, rope) == true)
 ```lua
 -- Serializes all userdata to a constant string:
 local custom_bluon = bluon.new{
-    aux_is_valid = function(object)
-        return type(object) == "userdata"
-    end,
-    aux_len = function(object)
-        return 1 + ("userdata"):len())
-    end,
-    aux_read = function(type, stream, references)
-        assert(type == 100, "unsupported type")
-        assert(stream:read(("userdata"):len()) == "userdata")
-        return userdata()
-    end,
-    -- object to be written, stream providing :write(text), list of references
-    aux_write = function(object, stream, references)
-        assert(type(object) == "userdata")
-        stream:write"\100userdata"
-    end
+	aux_is_valid = function(object)
+		return type(object) == "userdata"
+	end,
+	aux_len = function(object)
+		return 1 + ("userdata"):len())
+	end,
+	aux_read = function(type, stream, references)
+		assert(type == 100, "unsupported type")
+		assert(stream:read(("userdata"):len()) == "userdata")
+		return userdata()
+	end,
+	-- object to be written, stream providing :write(text), list of references
+	aux_write = function(object, stream, references)
+		assert(type(object) == "userdata")
+		stream:write"\100userdata"
+	end
 }
 -- Write to text
 local rope = modlib.table.rope{}
@@ -255,21 +255,21 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 * Fixes
   * Colorspec
-    * Stricter patterns in `colorspec:from_string`
-    * `colorspec:to_string` works now
+	* Stricter patterns in `colorspec:from_string`
+	* `colorspec:to_string` works now
   * Lua log file
-    * Patched memory leaks
-      * Added option to not reference strings
-    * Handling of circular tables
+	* Patched memory leaks
+	  * Added option to not reference strings
+	* Handling of circular tables
 * Additions
   * `luon`: Configurable serialization to and from Lua with circular and string reference support
-    * `minetest.luon` even supports `ItemStack` and `AreaStore`
+	* `minetest.luon` even supports `ItemStack` and `AreaStore`
   * `vector.rotate3`
   * `table.deep_foreach_any`
   * `func`:
-    * `func.iterate`
-    * `func.aggregate`
-    * Functional wrappers for operators
+	* `func.iterate`
+	* `func.aggregate`
+	* Functional wrappers for operators
 * Improvements
   * Code quality
   * Performance
