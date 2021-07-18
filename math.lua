@@ -9,6 +9,9 @@ setfenv(1, _ENV)
 math.randomseed(minetest and minetest.get_us_time() or os.time() + os.clock())
 for _ = 1, 100 do math.random() end
 
+negative_nan = 0/0
+positive_nan = negative_nan ^ 1
+
 function round(number, steps)
 	steps = steps or 1
 	return math.floor(number * steps + 0.5) / steps
