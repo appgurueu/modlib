@@ -41,9 +41,9 @@ end
 
 function new(file_path, root)
 	return setmetatable({
-        database = sqlite3.open(file_path),
-        root = root
-    }, metatable)
+		database = sqlite3.open(file_path),
+		root = root
+	}, metatable)
 end
 
 function _ENV.setmetatable(self)
@@ -54,16 +54,16 @@ end
 local set
 
 local function add_table(self, table)
-    if type(table) ~= "table" then return end
-    if self.counts[table] then
-        self.counts[table] = self.counts[table] + 1
-        return
-    end
-    self.table_ids[table] = increment_highest_table_id(self)
-    self.counts[table] = 1
-    for k, v in pairs(table) do
-        set(self, table, k, v)
-    end
+	if type(table) ~= "table" then return end
+	if self.counts[table] then
+		self.counts[table] = self.counts[table] + 1
+		return
+	end
+	self.table_ids[table] = increment_highest_table_id(self)
+	self.counts[table] = 1
+	for k, v in pairs(table) do
+		set(self, table, k, v)
+	end
 end
 
 local decrement_reference_count
@@ -136,13 +136,13 @@ function set(self, table, key, value)
 end
 
 local function exec(self, sql)
-    if self.database:exec(sql) ~= sqlite3.OK then
-        error(self.database:errmsg())
-    end
+	if self.database:exec(sql) ~= sqlite3.OK then
+		error(self.database:errmsg())
+	end
 end
 
 function init(self)
-    local database = self.database
+	local database = self.database
 	local function prepare(sql)
 		local stmt = database:prepare(sql)
 		if not stmt then error(database:errmsg()) end
@@ -167,8 +167,8 @@ CREATE TABLE IF NOT EXISTS table_entries (
 	value BLOB NOT NULL,
 	PRIMARY KEY (table_id, key_type, key)
 )]])
-    -- Default value
-    self.highest_table_id = 0
+	-- Default value
+	self.highest_table_id = 0
 	for id in self.database:urows"SELECT MAX(table_id) FROM table_entries" do
 		-- Gets a single value
 		self.highest_table_id = id
@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS table_entries (
 	increment_highest_table_id(self)
 	local tables = {}
 	local counts = {}
-    self.counts = counts
+	self.counts = counts
 	local function get_value(type_, content)
 		if type_ == types.boolean then
 			if content == 0 then return false end
@@ -216,25 +216,25 @@ CREATE TABLE IF NOT EXISTS table_entries (
 		table[get_value(key_type, key)] = get_value(value_type, value)
 		tables[table_id] = table
 	end
-    if tables[1] then
-        self.root = tables[1]
-        counts[self.root] = counts[self.root] + 1
-        self.table_ids = modlib.table.flip(tables)
-        self:collectgarbage()
-    else
-        self.highest_table_id = 0
-        self.table_ids = {}
-        add_table(self, self.root)
-    end
+	if tables[1] then
+		self.root = tables[1]
+		counts[self.root] = counts[self.root] + 1
+		self.table_ids = modlib.table.flip(tables)
+		self:collectgarbage()
+	else
+		self.highest_table_id = 0
+		self.table_ids = {}
+		add_table(self, self.root)
+	end
 	databases[self] = true
 end
 
 function rewrite(self)
-    exec(self, "DELETE FROM table_entries")
-    self.highest_table_id = 0
-    self.table_ids = {}
-    self.counts = {}
-    add_table(self, self.root)
+	exec(self, "DELETE FROM table_entries")
+	self.highest_table_id = 0
+	self.table_ids = {}
+	self.counts = {}
+	add_table(self, self.root)
 end
 
 function _ENV.set(self, table, key, value)
@@ -248,7 +248,7 @@ function _ENV.set(self, table, key, value)
 end
 
 function set_root(self, key, value)
-    return _ENV.set(self, self.root, key, value)
+	return _ENV.set(self, self.root, key, value)
 end
 
 function collectgarbage(self)
@@ -292,10 +292,10 @@ local function finalize_statements(table)
 	for _, stmt in pairs(table) do
 		if type(stmt) == "table" then
 			finalize_statements(stmt)
-        else
-            local errcode = stmt:finalize()
-            assert(errcode == sqlite3.OK, errcode)
-        end
+		else
+			local errcode = stmt:finalize()
+			assert(errcode == sqlite3.OK, errcode)
+		end
 	end
 end
 
