@@ -148,6 +148,15 @@ function init(self)
 		if not stmt then error(database:errmsg()) end
 		return stmt
 	end
+	exec(self, [[
+CREATE TABLE IF NOT EXISTS table_entries (
+	table_id INTEGER NOT NULL,
+	key_type INTEGER NOT NULL,
+	key BLOB NOT NULL,
+	value_type INTEGER NOT NULL,
+	value BLOB NOT NULL,
+	PRIMARY KEY (table_id, key_type, key)
+)]])
 	self._prepared = {
 		insert = prepare"INSERT OR REPLACE INTO table_entries(table_id, key_type, key, value_type, value) VALUES (?, ?, ?, ?, ?)",
 		delete = prepare"DELETE FROM table_entries WHERE table_id = ? AND key_type = ? AND key = ?",
@@ -158,15 +167,6 @@ function init(self)
 			values = prepare("UPDATE table_entries SET value = ? WHERE value_type = " .. types.table .. " AND value = ?")
 		}
 	}
-	exec(self, [[
-CREATE TABLE IF NOT EXISTS table_entries (
-	table_id INTEGER NOT NULL,
-	key_type INTEGER NOT NULL,
-	key BLOB NOT NULL,
-	value_type INTEGER NOT NULL,
-	value BLOB NOT NULL,
-	PRIMARY KEY (table_id, key_type, key)
-)]])
 	-- Default value
 	self.highest_table_id = 0
 	for id in self.database:urows"SELECT MAX(table_id) FROM table_entries" do
