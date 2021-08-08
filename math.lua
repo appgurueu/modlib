@@ -1,5 +1,6 @@
 -- Localize globals
-local math, minetest, modlib, os, string, table = math, minetest, modlib, os, string, table
+local math, math_floor, minetest, modlib_table_reverse, os, string_char, table, table_insert, table_concat
+	= math, math.floor, minetest, modlib.table.reverse, os, string.char, table, table.insert, table.concat
 
 -- Set environment
 local _ENV = {}
@@ -14,15 +15,15 @@ positive_nan = negative_nan ^ 1
 
 function round(number, steps)
 	steps = steps or 1
-	return math.floor(number * steps + 0.5) / steps
+	return math_floor(number * steps + 0.5) / steps
 end
 
 local c0 = ("0"):byte()
 local cA = ("A"):byte()
 
 function default_digit_function(digit)
-	if digit <= 9 then return string.char(c0 + digit) end
-	return string.char(cA + digit - 10)
+	if digit <= 9 then return string_char(c0 + digit) end
+	return string_char(cA + digit - 10)
 end
 
 default_precision = 10
@@ -33,31 +34,32 @@ function tostring(number, base, digit_function, precision)
 	precision = precision or default_precision
 	local out = {}
 	if number < 0 then
-		table.insert(out, "-")
+		table_insert(out, "-")
 		number = -number
 	end
+	-- Rounding
 	number = number + base ^ -precision / 2
 	local digit
 	while number >= base do
-		digit = math.floor(number % base)
-		table.insert(out, digit_function(digit))
+		digit = math_floor(number % base)
+		table_insert(out, digit_function(digit))
 		number = (number - digit) / base
 	end
-	digit = math.floor(number)
-	table.insert(out, digit_function(digit))
-	modlib.table.reverse(out)
+	digit = math_floor(number)
+	table_insert(out, digit_function(digit))
+	modlib_table_reverse(out)
 	number = number % 1
 	if number ~= 0 and number >= base ^ -precision then
-		table.insert(out, ".")
+		table_insert(out, ".")
 		while precision >= 0 and number >= base ^ -precision do
 			number = number * base
-			digit = math.floor(number % base)
-			table.insert(out, digit_function(digit))
+			digit = math_floor(number % base)
+			table_insert(out, digit_function(digit))
 			number = number - digit
 			precision = precision - 1
 		end
 	end
-	return table.concat(out)
+	return table_concat(out)
 end
 
 -- See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/fround#polyfill
@@ -70,10 +72,10 @@ function fround(number)
 		sign = -1
 		number = -number
 	end
-	local exp = math.floor(math.log(number, 2))
+	local exp = math_floor(math.log(number, 2))
 	local powexp = 2 ^ math.max(-126, math.min(exp, 127))
 	local leading = exp < -127 and 0 or 1
-	local mantissa = math.floor((leading - number / powexp) * 0x800000 + 0.5)
+	local mantissa = math_floor((leading - number / powexp) * 0x800000 + 0.5)
 	if mantissa <= -0x800000 then
 		return sign * math.huge
 	end
