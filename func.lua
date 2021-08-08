@@ -35,17 +35,14 @@ function values(...)
 	return function() return unpack(args) end
 end
 
--- Equivalent to `for x, y, z in iterator(...) do callback(x, y, z) end`
-function iterate(callback, iterator, ...)
-	local function _iterate(iterable, state, ...)
-		local function loop(...)
-			if ... == nil then return end
-			callback(...)
-			return loop(iterable(state, ...))
-		end
-		return loop(iterable(state, ...))
+-- Equivalent to `for x, y, z in iterator, state, ... do callback(x, y, z) end`
+function iterate(callback, iterator, state, ...)
+	local function loop(...)
+		if ... == nil then return end
+		callback(...)
+		return loop(iterator(state, ...))
 	end
-	return _iterate(iterator(...))
+	return loop(iterator(state, ...))
 end
 
 function for_generator(caller, ...)

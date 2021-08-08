@@ -33,7 +33,7 @@ do
 		assert(tab[key] == value)
 		tab[key] = nil
 	end
-	func.iterate(check_entry, pairs, tab)
+	func.iterate(check_entry, pairs(tab))
 	assert(next(tab) == nil)
 
 	tab = {a = 1, b = 2}
