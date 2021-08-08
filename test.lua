@@ -101,6 +101,31 @@ do
 	for _, value in pairs(contents) do
 		assert(value == 2)
 	end
+
+	-- Test table.binary_search against a linear search
+	local function linear_search(list, value)
+		for i, val in ipairs(list) do
+			if val == value then
+				return i
+			end
+			if val > value then
+				return -i
+			end
+		end
+		return -#list-1
+	end
+	
+	for k = 0, 100 do
+		local sorted = {}
+		for i = 1, k do
+			sorted[i] = _G.math.random(1, 1000)
+		end
+		_G.table.sort(sorted)
+		for i = 1, 10 do
+			local pick = _G.math.random(-100, 1100)
+			assert(linear_search(sorted, pick) == table.binary_search(sorted, pick))
+		end
+	end
 end
 
 -- heap
