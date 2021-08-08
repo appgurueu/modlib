@@ -16,6 +16,16 @@ setfenv(1, setmetatable({}, {
 	end
 }))
 
+-- math
+do
+	local function assert_tonumber(num, base)
+		local str = modlib.math.tostring(num, base)
+		assert(tonumber(str, base) == num, str)
+	end
+	assert_tonumber(134217503, 36)
+	assert_tonumber(3.14, 10)
+end
+
 -- func
 do
 	local tab = {a = 1, b = 2}
