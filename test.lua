@@ -114,7 +114,7 @@ do
 		end
 		return -#list-1
 	end
-	
+
 	for k = 0, 100 do
 		local sorted = {}
 		for i = 1, k do
@@ -123,7 +123,9 @@ do
 		_G.table.sort(sorted)
 		for i = 1, 10 do
 			local pick = _G.math.random(-100, 1100)
-			assert(linear_search(sorted, pick) == table.binary_search(sorted, pick))
+			local linear, binary = linear_search(sorted, pick), table.binary_search(sorted, pick)
+			-- If numbers appear twice (or more often), the indices may differ, as long as the number is the same.
+			assert(linear == binary or (linear > 0 and sorted[linear] == sorted[binary]))
 		end
 	end
 end
