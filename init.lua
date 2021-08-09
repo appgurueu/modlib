@@ -132,6 +132,12 @@ modlib = setmetatable({
 modlib.mod = minetest and dofile(get_resource(modlib.modname, "mod.lua"))
 
 if minetest then
+	local ie = minetest.request_insecure_environment()
+	if ie then
+		-- Force load persistence namespace to pass insecure require
+		-- TODO currently no need to set _G.require, lsqlite3 loads no dependencies that way
+		modlib.persistence = assert(loadfile(get_resource"persistence.lua"))(ie.require)
+	end
 	modlib.conf.build_setting_tree()
 	modlib.mod.get_resource = get_resource
 end

@@ -1,7 +1,7 @@
 local assert, error, math_huge, modlib, minetest, setmetatable, type, table_insert, table_sort, pairs, ipairs
 	= assert, error, math.huge, modlib, minetest, setmetatable, type, table.insert, table.sort, pairs, ipairs
 
-local sqlite3 = ... or require"lsqlite3"
+local sqlite3 = ...
 
 --! experimental
 
