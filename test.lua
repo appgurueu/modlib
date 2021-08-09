@@ -343,7 +343,7 @@ test_logfile(true)
 test_logfile(false)
 -- SQLite3
 do
-	local sqlite3 = persistence.sqlite3(require"lsqlite3")
+	local sqlite3 = persistence.sqlite3()
 	local p = sqlite3.new("database.test.sqlite3", {})
 	p:init()
 	p:rewrite()
