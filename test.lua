@@ -228,9 +228,17 @@ for _ = 1, 1000 do
 	assert(distance == min_distance)
 end
 
-local function serializer_test(assert_preserves)
-	-- TODO nan
-	for _, constant in pairs{true, false, huge, -huge} do
+local function serializer_test(preserve)
+	local function assert_preserves(obj)
+		local preserved = preserve(obj)
+		if obj ~= obj then
+			assert(preserved ~= preserved)
+		else
+			assert(table.equals_references(preserved, obj), luon:write_string(preserved))
+		end
+	end
+	-- TODO proper deep table comparison with nan support
+	for _, constant in pairs{true, false, huge, -huge, 0/0} do
 		assert_preserves(constant)
 	end
 	-- Strings
@@ -265,37 +273,27 @@ local function serializer_test(assert_preserves)
 	assert_preserves(a)
 end
 
--- bluon
-do
-	local bluon = bluon
-	serializer_test(function(object)
-		local rope = table.rope{}
-		local written, read, input
-		local _, err = pcall(function()
-			bluon:write(object, rope)
-			written = rope:to_text()
-			input = text.inputstream(written)
-			read = bluon:read(input)
-			local remaining = input:read(1000)
-			assert(not remaining)
-		end)
-		assertdump(table.equals_references(object, read) and not err, {
-			object = object,
-			read = read,
-			written = written and text.hexdump(written),
-			err = err
-		})
-	end)
-end
-
 -- luon
 do
 	serializer_test(function(object)
-		local serialized = luon:write_string(object)
-		assert(table.equals_references(object, luon:read_string(serialized)), serialized)
+		return luon:read_string(luon:write_string(object))
 	end)
-	local nan = luon:read_string(luon:write_string(0/0))
-	assert(nan ~= nan)
+end
+
+-- bluon
+do
+	-- TODO 1.1496387980481e-07 fails due to precision issues
+	serializer_test(function(object)
+		local rope = table.rope{}
+		local written, read, input
+		bluon:write(object, rope)
+		written = rope:to_text()
+		input = text.inputstream(written)
+		read = bluon:read(input)
+		local remaining = input:read(1)
+		assert(not remaining)
+		return read
+	end)
 end
 
 if not _G.minetest then return end

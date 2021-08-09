@@ -260,6 +260,7 @@ function write(self, value, stream)
 end
 
 local constants_flipped = modlib.table.flip(constants)
+constants_flipped[constant_nan] = 0/0
 
 -- See https://www.lua.org/manual/5.1/manual.html#2.2
 function read(self, stream)
