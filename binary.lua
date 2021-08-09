@@ -2,6 +2,8 @@
 local assert, math_huge, math_frexp, math_floor
 	= assert, math.huge, math.frexp, math.floor
 
+local positive_nan, negative_nan = modlib.math.positive_nan, modlib.math.negative_nan
+
 -- Set environment
 local _ENV = {}
 setfenv(1, _ENV)
@@ -34,8 +36,7 @@ function read_float(read_byte, double)
 			return sign * math_huge
 		end
 		-- Differentiating quiet and signalling nan is not possible in Lua, hence we don't have to do it
-		-- HACK ((0/0)^1) yields nan, 0/0 yields -nan
-		return sign == 1 and ((0/0)^1) or 0/0
+		return sign == 1 and positive_nan or negative_nan
 	end
 	assert(mantissa < 1)
 	if exponent == 0 then
