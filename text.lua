@@ -131,7 +131,7 @@ magic_charset = "[" .. table.concat(magic_charset) .. "]"
 function escape_magic_chars(text) return text:gsub("(" .. magic_charset .. ")", "%%%1") end
 
 function utf8(number)
-	if number < 0x007F then
+	if number <= 0x007F then
 		-- Single byte
 		return string.char(number)
 	end
