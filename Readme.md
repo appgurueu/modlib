@@ -293,6 +293,10 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+### `rolling-73`
+
+* Fixes Mesecons LuaController overheating by luk3yx
+
 ### `rolling-71`
 
 * Fixes

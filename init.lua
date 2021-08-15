@@ -91,7 +91,7 @@ end
 local rawget, rawset = rawget, rawset
 modlib = setmetatable({
 	-- TODO bump on release
-	version = 72,
+	version = 73,
 	modname = minetest and minetest.get_current_modname(),
 	-- TODO
 	dir_delim = rawget(_G, "DIR_DELIM") or "/",
