@@ -131,6 +131,11 @@ modlib = setmetatable({
 
 modlib.mod = minetest and dofile(get_resource(modlib.modname, "mod.lua"))
 
+-- HACK force load minetest/gametime.lua to ensure that the globalstep is registered earlier than globalsteps of mods depending on modlib
+if minetest then
+	dofile(get_resource(modlib.modname, "minetest", "gametime.lua"))
+end
+
 if minetest then
 	local ie = minetest.request_insecure_environment()
 	if ie then
