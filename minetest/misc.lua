@@ -33,14 +33,13 @@ local function get_gametime_init(dtime)
 	end
 	for index, globalstep in pairs(minetest.registered_globalsteps) do
 		if globalstep == get_gametime_init then
-			table.remove(minetest.registered_globalsteps, index)
+			-- globalsteps of mods which depend on modlib will execute after this
+			minetest.registered_globalsteps[index] = function(dtime)
+				gametime = gametime + dtime
+			end
 			break
 		end
 	end
-	-- globalsteps of mods which depend on modlib will execute after this
-	minetest.register_globalstep(function(dtime)
-		gametime = gametime + dtime
-	end)
 end
 minetest.register_globalstep(get_gametime_init)
 
