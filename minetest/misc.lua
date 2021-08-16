@@ -200,8 +200,7 @@ end
 --> function(nodename) -> whether node matches
 function nodename_matcher(node_or_groupname)
 	if modlib.text.starts_with(node_or_groupname, "group:") then
-		-- TODO consider using modlib.text.split instead of Minetest's string.split
-		local groups = node_or_groupname:sub(("group:"):len() + 1):split(",")
+		local groups = modlib.text.split(node_or_groupname:sub(("group:"):len() + 1), ",")
 		return function(nodename)
 			for _, groupname in pairs(groups) do
 				if minetest.get_item_group(nodename, groupname) == 0 then
