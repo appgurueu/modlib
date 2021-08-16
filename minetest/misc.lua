@@ -1,11 +1,13 @@
 -- Localize globals
-local assert, minetest, modlib, next, pairs, string, table, type = assert, minetest, modlib, next, pairs, string, table, type
+local assert, minetest, modlib, next, pairs, string, table, type
+	= assert, minetest, modlib, next, pairs, string, table, type
 
 -- Set environment
 local _ENV = ...
 setfenv(1, _ENV)
 
 max_wear = 2 ^ 16 - 1
+
 function override(function_name, function_builder)
 	local func = minetest[function_name]
 	minetest["original_" .. function_name] = func
@@ -35,13 +37,9 @@ function register_form_listener(formname, func)
 	form_listeners[formname] = current_listeners
 end
 
+local icall = modlib.table.icall
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local handlers = form_listeners[formname]
-	if handlers then
-		for _, handler in pairs(handlers) do
-			handler(player, fields)
-		end
-	end
+	icall(form_listeners[formname] or {})
 end)
 
 function texture_modifier_inventorycube(face_1, face_2, face_3)
