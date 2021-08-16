@@ -135,7 +135,6 @@ if minetest then
 	modlib.mod = dofile(get_resource(modlib.modname, "mod.lua"))
 	modlib.mod.get_resource = get_resource
 	-- HACK force load minetest/gametime.lua to ensure that the globalstep is registered earlier than globalsteps of mods depending on modlib
-	_ = modlib.minetest
 	dofile(get_resource(modlib.modname, "minetest", "gametime.lua"))
 	local ie = minetest.request_insecure_environment()
 	if ie then
