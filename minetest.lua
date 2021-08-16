@@ -23,7 +23,8 @@ for filename, comps in pairs{
 		"decode_base64",
 		"objects_inside_radius",
 		"objects_inside_area",
-		"nodename_matcher"
+		"nodename_matcher",
+		"playerdata",
 	},
 	liquid = {
 		"liquid_level_max",

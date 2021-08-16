@@ -215,3 +215,25 @@ function nodename_matcher(node_or_groupname)
 		end
 	end
 end
+
+do
+	local default_create, default_free = function() return {} end, modlib.func.no_op
+	local metatable = {__index = function(self, player)
+		if type(player) == "userdata" then
+			return self[player:get_player_name()]
+		end
+	end}
+	function playerdata(create, free)
+		create = create or default_create
+		free = free or default_free
+		local data = {}
+		minetest.register_on_joinplayer(function(player)
+			data[player:get_player_name()] = create(player)
+		end)
+		minetest.register_on_leaveplayer(function(player)
+			data[player:get_player_name()] = free(player)
+		end)
+		setmetatable(data, metatable)
+		return data
+	end
+end
