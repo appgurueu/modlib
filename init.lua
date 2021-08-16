@@ -129,7 +129,6 @@ modlib = setmetatable({
 	end
 })
 
-_ml = modlib
 
 if minetest then
 	modlib.mod = dofile(get_resource(modlib.modname, "mod.lua"))
@@ -145,7 +144,6 @@ if minetest then
 	modlib.conf.build_setting_tree()
 end
 
-_ml = modlib
 
 --[[
 --modlib.mod.include"test.lua"

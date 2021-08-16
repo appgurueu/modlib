@@ -8,7 +8,8 @@ No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD
 
 ## API
 
-Mostly self-documenting code. Mod namespace is `modlib` or `_ml`, containing all variables & functions.
+Mostly self-documenting code. Mod namespace is `modlib`, containing all variables & functions.
+
 
 ### Persistence
 
