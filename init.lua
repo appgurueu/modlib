@@ -1,13 +1,14 @@
 -- Lua version check
 if _VERSION then
+	-- TODO get rid of this string version checking
 	if _VERSION < "Lua 5" then
 		error("Outdated Lua version! modlib requires Lua 5 or greater.")
 	end
 	if _VERSION > "Lua 5.1" then
 		-- not throwing error("Too new Lua version! modlib requires Lua 5.1 or smaller.") anymore
 		unpack = unpack or table.unpack -- unpack was moved to table.unpack in Lua 5.2
-		loadstring = load
-		function setfenv(fn, env)
+		loadstring = loadstring or load
+		setfenv = setfenv or function(fn, env)
 			local i = 1
 			while true do
 				local name = debug.getupvalue(fn, i)
@@ -20,7 +21,7 @@ if _VERSION then
 			end
 			return fn
 		end
-		function getfenv(fn)
+		getfenv = getfenv or function(fn)
 			local i = 1
 			local name, val
 			repeat
