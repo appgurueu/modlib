@@ -74,9 +74,6 @@ function get_node_inventory_image(nodename)
 	end
 	return img or texture_modifier_inventorycube(chosen_tiles[1], chosen_tiles[2], chosen_tiles[3])
 end
-function get_color_int(color)
-	return color.b + (color.g*256) + (color.r*256*256)
-end
 function check_player_privs(playername, privtable)
 	local privs=minetest.get_player_privs(playername)
 	local missing_privs={}
