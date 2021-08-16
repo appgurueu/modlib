@@ -2,6 +2,8 @@
 local math, math_floor, minetest, modlib_table_reverse, os, string_char, table, table_insert, table_concat
 	= math, math.floor, minetest, modlib.table.reverse, os, string.char, table, table.insert, table.concat
 
+local inf = math.huge
+
 -- Set environment
 local _ENV = {}
 setfenv(1, _ENV)
@@ -30,6 +32,15 @@ default_precision = 10
 
 -- See https://github.com/appgurueu/Luon/blob/master/index.js#L724
 function tostring(number, base, digit_function, precision)
+	if number ~= number then
+		return "nan"
+	end
+	if number == inf then
+		return "inf"
+	end
+	if number == -inf then
+		return "-inf"
+	end
 	digit_function = digit_function or default_digit_function
 	precision = precision or default_precision
 	local out = {}
@@ -77,7 +88,7 @@ function fround(number)
 	local leading = exp < -127 and 0 or 1
 	local mantissa = math_floor((leading - number / powexp) * 0x800000 + 0.5)
 	if mantissa <= -0x800000 then
-		return sign * math.huge
+		return sign * inf
 	end
 	return sign * powexp * (leading - mantissa / 0x800000)
 end
