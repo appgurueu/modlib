@@ -129,9 +129,11 @@ modlib = setmetatable({
 	end
 })
 
+_ml = modlib
 
 if minetest then
 	modlib.mod = dofile(get_resource(modlib.modname, "mod.lua"))
+	modlib.mod.get_resource = get_resource
 	-- HACK force load minetest/gametime.lua to ensure that the globalstep is registered earlier than globalsteps of mods depending on modlib
 	_ = modlib.minetest
 	dofile(get_resource(modlib.modname, "minetest", "gametime.lua"))
@@ -142,7 +144,6 @@ if minetest then
 		modlib.persistence = assert(loadfile(get_resource"persistence.lua"))(ie.require)
 	end
 	modlib.conf.build_setting_tree()
-	modlib.mod.get_resource = get_resource
 end
 
 _ml = modlib
