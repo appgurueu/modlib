@@ -12,17 +12,38 @@ function override(function_name, function_builder)
 	minetest[function_name] = function_builder(func)
 end
 
-delta_times={}
-delays={}
-callbacks={}
 function register_globalstep(interval, callback)
 	if type(callback) ~= "function" then
 		return
 	end
-	table.insert(delta_times, 0)
-	table.insert(delays, interval)
-	table.insert(callbacks, callback)
+	local time = 0
+	minetest.register_globalstep(function(dtime)
+		time = time + dtime
+		if time >= interval then
+			callback(time)
+			-- TODO ensure this breaks nothing
+			time = time % interval
+		end
+	end)
 end
+
+form_listeners = {}
+
+function register_form_listener(formname, func)
+	local current_listeners = form_listeners[formname] or {}
+	table.insert(current_listeners, func)
+	form_listeners[formname] = current_listeners
+end
+
+minetest.register_on_player_receive_fields(function(player, formname, fields)
+	local handlers = form_listeners[formname]
+	if handlers then
+		for _, handler in pairs(handlers) do
+			handler(player, fields)
+		end
+	end
+end)
+
 function texture_modifier_inventorycube(face_1, face_2, face_3)
 	return "[inventorycube{" .. string.gsub(face_1, "%^", "&")
 			.. "{" .. string.gsub(face_2, "%^", "&")
