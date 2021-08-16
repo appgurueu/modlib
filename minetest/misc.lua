@@ -1,7 +1,6 @@
 -- Localize globals
-local assert, minetest, modlib, next, pairs, string, table, type
-	= assert, minetest, modlib, next, pairs, string, table, type
-
+local assert, minetest, modlib, next, pairs, string, setmetatable, table, type, unpack
+	= assert, minetest, modlib, next, pairs, string, setmetatable, table, type, unpack
 -- Set environment
 local _ENV = ...
 setfenv(1, _ENV)
@@ -13,6 +12,38 @@ function override(function_name, function_builder)
 	minetest["original_" .. function_name] = func
 	minetest[function_name] = function_builder(func)
 end
+
+local jobs = modlib.heap.new(function(a, b)
+	return a.time < b.time
+end)
+local job_metatable = {
+	__index = {
+		cancel = function(self)
+			self.cancelled = true
+		end
+	}
+}
+local time = 0
+function after(seconds, func, ...)
+	local job = setmetatable({
+		time = time + seconds,
+		func = func,
+		...
+	}, job_metatable)
+	jobs:push(job)
+	return job
+end
+minetest.register_globalstep(function(dtime)
+	time = time + dtime
+	local job = jobs[1]
+	while job and job.time <= time do
+		if not job.cancelled then
+			job.func(unpack(job))
+		end
+		jobs:pop()
+		job = jobs[1]
+	end
+end)
 
 function register_globalstep(interval, callback)
 	if type(callback) ~= "function" then
