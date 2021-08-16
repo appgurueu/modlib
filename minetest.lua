@@ -13,6 +13,7 @@ for filename, comps in pairs{
 	misc = {
 		"max_wear",
 		"override",
+		"after",
 		"register_globalstep",
 		"form_listeners",
 		"register_form_listener",
