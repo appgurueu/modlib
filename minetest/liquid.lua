@@ -1,5 +1,5 @@
 -- Localize globals
-local minetest, modlib, pairs = minetest, modlib, pairs
+local math, minetest, modlib, pairs = math, minetest, modlib, pairs
 
 -- Set environment
 local _ENV = ...
