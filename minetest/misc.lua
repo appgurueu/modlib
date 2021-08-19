@@ -244,9 +244,6 @@ function connected_players()
 	local index = 0
 	local len = #connected_players
 	return function()
-		if index >= len then
-			return
-		end
 		index = index + 1
 		return connected_players[index]
 	end
