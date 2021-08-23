@@ -252,3 +252,46 @@ end
 function register_on_leaveplayer(func)
 	return minetest["register_on_" .. (minetest.is_singleplayer() and "shutdown" or "leaveplayer")](func)
 end
+
+--! experimental
+function get_mod_info()
+	-- TODO validate modnames
+	local modnames = minetest.get_modnames()
+	local mod_info = {}
+	for _, mod in pairs(modnames) do
+		local info
+		local function read_file(filename)
+			return modlib.file.read(modlib.mod.get_resource(mod, filename))
+		end
+		local mod_conf = Settings(modlib.mod.get_resource(mod, "mod.conf"))
+		if mod_conf then
+			info = {}
+			mod_conf = mod_conf:to_table()
+			local function read_depends(field)
+				local depends = {}
+				for depend in (mod_conf[field] or ""):gmatch"[^,]+" do
+					depends[depend:match"^%s*(.-)%s*$"] = true
+				end
+				info[field] = depends
+			end
+			read_depends"depends"
+			read_depends"optional_depends"
+		else
+			info = {
+				description = read_file"description.txt",
+				depends = {},
+				optional_depends = {}
+			}
+			local depends_txt = read_file"depends.txt"
+			if depends_txt then
+				for _, dependency in ipairs(modlib.table.map(modlib.text.split(depends_txt or "", "\n"), modlib.text.trim_spacing)) do
+					local modname, is_optional = dependency:match"(.+)(%??)"
+					table.insert(is_optional == "" and info.depends or info.optional_depends, modname)
+				end
+			end
+		end
+		mod_info[mod] = info
+	end
+	return mod_info
+end
+
