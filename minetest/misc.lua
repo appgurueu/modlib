@@ -248,3 +248,7 @@ function connected_players()
 		return connected_players[index]
 	end
 end
+
+function register_on_leaveplayer(func)
+	return minetest["register_on_" .. (minetest.is_singleplayer() and "shutdown" or "leaveplayer")](func)
+end
