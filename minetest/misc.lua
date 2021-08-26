@@ -290,6 +290,9 @@ function get_mod_info()
 				end
 			end
 		end
+		if info.name == nil then
+			info.name = mod
+		end
 		mod_info[mod] = info
 	end
 	return mod_info
