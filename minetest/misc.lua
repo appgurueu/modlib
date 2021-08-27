@@ -70,7 +70,7 @@ end
 
 local icall = modlib.table.icall
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	icall(form_listeners[formname] or {})
+	icall(form_listeners[formname] or {}, player, fields)
 end)
 
 function texture_modifier_inventorycube(face_1, face_2, face_3)
