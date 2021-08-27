@@ -81,6 +81,14 @@ function slerp(self, other, ratio)
 	return modlib.vector.add(modlib.vector.multiply_scalar(self, s_0), modlib.vector.multiply_scalar(other, s_1))
 end
 
+--> axis, angle
+function to_axis_angle(self)
+	local axis = modlib.vector.new{self[1], self[2], self[3]}
+	local len = axis:length()
+	-- HACK invert axis for correct rotation in Minetest
+	return len == 0 and axis or axis:divide_scalar(-len), 2 * math.atan2(len, self[4])
+end
+
 --> {x = pitch, y = yaw, z = roll} euler rotation in degrees
 function to_euler_rotation(self)
 	local rotation = {}
