@@ -12,9 +12,9 @@ function from_euler_rotation(rotation)
 	local cos = vector.apply(rotation, math.cos)
 	local sin = vector.apply(rotation, math.sin)
 	return {
-		sin.z * cos.x * cos.y - cos.z * sin.x * sin.y,
 		cos.z * sin.x * cos.y + sin.z * cos.x * sin.y,
 		cos.z * cos.x * sin.y - sin.z * sin.x * cos.y,
+		sin.z * cos.x * cos.y - cos.z * sin.x * sin.y,
 		cos.z * cos.x * cos.y + sin.z * sin.x * sin.y
 	}
 end
