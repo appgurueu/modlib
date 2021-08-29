@@ -1,5 +1,5 @@
 -- Localize globals
-local assert, math, modlib, pairs, rawset, setmetatable, unpack, vector = assert, math, modlib, pairs, rawset, setmetatable, unpack, vector
+local assert, math, pairs, rawset, setmetatable, unpack, vector = assert, math, pairs, rawset, setmetatable, unpack, vector
 
 -- Set environment
 local _ENV = {}
@@ -11,10 +11,9 @@ index_aliases = {
 	x = 1,
 	y = 2,
 	z = 3,
-	w = 4
+	w = 4;
+	"x", "y", "z", "w";
 }
-
-modlib.table.add_all(index_aliases, modlib.table.flip(index_aliases))
 
 metatable = {
 	__index = function(table, key)
