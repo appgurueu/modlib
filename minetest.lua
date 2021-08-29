@@ -5,7 +5,8 @@ for _, value in pairs{
 	"luon",
 	"raycast",
 	"schematic",
-	"colorspec"
+	"colorspec",
+	"media"
 } do
 	components[value] = value
 end
