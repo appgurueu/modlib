@@ -298,3 +298,37 @@ function get_mod_info()
 	return mod_info
 end
 
+--! experimental
+function get_mod_load_order()
+	local mod_info = get_mod_info()
+	local mod_load_order = {}
+	-- If there are circular soft dependencies, it is possible that a mod is loaded, but not in the right order
+	-- TODO somehow maximize the number of soft dependencies fulfilled in case of circular soft dependencies
+	local function load(mod)
+		if mod.status == "loaded" then
+			return true
+		end
+		if mod.status == "loading" then
+			return false
+		end
+		-- TODO soft/vs hard loading status, reset?
+		mod.status = "loading"
+		-- Try hard dependencies first. These must be fulfilled.
+		for depend in pairs(mod.depends) do
+			if not load(mod_info[depend]) then
+				return false
+			end
+		end
+		-- Now, try soft dependencies.
+		for depend in pairs(mod.optional_depends) do
+			load(mod_info[depend])
+		end
+		mod.status = "loaded"
+		table.insert(mod_load_order, mod)
+		return true
+	end
+	for _, mod in pairs(mod_info) do
+		assert(load(mod))
+	end
+	return mod_load_order
+end

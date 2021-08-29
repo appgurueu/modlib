@@ -27,7 +27,8 @@ for filename, comps in pairs{
 		"playerdata",
 		"connected_players",
 		"register_on_leaveplayer",
-		"get_mod_info"
+		"get_mod_info",
+		"get_mod_load_order"
 	},
 	liquid = {
 		"liquid_level_max",
