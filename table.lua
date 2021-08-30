@@ -34,7 +34,7 @@ end
 -- Fisher-Yates
 function shuffle(table)
 	for index = 1, #table - 1 do
-		local index_2 = math.random(index + 1, #table)
+		local index_2 = math.random(index, #table)
 		table[index], table[index_2] = table[index_2], table[index]
 	end
 	return table
