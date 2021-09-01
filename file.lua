@@ -5,7 +5,7 @@ local io, minetest, modlib, string = io, minetest, modlib, string
 local _ENV = {}
 setfenv(1, _ENV)
 
-function split_extension(filename)
+function get_extension(filename)
 	return filename:match"(.*)%.(.*)$"
 end
 

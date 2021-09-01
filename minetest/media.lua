@@ -24,7 +24,7 @@ local function collect_media(modname)
 	local function traverse(folder)
 		local filenames = minetest.get_dir_list(folder, false)
 		for _, filename in pairs(filenames) do
-			local _, ext = modlib.file.split_extension(filename)
+			local _, ext = modlib.file.get_extension(filename)
 			if media_extensions[ext] then
 				media[filename] = folder .. "/" .. filename
 			end
