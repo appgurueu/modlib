@@ -5,6 +5,10 @@ local io, minetest, modlib, string = io, minetest, modlib, string
 local _ENV = {}
 setfenv(1, _ENV)
 
+function split_extension(filename)
+	return filename:match"(.*)%.(.*)$"
+end
+
 function read(filename)
 	local file = io.open(filename, "r")
 	if file == nil then return nil end
