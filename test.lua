@@ -228,17 +228,17 @@ for _ = 1, 1000 do
 	assert(distance == min_distance)
 end
 
-local function serializer_test(preserve)
+local function serializer_test(is_json, preserve)
 	local function assert_preserves(obj)
 		local preserved = preserve(obj)
 		if obj ~= obj then
 			assert(preserved ~= preserved)
 		else
-			assert(table.equals_references(preserved, obj), luon:write_string(preserved))
+			assert(table.equals_references(preserved, obj), luon:write_string(preserved) .. " vs " .. luon:write_string(obj))
 		end
 	end
 	-- TODO proper deep table comparison with nan support
-	for _, constant in pairs{true, false, huge, -huge, 0/0} do
+	for _, constant in pairs(is_json and {true, false} or {true, false, huge, -huge, 0/0}) do
 		assert_preserves(constant)
 	end
 	-- Strings
@@ -254,7 +254,10 @@ local function serializer_test(preserve)
 	end
 	-- Simple tables
 	assert_preserves{hello = "world", welt = "hallo"}
+	assert_preserves{a = 1, b = "hallo", c = "true"}
 	assert_preserves{"hello", "hello", "hello"}
+	assert_preserves{1, 2, 3, true, false}
+	if is_json then return end
 	local circular = {}
 	circular[circular] = circular
 	circular[1] = circular
@@ -273,9 +276,18 @@ local function serializer_test(preserve)
 	assert_preserves(a)
 end
 
+-- JSON
+do
+	serializer_test(true, function(object)
+		return json:read_string(json:write_string(object))
+	end)
+	-- Verify spacing is accepted
+	assert(modlib.table.equals_noncircular(json:read_string'\t\t\n{ "a"   : 1, \t"b":2, "c" : [ 1, 2 ,3  ]   }  \n\r\t', {a = 1, b = 2, c = {1, 2, 3}}))
+end
+
 -- luon
 do
-	serializer_test(function(object)
+	serializer_test(false, function(object)
 		return luon:read_string(luon:write_string(object))
 	end)
 end
@@ -283,7 +295,7 @@ end
 -- bluon
 do
 	-- TODO 1.1496387980481e-07 fails due to precision issues
-	serializer_test(function(object)
+	serializer_test(false, function(object)
 		local rope = table.rope{}
 		local written, read, input
 		bluon:write(object, rope)
