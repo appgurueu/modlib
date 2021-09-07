@@ -234,7 +234,7 @@ local function serializer_test(is_json, preserve)
 		if obj ~= obj then
 			assert(preserved ~= preserved)
 		else
-			assert(table.equals_references(preserved, obj), luon:write_string(preserved) .. " vs " .. luon:write_string(obj))
+			assert(table.equals_references(preserved, obj))
 		end
 	end
 	-- TODO proper deep table comparison with nan support
