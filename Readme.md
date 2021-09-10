@@ -1,4 +1,4 @@
-# Modding Library (`modlib`)
+# ![Logo](logo.svg) Modding Library (`modlib`)
 
 Multipurpose Minetest Modding Library
 
