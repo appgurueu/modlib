@@ -209,7 +209,7 @@ function colorspec.from_string(string)
 			r = (floor(num / (16 ^ 2)) % 16) * 17
 		}
 	end
-	error("Invalid colorstring: " .. string)
+	error("invalid colorstring: " .. string)
 end
 
 colorspec.from_text = colorspec.from_string
