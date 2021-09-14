@@ -1,6 +1,7 @@
 -- Localize globals
-local assert, minetest, modlib, next, pairs, string, setmetatable, table, type, unpack
-	= assert, minetest, modlib, next, pairs, string, setmetatable, table, type, unpack
+local Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, table, type, unpack
+	= Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, table, type, unpack
+
 -- Set environment
 local _ENV = ...
 setfenv(1, _ENV)
