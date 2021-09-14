@@ -122,33 +122,6 @@ function check_player_privs(playername, privtable)
 	return missing_privs, to_lose_privs
 end
 
-minetest.register_globalstep(function(dtime)
-	for k, v in pairs(delta_times) do
-		local v=dtime+v
-		if v > delays[k] then
-			callbacks[k](v)
-			v=0
-		end
-		delta_times[k]=v
-	end
-end)
-
-form_listeners = {}
-function register_form_listener(formname, func)
-	local current_listeners = form_listeners[formname] or {}
-	table.insert(current_listeners, func)
-	form_listeners[formname] = current_listeners
-end
-
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local handlers = form_listeners[formname]
-	if handlers then
-		for _, handler in pairs(handlers) do
-			handler(player, fields)
-		end
-	end
-end)
-
 --+ Improved base64 decode removing valid padding
 function decode_base64(base64)
 	local len = base64:len()
