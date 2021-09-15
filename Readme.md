@@ -294,6 +294,23 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+### `rolling-74`
+
+* Fixes: Plenty, mostly related to the `minetest` module. Note:
+  * `table.shuffle` was fixed (previously had an off-by-one error); small tables are now shuffled correctly
+  * A crash on loading in the `minetest` module was fixed (note that this crash was not included in the `rolling-73` release)
+* Additions:
+  * A logo
+  * `minetest` module:
+    * Priority queue based `after`
+    * `playerdata`, `connected_players` & `set_privs` utilities
+    * Experimental `get_mod_info` & `get_mod_load_order`, `media` path getting
+    * Lazy loading of components
+  * `quaternion.from_euler_rotation`
+  * `text.trim_spacing`
+  * Experimental `json` module
+* Removal of `modlib.minetest.get_color_int`
+
 ### `rolling-73`
 
 * Fixes Mesecons LuaController overheating by luk3yx
