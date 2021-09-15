@@ -216,7 +216,6 @@ function connected_players()
 	-- TODO cache connected players
 	local connected_players = minetest.get_connected_players()
 	local index = 0
-	local len = #connected_players
 	return function()
 		index = index + 1
 		return connected_players[index]
