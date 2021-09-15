@@ -222,6 +222,10 @@ function connected_players()
 	end
 end
 
+function set_privs(name, privs)
+	return minetest.set_player_privs(name, modlib.table.add_all(minetest.get_player_privs(name), privs))
+end
+
 function register_on_leaveplayer(func)
 	return minetest["register_on_" .. (minetest.is_singleplayer() and "shutdown" or "leaveplayer")](func)
 end

@@ -27,6 +27,7 @@ for filename, comps in pairs{
 		"nodename_matcher",
 		"playerdata",
 		"connected_players",
+		"set_privs",
 		"register_on_leaveplayer",
 		"get_mod_info",
 		"get_mod_load_order"
