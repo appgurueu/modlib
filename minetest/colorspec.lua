@@ -186,6 +186,7 @@ function colorspec.from_string(string)
 		return colorspec.from_number(number * 0x100 + alpha)
 	end
 	local hex_text = string:match("^" .. hex .. "$")
+	assert(hex_text, "invalid colorstring")
 	local len, num = hex_text:len(), tonumber(hex_text, 16)
 	if len == 8 then
 		return colorspec.from_number(num)
@@ -209,7 +210,7 @@ function colorspec.from_string(string)
 			r = (floor(num / (16 ^ 2)) % 16) * 17
 		}
 	end
-	error("invalid colorstring: " .. string)
+	error"invalid colorstring"
 end
 
 colorspec.from_text = colorspec.from_string
