@@ -222,8 +222,17 @@ function connected_players()
 	end
 end
 
-function set_privs(name, privs)
-	return minetest.set_player_privs(name, modlib.table.add_all(minetest.get_player_privs(name), privs))
+function set_privs(name, priv_updates)
+	local privs = minetest.get_player_privs(name)
+	for priv, grant in pairs(priv_updates) do
+		if grant then
+			privs[priv] = true
+		else
+			-- May not be set to false; Minetest treats false as truthy in this instance
+			privs[priv] = nil
+		end
+	end
+	return minetest.set_player_privs(name, privs)
 end
 
 function register_on_leaveplayer(func)
