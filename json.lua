@@ -5,6 +5,7 @@ local _ENV = {}
 setfenv(1, _ENV)
 
 --! experimental
+-- See https://tools.ietf.org/id/draft-ietf-json-rfc4627bis-09.html#unichars and https://json.org
 
 -- Null
 -- TODO consider using userdata (for ex. by using newproxy)
@@ -100,6 +101,7 @@ for i = 0, 5 do
 end
 
 -- TODO SAX vs DOM
+local utf8 = modlib.text.utf8
 function read(self, read_)
 	local index = 0
 	local char
@@ -146,27 +148,51 @@ function read(self, read_)
 			read()
 		end
 	end
+	local function utf8_codepoint(codepoint)
+		return syntax_assert(utf8(codepoint), "invalid codepoint")
+	end
 	local function string()
 		local chars = {}
+		local high_surrogate
 		while true do
+			local string_char, next_high_surrogate
 			if char == '"' then
+				if high_surrogate then
+					table_insert(chars, utf8_codepoint(high_surrogate))
+				end
 				return table_concat(chars)
 			end
 			if char == "\\" then
 				read()
 				if char == "u" then
-					local num = 0
+					local codepoint = 0
 					for i = 3, 0, -1 do
-						num = syntax_assert(hex_digit_values[read()], "expected a hex digit") * (16 ^ i) + num
+						codepoint = syntax_assert(hex_digit_values[read()], "expected a hex digit") * (16 ^ i) + codepoint
 					end
-					table_insert(chars, syntax_assert(modlib.text.utf8(num), "invalid codepoint"))
+					if high_surrogate and codepoint >= 0xDC00 and codepoint <= 0xDFFF then
+						-- TODO strict mode: throw an error for single surrogates
+						codepoint = 0x10000 + (high_surrogate - 0xD800) * 0x400 + codepoint - 0xDC00
+						-- Don't write the high surrogate
+						high_surrogate = nil
+					end
+					if codepoint >= 0xD800 and codepoint <= 0xDBFF then
+						next_high_surrogate = codepoint
+					else
+						string_char = utf8_codepoint(codepoint)
+					end
 				else
-					table_insert(chars, syntax_assert(decoding_escapes[char], "invalid escape sequence"))
+					string_char = syntax_assert(decoding_escapes[char], "invalid escape sequence")
 				end
 			else
-				syntax_assert(char, "unclosed string")
 				-- TODO check whether the character is one that must be escaped ("strict" mode)
-				table_insert(chars, char)
+				string_char = syntax_assert(char, "unclosed string")
+			end
+			if high_surrogate then
+				table_insert(chars, utf8_codepoint(high_surrogate))
+			end
+			high_surrogate = next_high_surrogate
+			if string_char then
+				table_insert(chars, string_char)
 			end
 			read()
 		end

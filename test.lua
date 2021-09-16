@@ -282,7 +282,22 @@ do
 		return json:read_string(json:write_string(object))
 	end)
 	-- Verify spacing is accepted
-	assert(modlib.table.equals_noncircular(json:read_string'\t\t\n{ "a"   : 1, \t"b":2, "c" : [ 1, 2 ,3  ]   }  \n\r\t', {a = 1, b = 2, c = {1, 2, 3}}))
+	assert(table.equals_noncircular(json:read_string'\t\t\n{ "a"   : 1, \t"b":2, "c" : [ 1, 2 ,3  ]   }  \n\r\t', {a = 1, b = 2, c = {1, 2, 3}}))
+	-- Simple surrogate pair tests
+	for _, prefix in pairs{"x", ""} do
+		for _, suffix in pairs{"x", ""} do
+			local function test(str, expected_str)
+				if type(expected_str) == "number" then
+					expected_str = text.utf8(expected_str)
+				end
+				return assert(json:read_string('"' .. prefix .. str .. suffix .. '"') == prefix .. expected_str .. suffix)
+			end
+			test([[\uD834\uDD1E]],  0x1D11E)
+			test([[\uDD1E\uD834]], text.utf8(0xDD1E) .. text.utf8(0xD834))
+			test([[\uD834]], 0xD834)
+			test([[\uDD1E]], 0xDD1E)
+		end
+	end
 end
 
 -- luon
