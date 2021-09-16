@@ -5,6 +5,8 @@ local ipairs, minetest, modlib, table = ipairs, minetest, modlib, table
 local _ENV = {}
 setfenv(1, _ENV)
 
+--! deprecated
+
 forbidden_names = {}
 
 function register_forbidden_name(name) forbidden_names[name] = true end
