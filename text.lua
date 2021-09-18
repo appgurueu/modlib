@@ -58,7 +58,7 @@ end
 trim_right = trim_end
 
 function trim_spacing(text)
-	return text:match"%s*(.-)%s*"
+	return text:match"^%s*(.-)%s*$"
 end
 
 local inputstream_metatable = {
