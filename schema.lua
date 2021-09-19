@@ -119,6 +119,7 @@ function generate_markdown(self)
 		return ""
 	end
 	local lines = {}
+	description(lines)
 	local function line(text)
 		table.insert(lines, "* " .. text)
 	end
