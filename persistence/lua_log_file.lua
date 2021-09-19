@@ -142,12 +142,9 @@ local function _dump(self, value, is_key)
 		create_reference()
 		-- TODO traverse tables to determine whether this is actually needed
 		self:log(key .. "={}")
-		local tablelen = #value
 		for k, v in pairs(value) do
-			if type(k) ~= "number" or k % 1 ~= 0 or k < 1 or k > tablelen then
-				local dumped, short = _dump(self, k, true)
-				self:log(key .. (short and ("." .. dumped) or ("[" .. dumped .. "]")) .. "=" .. _dump(self, v))
-			end
+			local dumped, short = _dump(self, k, true)
+			self:log(key .. (short and ("." .. dumped) or ("[" .. dumped .. "]")) .. "=" .. _dump(self, v))
 		end
 	else
 		error("unsupported type: " .. _type)
