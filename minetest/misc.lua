@@ -307,7 +307,10 @@ function get_mod_load_order()
 		end
 		-- Now, try soft dependencies.
 		for depend in pairs(mod.optional_depends) do
-			load(mod_info[depend])
+			-- Mod may not exist
+			if mod_info[depend] then
+				load(mod_info[depend])
+			end
 		end
 		mod.status = "loaded"
 		table.insert(mod_load_order, mod)
