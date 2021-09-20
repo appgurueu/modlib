@@ -345,8 +345,9 @@ assert(colorspec.from_string"#694269":to_string() == "694269")
 
 -- Persistence
 local function test_logfile(reference_strings)
-	local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {}, reference_strings)
+	local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {root_preserved = true}, reference_strings)
 	logfile:init()
+	assert(logfile.root.root_preserved)
 	logfile.root = {a_longer_string = "test"}
 	logfile:rewrite()
 	logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge})

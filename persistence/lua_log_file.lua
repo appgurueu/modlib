@@ -68,7 +68,6 @@ function init(self)
 		return
 	end
 	self:open()
-	self.root = {}
 	self:_write()
 end
 
