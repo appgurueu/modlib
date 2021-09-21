@@ -33,7 +33,7 @@ local function collect_media(modname)
 		for _, folderpath in pairs(folderpaths) do
 			local first = folderpath:sub(1, 1)
 			if first ~= "_" and first ~= "." then
-				traverse(folderpath)
+				traverse(modlib.mod.get_resource(modname, folderpath))
 			end
 		end
 	end
