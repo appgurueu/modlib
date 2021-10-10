@@ -1,6 +1,8 @@
 -- Localize globals
 local assert, error, math, modlib, next, pairs, setmetatable, table = assert, error, math, modlib, next, pairs, setmetatable, table
 
+local read_int, read_single = modlib.binary.read_int, modlib.binary.read_single
+
 -- Set environment
 local _ENV = {}
 setfenv(1, _ENV)
@@ -21,11 +23,7 @@ function read(stream)
 	end
 
 	local function int()
-		local value = byte() + byte() * 0x100 + byte() * 0x10000 + byte() * 0x1000000
-		if value >= 2^31 then
-			return value - 2^32
-		end
-		return value
+		return read_int(byte, 4)
 	end
 
 	local function id()
@@ -52,7 +50,6 @@ function read(stream)
 		end
 	end
 
-	local read_single = modlib.binary.read_single
 	local function float()
 		return read_single(byte)
 	end

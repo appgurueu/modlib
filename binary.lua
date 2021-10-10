@@ -66,12 +66,32 @@ function read_uint(read_byte, bytes)
 	return uint
 end
 
+function read_int(read_byte, bytes)
+	local uint = read_uint(read_byte, bytes)
+	local max = 0x100 ^ bytes
+	if uint >= max / 2 then
+		return uint - max
+	end
+	return uint
+end
+
 function write_uint(write_byte, uint, bytes)
 	for _ = 1, bytes do
 		write_byte(uint % 0x100)
 		uint = math_floor(uint / 0x100)
 	end
 	assert(uint == 0)
+end
+
+function write_int(write_byte, int, bytes)
+	local max = 0x100 ^ bytes / 2
+	if int < 0 then
+		-- No bound checking is needed: If the int is too small, the uint will be too big
+		int = max - int
+	else
+		assert(int < max)
+	end
+	return write_uint(write_byte, int, bytes)
 end
 
 --: on_write function(double)
