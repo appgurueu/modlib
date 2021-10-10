@@ -1,5 +1,5 @@
 -- Localize globals
-local assert, math, pairs, rawset, setmetatable, unpack, vector = assert, math, pairs, rawset, setmetatable, unpack, vector
+local assert, math, pairs, rawget, rawset, setmetatable, unpack, vector = assert, math, pairs, rawget, rawset, setmetatable, unpack, vector
 
 -- Set environment
 local _ENV = {}
@@ -19,7 +19,7 @@ metatable = {
 	__index = function(table, key)
 		local index = index_aliases[key]
 		if index ~= nil then
-			return table[index]
+			return rawget(table, index)
 		end
 		return _ENV[key]
 	end,
