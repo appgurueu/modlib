@@ -228,7 +228,7 @@ function ray_triangle_intersection(origin, direction, triangle)
 	end
 	local pos_on_line = f * dot(edge_2, q)
 	if pos_on_line >= 0 then
-		return pos_on_line
+		return pos_on_line, u, v
 	end
 end
 
