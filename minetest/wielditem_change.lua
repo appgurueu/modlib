@@ -46,13 +46,18 @@ else
 	register_callbacks()
 end
 
+-- TODO export
+local function itemstack_equals(a, b)
+	return a:get_name() == b:get_name() and a:get_count() == b:get_count() and a:get_wear() == b:get_wear() and a:get_meta():equals(b:get_meta())
+end
+
 minetest.register_globalstep(function()
 	for _, player in pairs(minetest.get_connected_players()) do
 		local item, index = player:get_wielded_item(), player:get_wield_index()
 		local playerdata = players[player:get_player_name()]
 		if not playerdata then return end
 		local previous_item, previous_index = playerdata.wield.item, playerdata.wield.index
-		if item:get_name() ~= previous_item or index ~= previous_index then
+		if not (itemstack_equals(item, previous_item) and index == previous_index) then
 			playerdata.wield.item = item
 			playerdata.wield.index = index
 			modlib.table.icall(registered_on_wielditem_changes, player, previous_item, previous_index, item)
