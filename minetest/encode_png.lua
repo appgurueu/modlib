@@ -1,5 +1,6 @@
 if minetest.encode_png then
-	return minetest.encode_png
+	(...).encode_png = minetest.encode_png
+	return
 end
 
 local assert, char, ipairs, insert, concat, floor = assert, string.char, ipairs, table.insert, table.concat, math.floor
