@@ -90,20 +90,16 @@ local function encode_png(width, height, data, compression, raw_write)
 	byte(0)
 	end_chunk()
 	chunk"IDAT"
-	local data_bytestring = {}
+	local data_rope = {}
 	for y = 0, height - 1 do
-		local base = y * width
-		insert(data_bytestring, "\0")
+		local base_index = y * width
+		insert(data_rope, "\0")
 		for x = 1, width do
-			local color_int = data[base + x]
-			local a = floor(color_int / 0x1000000) % 0x100
-			local r = floor(color_int / 0x10000) % 0x100
-			local g = floor(color_int / 0x100) % 0x100
-			local b = color_int % 0x100
-			insert(data_bytestring, char(r, g, b, a))
+			local colorspec = modlib.minetest.colorspec.from_any(data[base_index + x])
+			insert(data_rope, char(colorspec.r, colorspec.g, colorspec.b, colorspec.a))
 		end
 	end
-	write(minetest.compress(concat(data_bytestring), "deflate", compression))
+	write(minetest.compress(type(data) == "string" and data or concat(data_rope), "deflate", compression))
 	end_chunk()
 	chunk"IEND"
 	end_chunk()
