@@ -6,7 +6,8 @@ for _, value in pairs{
 	"raycast",
 	"schematic",
 	"colorspec",
-	"media"
+	"media",
+	"encode_png",
 } do
 	components[value] = value
 end
