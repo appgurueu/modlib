@@ -1,5 +1,6 @@
 -- Localize globals
 local assert, error, math, minetest, setmetatable, tonumber, type = assert, error, math, minetest, setmetatable, tonumber, type
+local floor = math.floor
 
 -- Set environment
 local _ENV = ...
@@ -194,7 +195,6 @@ function colorspec.from_string(string)
 	if len == 6 then
 		return colorspec.from_number(num * 0x100 + 0xFF)
 	end
-	local floor = math.floor
 	if len == 4 then
 		return colorspec.from_table{
 			a = (num % 16) * 17,
@@ -210,13 +210,14 @@ function colorspec.from_string(string)
 			r = (floor(num / (16 ^ 2)) % 16) * 17
 		}
 	end
+	-- TODO return nil
 	error"invalid colorstring"
 end
 
 colorspec.from_text = colorspec.from_string
 
+--! This does not take a Minetest-accepted number, use :to_number_argb() instead
 function colorspec.from_number(number)
-	local floor = math.floor
 	return colorspec.from_table{
 		a = number % 0x100,
 		b = floor(number / 0x100) % 0x100,
@@ -226,12 +227,20 @@ function colorspec.from_number(number)
 end
 
 function colorspec.from_number_rgb(number)
-	local floor = math.floor
 	return colorspec.from_table{
 		a = 0xFF,
 		b = number % 0x100,
 		g = floor(number / 0x100) % 0x100,
 		r = floor(number / 0x10000)
+	}
+end
+
+function colorspec.from_number_argb(number)
+	return colorspec.from_table{
+		b = number % 0x100,
+		g = floor(number / 0x100) % 0x100,
+		r = floor(number / 0x10000) % 0x100,
+		a = floor(number / 0x1000000)
 	}
 end
 
@@ -244,7 +253,7 @@ function colorspec.from_any(value)
 		return colorspec.from_string(value)
 	end
 	if type == "number" then
-		return colorspec.from_number(value)
+		return colorspec.from_number_argb(value)
 	end
 	error("Unsupported type " .. type)
 end
@@ -261,12 +270,17 @@ function colorspec:to_string()
 	return ("%02X%02X%02X%02X"):format(self.r, self.g, self.b, self.a)
 end
 
+--! This is not a Minetest-accepted number, use :to_number_argb() instead
 function colorspec:to_number()
 	return self.r * 0x1000000 + self.g * 0x10000 + self.b * 0x100 + self.a
 end
 
 function colorspec:to_number_rgb()
 	return self.r * 0x10000 + self.g * 0x100 + self.b
+end
+
+function colorspec:to_number_argb()
+	return self.a * 0x1000000 + self.r * 0x10000 + self.g * 0x100 + self.b
 end
 
 colorspec_to_colorstring = minetest.colorspec_to_colorstring or function(spec)
