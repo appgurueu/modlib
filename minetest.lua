@@ -50,6 +50,11 @@ for filename, comps in pairs{
 	},
 	collisionboxes = {
 		"get_node_collisionboxes"
+	},
+	png = {
+		"decode_png",
+		"convert_png_to_argb8",
+		"encode_png",
 	}
 } do
 	for _, component in pairs(comps) do
