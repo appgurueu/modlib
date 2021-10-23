@@ -72,6 +72,13 @@ local samples = {
 	truecolor = 3
 }
 
+local adam7_passes = {
+	x_min = { 0, 4, 0, 2, 0, 1, 0 },
+	y_min = { 0, 0, 4, 0, 2, 0, 1 },
+	x_step = { 8, 8, 4, 4, 2, 2, 1 },
+	y_step = { 8, 8, 8, 4, 4, 2, 2 },
+}
+
 (...).decode_png = function(stream)
 	local chunk_crc
 	local function read(n)
@@ -125,7 +132,6 @@ local samples = {
 	local interlace_method = byte()
 	assert(interlace_method <= 1, "unsupported interlace method")
 	local adam7 = interlace_method == 1
-	assert(not adam7, "adam7 interlacing not supported yet")
 	check_crc() -- IHDR CRC
 
 	local palette
@@ -205,13 +211,23 @@ local samples = {
 			(64 bits required, packing non-mantissa bits isn't practical) => separate table with alpha values
 	]]
 	local data = {}
-	local alpha_data = {}
+	local alpha_data = color_type.color == "truecolor" and bit_depth == 16 and {} or nil
+	if adam7 then
+		-- Allocate space in list part in order to not fill the hash part later
+		for i = 1, width * height do
+			data[i] = false
+			if alpha_data then
+				alpha_data[i] = false
+			end
+		end
+	end
 	local bits_per_pixel = (samples[color_type.color] + (color_type.alpha and 1 or 0)) * bit_depth
 	local bytes_per_pixel = math.ceil(bits_per_pixel / 8)
-	local scanline_bytecount = math.ceil(width * bits_per_pixel / 8)
 	local previous_scanline
-	for y = 0, height - 1 do
-		local idat_base_index = y * (scanline_bytecount + 1) + 1
+	local idat_base_index = 1
+	local function read_scanline(x_min, x_step, y)
+		local scanline_width = math.ceil((width - x_min) / x_step)
+		local scanline_bytecount = math.ceil(scanline_width * bits_per_pixel / 8)
 		local filtering = idat_content:byte(idat_base_index)
 		local scanline = {}
 		for i = 1, scanline_bytecount do
@@ -262,7 +278,7 @@ local samples = {
 			local low = 2^(-bit % 8)
 			return floor(byte / low) % (2^bit_depth)
 		end
-		for x = 0, width - 1 do
+		for x = x_min, width - 1, x_step do
 			local data_index = y * width + x + 1
 			if color_type.color == "palette" then
 				local palette_index = sample()
@@ -303,6 +319,23 @@ local samples = {
 		-- Each byte of the scanline must have been read from
 		assert(bit >= #scanline * 8 - 7)
 		previous_scanline = scanline
+		idat_base_index = idat_base_index + scanline_bytecount + 1
+	end
+	if adam7 then
+		for pass = 1, 7 do
+			local x_min, y_min = adam7_passes.x_min[pass], adam7_passes.y_min[pass]
+			if x_min < width and y_min < height then -- Non-empty pass
+				local x_step, y_step = adam7_passes.x_step[pass], adam7_passes.y_step[pass]
+				previous_scanline = nil -- Filtering doesn't use scanlines of previous passes
+				for y = y_min, height - 1, y_step do
+					read_scanline(x_min, x_step, y)
+				end
+			end
+		end
+	else
+		for y = 0, height - 1 do
+			read_scanline(0, 1, y)
+		end
 	end
 	return {
 		width = width,
@@ -310,7 +343,7 @@ local samples = {
 		color_type = color_type,
 		source_gamma = source_gamma,
 		data = data,
-		alpha_data = next(alpha_data) and alpha_data
+		alpha_data = alpha_data
 	}
 end
 
