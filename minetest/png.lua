@@ -3,7 +3,7 @@ local signature = "\137\80\78\71\13\10\26\10"
 local assert, char, ipairs, insert, concat, abs, floor = assert, string.char, ipairs, table.insert, table.concat, math.abs, math.floor
 
 -- TODO move to modlib.bit eventually
-local bit_xor = bit and bit.xor or function(a, b)
+local bit_xor = bit and bit.bxor or function(a, b)
 	local res = 0
 	local bit = 1
 	for _ = 1, 32 do
