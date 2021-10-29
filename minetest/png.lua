@@ -375,7 +375,7 @@ end
 			png.data[index] = a * 0x1000000 + r * 0x10000 + g * 0x100 + b
 		end
 	end
-	png.color_type = colortypes[6]
+	png.color_type = color_types[6]
 	png.bit_depth = 8
 	png.alpha_data = nil
 end
