@@ -167,6 +167,7 @@ local adam7_passes = {
 				end
 			elseif chunk_type == "tRNS" then
 				assert(not color_type.alpha, "unexpected tRNS chunk")
+				color_type.transparency = true
 				assert(idat_allowed, "tRNS after IDAT chunks")
 				if color_type.color == "palette" then
 					assert(palette, "PLTE chunk expected")
@@ -180,7 +181,11 @@ local adam7_passes = {
 				else
 					assert(color_type.color == "truecolor")
 					assert(chunk_length == 6)
-					alpha = ((((byte() * 0x100 + byte()) * 0x100 + byte()) * 0x100 + byte()) * 0x100 + byte()) * 0x100 + byte() -- 16-bit RGB
+					alpha = 0
+					-- Read 16-bit RGB (6 bytes)
+					for _ = 1, 6 do
+						alpha = alpha * 0x100 + byte()
+					end
 				end
 			elseif chunk_type == "gAMA" then
 				assert(not palette, "gAMA after PLTE chunk")
@@ -211,7 +216,10 @@ local adam7_passes = {
 			(64 bits required, packing non-mantissa bits isn't practical) => separate table with alpha values
 	]]
 	local data = {}
-	local alpha_data = color_type.color == "truecolor" and bit_depth == 16 and {} or nil
+	local alpha_data
+	if color_type.color == "truecolor" and bit_depth == 16 and (color_type.alpha or color_type.transparency) then
+		alpha_data = {}
+	end
 	if adam7 then
 		-- Allocate space in list part in order to not fill the hash part later
 		for i = 1, width * height do
@@ -312,7 +320,9 @@ local adam7_passes = {
 					-- Pack only RGB in data, alpha goes in a different table
 					-- 3 * 16 = 48 bytes can still be held accurately by the double mantissa
 					data[data_index] = rgb16
-					alpha_data[data_index] = a
+					if alpha_data then
+						alpha_data[data_index] = a
+					end
 				end
 			end
 		end
@@ -347,15 +357,15 @@ local adam7_passes = {
 	}
 end
 
-local function rescale_depth(sample, source, target)
-	if source == target then
+local function rescale_depth(sample, source_depth, target_depth)
+	if source_depth == target_depth then
 		return sample
 	end
-	return floor((sample / (2^source - 1) * (2^target - 1)) + 0.5)
+	return floor((sample * (2^target_depth - 1) / (2^source_depth - 1)) + 0.5)
 end
 -- In-place lossy (if bit depth = 16) conversion to ARGB8
 (...).convert_png_to_argb8 = function(png)
-	local color, alpha, depth = png.color_type.color, png.color_type.alpha, png.color_type.depth
+	local color, transparency, depth = png.color_type.color, png.color_type.alpha or png.color_type.transparency, png.color_type.depth
 	if color == "palette" or (color == "truecolor" and depth == 8) then
 		return
 	end
@@ -369,7 +379,7 @@ end
 			local g = rescale_depth(floor(value / 0x10000) % 0x10000, depth, 8)
 			local b = rescale_depth(value % 0x10000, depth, 8)
 			local a = 0xFF
-			if alpha then
+			if transparency then
 				a = rescale_depth(png.alpha_data[index], depth, 8)
 			end
 			png.data[index] = a * 0x1000000 + r * 0x10000 + g * 0x100 + b
