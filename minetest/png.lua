@@ -371,7 +371,7 @@ end
 	end
 	for index, value in pairs(png.data) do
 		if color == "grayscale" then
-			local a, Y = rescale_depth(floor(value / (2^depth)), depth, 8), rescale_depth(floor(value % (2^depth)), depth, 8)
+			local a, Y = rescale_depth(floor(value / (2^depth)), depth, 8), rescale_depth(value % (2^depth), depth, 8)
 			png.data[index] = a * 0x1000000 + Y * 0x10000 + Y * 0x100 + Y -- R = G = B = Y
 		else
 			assert(color == "truecolor" and depth == 16)
