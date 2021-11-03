@@ -172,6 +172,30 @@ end
 
 colorspec.from_table = colorspec.new
 
+local c_comp = { "r", "g", "g", "b", "b", "r" }
+local x_comp = { "g", "r", "b", "g", "r", "b" }
+function colorspec.from_hsv(
+	-- 0 (inclusive) to 1 (exclusive)
+	hue,
+	-- 0 to 1 (both inclusive)
+	saturation,
+	-- 0 to 1 (both inclusive)
+	value
+)
+	hue = hue * 6
+	local chroma = saturation * value
+	local m = value - chroma
+	local color = {r = m, g = m, b = m}
+	local idx = 1 + floor(hue)
+	color[c_comp[idx]] = color[c_comp[idx]] + chroma
+	local x = chroma * (1 - math.abs(hue % 2 - 1))
+	color[x_comp[idx]] = color[x_comp[idx]] + x
+	color.r = floor(color.r * 255 + 0.5)
+	color.g = floor(color.g * 255 + 0.5)
+	color.b = floor(color.b * 255 + 0.5)
+	return colorspec.from_table(color)
+end
+
 function colorspec.from_string(string)
 	local hex = "#([A-Fa-f%d]+)"
 	local number, alpha = named_colors[string], 0xFF
