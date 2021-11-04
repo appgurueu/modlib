@@ -5,6 +5,10 @@ local io, minetest, modlib, string = io, minetest, modlib, string
 local _ENV = {}
 setfenv(1, _ENV)
 
+function get_name(filepath)
+	assert(#modlib.dir_delim == 1)
+	return filepath:match(modlib.dir_delim .. "?(.-)$")
+end
 function get_extension(filename)
 	return filename:match"(.*)%.(.*)$"
 end
