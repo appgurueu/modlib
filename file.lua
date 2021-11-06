@@ -18,6 +18,12 @@ end
 --! deprecated
 get_extension = split_extension
 
+function split_path(filepath)
+	return modlib.text.split(filepath, dir_delim)
+end
+
+-- concat_path is set by init.lua to avoid code duplication
+
 function read(filename)
 	local file = io.open(filename, "r")
 	if file == nil then return nil end
