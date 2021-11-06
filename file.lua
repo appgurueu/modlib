@@ -9,9 +9,11 @@ function get_name(filepath)
 	assert(#modlib.dir_delim == 1)
 	return filepath:match(modlib.dir_delim .. "?(.-)$")
 end
-function get_extension(filename)
-	return filename:match"(.*)%.(.*)$"
+function split_extension(filename)
+	return filename:match"^(.*)%.(.*)$"
 end
+--! deprecated
+get_extension = split_extension
 
 function read(filename)
 	local file = io.open(filename, "r")
