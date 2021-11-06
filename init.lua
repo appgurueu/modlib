@@ -96,6 +96,25 @@ local function get_resource(modname, resource, ...)
 	return concat_path{minetest.get_modpath(modname), resource, ...}
 end
 
+local function load_module(self, module_name_or_alias)
+	local module_name = modules[module_name_or_alias]
+	if not module_name then
+		-- no such module
+		return
+	end
+	local environment
+	if module_name ~= module_name_or_alias then
+		-- alias handling
+		environment = self[module_name]
+	else
+		environment = dofile(minetest
+			and get_resource(self.modname, module_name .. ".lua")
+			or (parent_dir .. module_name .. ".lua"))
+	end
+	self[module_name_or_alias] = environment
+	return environment
+end
+
 local rawget, rawset = rawget, rawset
 modlib = setmetatable({
 	-- TODO bump on release
@@ -114,26 +133,7 @@ modlib = setmetatable({
 			error(dump(value), 2)
 		end
 	end
-}, {
-	__index = function(self, module_name_or_alias)
-		local module_name = modules[module_name_or_alias]
-		if not module_name then
-			-- module not available, return nil
-			return
-		end
-		local environment
-		if module_name ~= module_name_or_alias then
-			-- alias handling
-			environment = self[module_name]
-		else
-			environment = dofile(minetest
-				and get_resource(self.modname, module_name .. ".lua")
-				or (parent_dir .. module_name .. ".lua"))
-		end
-		self[module_name_or_alias] = environment
-		return environment
-	end
-})
+}, { __index = load_module })
 
 -- Force load file module to pass dir_delim & to set concat_path
 modlib.file = assert(loadfile(get_resource"file.lua"))(dir_delim)
