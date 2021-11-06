@@ -135,6 +135,9 @@ modlib = setmetatable({
 	end
 })
 
+-- Force load file module to pass dir_delim & to set concat_path
+modlib.file = assert(loadfile(get_resource"file.lua"))(dir_delim)
+modlib.file.concat_path = concat_path
 
 if minetest then
 	modlib.mod = dofile(get_resource(modlib.modname, "mod.lua"))
