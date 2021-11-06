@@ -81,7 +81,7 @@ if not minetest then
 	parent_dir = init_path and init_path:match"^.[/\\]" or ""
 end
 
-local dir_delim = rawget(_G, "DIR_DELIM") or (package and package.config and assert(package.config:match("^(.-)[\r\n]"))) or "/"
+local dir_delim = rawget(_G, "DIR_DELIM") or (rawget(_G, "package") and package.config and assert(package.config:match("^(.-)[\r\n]"))) or "/"
 
 local function concat_path(path)
 	return table.concat(path, dir_delim)
