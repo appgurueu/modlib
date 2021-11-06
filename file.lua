@@ -1,3 +1,4 @@
+local dir_delim = ...
 -- Localize globals
 local io, minetest, modlib, string = io, minetest, modlib, string
 
@@ -5,10 +6,12 @@ local io, minetest, modlib, string = io, minetest, modlib, string
 local _ENV = {}
 setfenv(1, _ENV)
 
+_ENV.dir_delim = dir_delim
+
 function get_name(filepath)
-	assert(#modlib.dir_delim == 1)
-	return filepath:match(modlib.dir_delim .. "?(.-)$")
+	return filepath:match(dir_delim .. "(.-)$") or filepath
 end
+
 function split_extension(filename)
 	return filename:match"^(.*)%.(.*)$"
 end

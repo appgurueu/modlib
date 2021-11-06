@@ -81,13 +81,19 @@ if not minetest then
 	parent_dir = init_path and init_path:match"^.[/\\]" or ""
 end
 
+local dir_delim = rawget(_G, "DIR_DELIM") or (package and package.config and assert(package.config:match("^(.-)[\r\n]"))) or "/"
+
+local function concat_path(path)
+	return table.concat(path, dir_delim)
+end
+
 -- only used if Minetest is available
 local function get_resource(modname, resource, ...)
 	if not resource then
 		resource = modname
 		modname = minetest.get_current_modname()
 	end
-	return table.concat({minetest.get_modpath(modname), resource, ...}, modlib.dir_delim)
+	return concat_path{minetest.get_modpath(modname), resource, ...}
 end
 
 local rawget, rawset = rawget, rawset
@@ -95,8 +101,6 @@ modlib = setmetatable({
 	-- TODO bump on release
 	version = 73,
 	modname = minetest and minetest.get_current_modname(),
-	-- TODO
-	dir_delim = rawget(_G, "DIR_DELIM") or "/",
 	_RG = setmetatable({}, {
 		__index = function(_, index)
 			return rawget(_G, index)
