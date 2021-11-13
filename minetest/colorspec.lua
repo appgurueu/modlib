@@ -241,8 +241,7 @@ end
 
 colorspec.from_text = colorspec.from_string
 
---! This does not take a Minetest-accepted number, use :to_number_argb() instead
-function colorspec.from_number(number)
+function colorspec.from_number_rgba(number)
 	return colorspec.from_table{
 		a = number % 0x100,
 		b = floor(number / 0x100) % 0x100,
@@ -260,7 +259,7 @@ function colorspec.from_number_rgb(number)
 	}
 end
 
-function colorspec.from_number_argb(number)
+function colorspec.from_number(number)
 	return colorspec.from_table{
 		b = number % 0x100,
 		g = floor(number / 0x100) % 0x100,
@@ -278,7 +277,7 @@ function colorspec.from_any(value)
 		return colorspec.from_string(value)
 	end
 	if type == "number" then
-		return colorspec.from_number_argb(value)
+		return colorspec.from_number(value)
 	end
 	error("Unsupported type " .. type)
 end
@@ -296,8 +295,7 @@ function colorspec:to_string()
 end
 metatable.__tostring = colorspec.to_string
 
---! This is not a Minetest-accepted number, use :to_number_argb() instead
-function colorspec:to_number()
+function colorspec:to_number_rgba()
 	return self.r * 0x1000000 + self.g * 0x10000 + self.b * 0x100 + self.a
 end
 
@@ -305,7 +303,7 @@ function colorspec:to_number_rgb()
 	return self.r * 0x10000 + self.g * 0x100 + self.b
 end
 
-function colorspec:to_number_argb()
+function colorspec:to_number()
 	return self.a * 0x1000000 + self.r * 0x10000 + self.g * 0x100 + self.b
 end
 
