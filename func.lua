@@ -1,6 +1,6 @@
 -- Localize globals
-local error, coroutine, modlib, unpack
-	= error, coroutine, modlib, unpack
+local error, coroutine, math, modlib, unpack
+	= error, coroutine, math, modlib, unpack
 
 -- Set environment
 local _ENV = {}
@@ -76,6 +76,62 @@ function aggregate(binary_func, total, ...)
 	end
 	_aggregate(...)
 	return total
+end
+
+--+ For all functions which aggregate over single values, use modlib.table.ivalues - not ipairs - for lists!
+--+ Otherwise they will be applied to the indices.
+iterator = {}
+
+function iterator.aggregate(binary_func, total, ...)
+	for value in ... do
+		total = binary_func(total, value)
+	end
+	return total
+end
+
+function iterator.min(less_than_func, ...)
+	local min
+	for value in ... do
+		if min == nil or less_than_func(value, min) then
+			min = value
+		end
+	end
+	return min
+end
+
+function iterator.count(...)
+	local count = 0
+	for _ in ... do
+		count = count + 1
+	end
+	return count
+end
+
+function iterator.sum(...)
+	return iterator.aggregate(add, ...)
+end
+
+function iterator.average(...)
+	local count = 0
+	local sum = 0
+	for value in ... do
+		count = count + 1
+		sum = sum + value
+	end
+	return sum / count
+end
+
+--: ... **restartable** iterator
+-- While a single pass method for calculating the standard deviation exists, it is highly inaccurate
+function iterator.standard_deviation(...)
+	local avg = iterator.average(...)
+	local count = 0
+	local sum = 0
+	for value in ... do
+		count = count + 1
+		sum = sum + (value - avg)^2
+	end
+	return math.sqrt(sum / count)
 end
 
 function override_chain(func, override)
