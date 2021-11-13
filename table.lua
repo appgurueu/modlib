@@ -558,6 +558,14 @@ function unique(table)
 	return keys(set(table))
 end
 
+function ivalues(table)
+	local index = 0
+	return function()
+		index = index + 1
+		return table[index]
+	end
+end
+
 function rpairs(table)
 	local index = #table
 	return function()
