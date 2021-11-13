@@ -5,6 +5,9 @@ local assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, t
 local _ENV = {}
 setfenv(1, _ENV)
 
+-- Empty table
+empty = {}
+
 -- Table helpers
 
 function map_index(table, func)
@@ -391,6 +394,8 @@ function map(table, func)
 	return table
 end
 
+map_values = map
+
 function map_keys(table, func)
 	local new_tab = {}
 	for key, value in pairs(table) do
@@ -615,6 +620,16 @@ function binary_search_comparator(comparator)
 end
 
 binary_search = binary_search_comparator(default_comparator)
+
+--> whether the list is sorted in ascending order
+function is_sorted(list, comparator)
+	for index = 2, #list do
+		if comparator(list[index - 1], list[index]) >= 0 then
+			return false
+		end
+	end
+	return true
+end
 
 function reverse(table)
 	local len = #table
