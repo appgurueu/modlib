@@ -331,7 +331,7 @@ assert(minetest.luon:read_string(minetest.luon:write_string(ItemStack"")))
 local colorspec = minetest.colorspec
 local function test_from_string(string, number)
 	local spec = colorspec.from_string(string)
-	local expected = colorspec.from_number(number)
+	local expected = colorspec.from_number_rgba(number)
 	assertdump(table.equals(spec, expected), {expected = expected, actual = spec})
 end
 local spec = colorspec.from_number(0xDDCCBBAA)
@@ -341,7 +341,7 @@ test_from_string("aliceblue#42", 0xf0f8ff42)
 test_from_string("#333", 0x333333FF)
 test_from_string("#694269", 0x694269FF)
 test_from_string("#11223344", 0x11223344)
-assert(colorspec.from_string"#694269":to_string() == "694269")
+assert(colorspec.from_string"#694269":to_string() == "#694269")
 
 -- Persistence
 local function test_logfile(reference_strings)

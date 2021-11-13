@@ -203,22 +203,29 @@ function colorspec.from_string(string)
 	if not number then
 		local name, alpha_text = string:match("^([a-z]+)" .. hex .. "$")
 		if name then
-			assert(alpha_text:len() == 2)
-			number = assert(named_colors[name])
+			if alpha_text:len() ~= 2 then
+				return
+			end
+			number = named_colors[name]
+			if not number then
+				return
+			end
 			alpha = tonumber(alpha_text, 16)
 		end
 	end
 	if number then
-		return colorspec.from_number(number * 0x100 + alpha)
+		return colorspec.from_number_rgba(number * 0x100 + alpha)
 	end
 	local hex_text = string:match("^" .. hex .. "$")
-	assert(hex_text, "invalid colorstring")
+	if not hex_text then
+		return
+	end
 	local len, num = hex_text:len(), tonumber(hex_text, 16)
 	if len == 8 then
-		return colorspec.from_number(num)
+		return colorspec.from_number_rgba(num)
 	end
 	if len == 6 then
-		return colorspec.from_number(num * 0x100 + 0xFF)
+		return colorspec.from_number_rgba(num * 0x100 + 0xFF)
 	end
 	if len == 4 then
 		return colorspec.from_table{
@@ -235,8 +242,6 @@ function colorspec.from_string(string)
 			r = (floor(num / (16 ^ 2)) % 16) * 17
 		}
 	end
-	-- TODO return nil
-	error"invalid colorstring"
 end
 
 colorspec.from_text = colorspec.from_string
@@ -308,5 +313,9 @@ function colorspec:to_number()
 end
 
 colorspec_to_colorstring = minetest.colorspec_to_colorstring or function(spec)
-	return colorspec.from_any(spec):to_string()
+	local color = colorspec.from_any(spec)
+	if not color then
+		return nil
+	end
+	return color:to_string()
 end
