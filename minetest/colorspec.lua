@@ -290,10 +290,11 @@ end
 --> hex string, omits alpha if possible (if opaque)
 function colorspec:to_string()
 	if self.a == 255 then
-		return ("%02X%02X%02X"):format(self.r, self.g, self.b)
+		return ("#%02X%02X%02X"):format(self.r, self.g, self.b)
 	end
-	return ("%02X%02X%02X%02X"):format(self.r, self.g, self.b, self.a)
+	return ("#%02X%02X%02X%02X"):format(self.r, self.g, self.b, self.a)
 end
+metatable.__tostring = colorspec.to_string
 
 --! This is not a Minetest-accepted number, use :to_number_argb() instead
 function colorspec:to_number()
