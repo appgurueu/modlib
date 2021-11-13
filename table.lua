@@ -1,5 +1,5 @@
 -- Localize globals
-local assert, error, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type = assert, error, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type
+local assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type = assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type
 
 -- Set environment
 local _ENV = {}
@@ -58,7 +58,7 @@ local rope_len_metatable = {__index = {
 		self.len = self.len + text:len()
 	end
 }}
---> rope for determining length supporting :write(text), .len being the length
+--> rope for determining length of text supporting `:write(text)` and `.len` to get the length of written text
 function rope_len(len)
 	return setmetatable({len = len or 0}, rope_len_metatable)
 end
@@ -419,7 +419,6 @@ function find(list, value)
 			return index
 		end
 	end
-	return
 end
 
 contains = find
@@ -560,21 +559,20 @@ function rpairs(table)
 end
 
 function best_value(table, is_better_func)
-	local best = next(table)
-	if best == nil then
+	local best_key = next(table)
+	if best_key == nil then
 		return
 	end
-	local candidate = best
+	local candidate_key = best_key
 	while true do
-		candidate = next(table, candidate)
-		if candidate == nil then
-			return best
+		candidate_key = next(table, candidate_key)
+		if candidate_key == nil then
+			return best_key
 		end
-		if is_better_func(candidate, best) then
-			best = candidate
+		if is_better_func(candidate_key, best_key) then
+			best_key = candidate_key
 		end
 	end
-	error()
 end
 
 function min(table)
@@ -619,9 +617,10 @@ end
 binary_search = binary_search_comparator(default_comparator)
 
 function reverse(table)
-	local l = #table + 1
-	for index = 1, math.floor(#table / 2) do
-		table[l - index], table[index] = table[index], table[l - index]
+	local len = #table
+	for index = 1, math.floor(len / 2) do
+		local index_from_end = len + 1 - index
+		table[index_from_end], table[index] = table[index], table[index_from_end]
 	end
 	return table
 end
