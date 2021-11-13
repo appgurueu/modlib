@@ -10,6 +10,14 @@ empty = {}
 
 -- Table helpers
 
+function from_iterator(...)
+	local table = {}
+	for key, value in ... do
+		table[key] = value
+	end
+	return table
+end
+
 function map_index(table, func)
 	local mapping_metatable = {
 		__index = function(table, key)
