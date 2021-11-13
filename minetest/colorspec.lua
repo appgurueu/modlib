@@ -159,7 +159,8 @@ named_colors = {
 
 colorspec = {}
 
-local colorspec_metatable = {__index = colorspec}
+local metatable = {__index = colorspec}
+colorspec.metatable = metatable
 
 function colorspec.new(table)
 	return setmetatable({
@@ -167,7 +168,7 @@ function colorspec.new(table)
 		g = assert(table.g),
 		b = assert(table.b),
 		a = table.a or 255
-	}, colorspec_metatable)
+	}, metatable)
 end
 
 colorspec.from_table = colorspec.new
