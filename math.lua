@@ -8,12 +8,20 @@ local inf = math.huge
 local _ENV = {}
 setfenv(1, _ENV)
 
+-- TODO might be too invasive
 -- Make random random
 math.randomseed(minetest and minetest.get_us_time() or os.time() + os.clock())
 for _ = 1, 100 do math.random() end
 
 negative_nan = 0/0
 positive_nan = negative_nan ^ 1
+
+function sign(number)
+	if number ~= number then return number end -- nan
+	if number == 0 then return 0 end
+	if number < 0 then return -1 end
+	if number > 0 then return 1 end
+end
 
 function round(number, steps)
 	steps = steps or 1
