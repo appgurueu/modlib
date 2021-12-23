@@ -32,8 +32,9 @@ function list:len()
 end
 
 function list:ipairs()
-	local index = 1
+	local index = 0
 	return function()
+		index = index + 1
 		if index > self.length then
 			return
 		end
@@ -42,8 +43,9 @@ function list:ipairs()
 end
 
 function list:rpairs()
-	local index = self.length
+	local index = self.length + 1
 	return function()
+		index = index - 1
 		if index < 1 then
 			return
 		end
