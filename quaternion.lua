@@ -29,7 +29,7 @@ function multiply(self, other)
 end
 
 function normalize(self)
-	local len = math.sqrt(self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + (self[4] ^ 4))
+	local len = math.sqrt(self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + self[4] ^ 2)
 	local res = {}
 	for key, value in pairs(self) do
 		res[key] = value / len
