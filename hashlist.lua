@@ -84,6 +84,7 @@ end
 function list:pop_head()
 	if self.length == 0 then return end
 	local value = self:get_head()
+	self.length = self.length - 1
 	self.head = self.head + 1
 	self[self.head] = nil
 	return value
