@@ -42,6 +42,14 @@ end
 
 write = minetest and minetest.safe_file_write or write_unsafe
 
+function write_binary(filename, new_content)
+	local file = io.open(filename, "wb")
+	if file == nil then return false end
+	file:write(new_content)
+	file:close()
+	return true
+end
+
 function ensure_content(filename, ensured_content)
 	local content = read(filename)
 	if content ~= ensured_content then
