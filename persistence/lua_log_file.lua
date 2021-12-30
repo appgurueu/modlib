@@ -124,7 +124,7 @@ local function _dump(self, value, is_key)
 	end
 	if _type == "string" then
 		local reference_strings = self.reference_strings
-		if is_key and ((not reference_strings) or value:len() <= key:len()) and value:match"^[%a_][%a%d_]*$" then
+		if is_key and ((not reference_strings) or value:len() <= key:len()) and modlib.text.is_identifier(value) then
 			-- Short key
 			return value, true
 		end

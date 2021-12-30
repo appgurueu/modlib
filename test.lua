@@ -274,6 +274,7 @@ local function serializer_test(is_json, preserve)
 	c[a] = a; c[b] = b; c[c] = c;
 	a.a = {"a", a = a}
 	assert_preserves(a)
+	assert_preserves{["for"] = "keyword", ["in"] = "keyword"}
 end
 
 -- JSON
@@ -352,7 +353,7 @@ local function test_logfile(reference_strings)
 	assert(logfile.root.root_preserved)
 	logfile.root = {a_longer_string = "test"}
 	logfile:rewrite()
-	logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge})
+	logfile:set_root({a = 1}, {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge, ["in"] = "keyword"})
 	local circular = {}
 	circular[circular] = circular
 	logfile:set_root(circular, circular)
@@ -360,7 +361,7 @@ local function test_logfile(reference_strings)
 	logfile:init()
 	assert(table.equals_references(logfile.root, {
 		a_longer_string = "test",
-		[{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge},
+		[{a = 1}] = {b = 2, c = 3, d = _G.math.huge, e = -_G.math.huge, ["in"] = "keyword"},
 		[circular] = circular,
 	}))
 	if not reference_strings then

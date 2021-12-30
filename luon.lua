@@ -2,6 +2,7 @@ local assert, next, pairs, pcall, error, type, table_insert, table_concat, strin
 	= assert, next, pairs, pcall, error, type, table.insert, table.concat, string.format, string.match, setmetatable, select, setfenv, math.huge, loadfile, loadstring
 
 local count_objects = modlib.table.count_objects
+local is_identifier = modlib.text.is_identifier
 
 -- Build a table with the succeeding character from A-Z
 local succ = {}
@@ -60,7 +61,7 @@ function write(self, value, write)
 		end
 	end
 	local function is_short_key(key)
-		return not references[key] and type(key) == "string" and string_match(key, "^[%a_][%a%d_]*$")
+		return not references[key] and type(key) == "string" and is_identifier(key)
 	end
 	local function dump(value)
 		-- Primitive types

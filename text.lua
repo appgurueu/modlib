@@ -176,5 +176,15 @@ function handle_ifdefs(code, vars)
 	return table.concat(finalcode, "")
 end
 
+local keywords = modlib.table.set{"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
+
+function is_keyword(text)
+	return keywords[text]
+end
+
+function is_identifier(text)
+	return (not keywords[text]) and text:match"^[%a_][%a%d_]*$"
+end
+
 -- Export environment
 return _ENV
