@@ -9,7 +9,7 @@ setfenv(1, _ENV)
 _ENV.dir_delim = dir_delim
 
 function get_name(filepath)
-	return filepath:match(dir_delim .. "(.-)$") or filepath
+	return filepath:match("([^%" .. dir_delim .. "]+)$") or filepath
 end
 
 function split_extension(filename)
