@@ -183,7 +183,7 @@ function is_keyword(text)
 end
 
 function is_identifier(text)
-	return (not keywords[text]) and text:match"^[%a_][%a%d_]*$"
+	return (not keywords[text]) and text:match"^[A-Za-z_][A-Za-z%d_]*$"
 end
 
 -- Export environment
