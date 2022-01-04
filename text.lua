@@ -177,6 +177,7 @@ function handle_ifdefs(code, vars)
 end
 
 local keywords = modlib.table.set{"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
+keywords["goto"] = true -- Lua 5.2 (LuaJIT) support
 
 function is_keyword(text)
 	return keywords[text]
