@@ -153,6 +153,8 @@ if minetest then
 	modlib.conf.build_setting_tree()
 end
 
+-- Run build scripts
+-- dofile(modlib.mod.get_resource("modlib", "build", "html_entities.lua"))
 
 --[[
 --modlib.mod.include"test.lua"

@@ -324,6 +324,14 @@ do
 	end)
 end
 
+do
+	local text = "<tag> & '\""
+	local escaped = web.html.escape(text)
+	assert(web.html.unescape(escaped) == text)
+	assert(web.html.unescape("&#42;") == _G.string.char(42))
+	assert(web.html.unescape("&#x42;") == _G.string.char(0x42))
+end
+
 if not _G.minetest then return end
 
 assert(minetest.luon:read_string(minetest.luon:write_string(ItemStack"")))
