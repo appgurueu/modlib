@@ -256,7 +256,7 @@ function get_mod_info()
 			local function read_depends(field)
 				local depends = {}
 				for depend in (mod_conf[field] or ""):gmatch"[^,]+" do
-					depends[depend:match"^%s*(.-)%s*$"] = true
+					depends[modlib.text.trim_spacing(depend)] = true
 				end
 				info[field] = depends
 			end
