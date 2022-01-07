@@ -23,6 +23,11 @@ function sign(number)
 	if number > 0 then return 1 end
 end
 
+-- one-based mod
+function onemod(number, modulus)
+	return ((number - 1) % modulus) + 1
+end
+
 function round(number, steps)
 	steps = steps or 1
 	return math_floor(number * steps + 0.5) / steps
