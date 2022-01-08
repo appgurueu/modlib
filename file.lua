@@ -50,6 +50,8 @@ function write_binary(filename, new_content)
 	return true
 end
 
+write_binary = minetest and minetest.safe_file_write or write_binary_unsafe
+
 function ensure_content(filename, ensured_content)
 	local content = read(filename)
 	if content ~= ensured_content then
