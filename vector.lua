@@ -206,8 +206,7 @@ function box_box_collision(diff, box, other_box)
 	return true
 end
 
---+ Möller-Trumbore
-function ray_triangle_intersection(origin, direction, triangle)
+local function moeller_trumbore(origin, direction, triangle, is_tri)
 	local point_1, point_2, point_3 = unpack(triangle)
 	local edge_1, edge_2 = subtract(point_2, point_1), subtract(point_3, point_1)
 	local h = cross3(direction, edge_2)
@@ -223,13 +222,21 @@ function ray_triangle_intersection(origin, direction, triangle)
 	end
 	local q = cross3(diff, edge_1)
 	local v = f * dot(direction, q)
-	if v < 0 or u + v > 1 then
+	if v < 0 or (is_tri and u or 0) + v > 1 then
 		return
 	end
 	local pos_on_line = f * dot(edge_2, q)
 	if pos_on_line >= 0 then
 		return pos_on_line, u, v
 	end
+end
+
+function ray_triangle_intersection(origin, direction, triangle)
+	return moeller_trumbore(origin, direction, triangle, true)
+end
+
+function ray_parallelogram_intersection(origin, direction, parallelogram)
+	return moeller_trumbore(origin, direction, parallelogram)
 end
 
 function triangle_normal(triangle)
