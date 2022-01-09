@@ -56,7 +56,8 @@ for _, file in pairs{
 	"luon",
 	"bluon",
 	"persistence",
-	"debug"
+	"debug",
+	"web"
 } do
 	modules[file] = file
 end
