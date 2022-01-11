@@ -190,10 +190,13 @@ function angle(v, w)
 end
 
 -- Uses Rodrigues' rotation formula
+-- axis must be normalized
 function rotate3(v, axis, angle)
+	assert(#v == 3 and #axis == 3)
 	local cos = math.cos(angle)
 	return multiply_scalar(v, cos)
-		+ multiply_scalar(cross3(axis, v), math.sin(angle))
+		-- Minetest's coordinate system is *left-handed*, so `v` and `axis` must be swapped here
+		+ multiply_scalar(cross3(v, axis), math.sin(angle))
 		+ multiply_scalar(axis, dot(axis, v) * (1 - cos))
 end
 
