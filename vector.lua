@@ -162,6 +162,19 @@ function normalize(v)
 	return divide_scalar(v, length(v))
 end
 
+function normalize_zero(v)
+	local len = length(v)
+	if len == 0 then
+		-- Return a zeroed vector with the same keys
+		local zeroed = {}
+		for k in pairs(v) do
+			zeroed[k] = 0
+		end
+		return new(zeroed)
+	end
+	return divide_scalar(v, len)
+end
+
 function floor(v)
 	return apply(v, math.floor)
 end
