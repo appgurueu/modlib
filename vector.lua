@@ -36,6 +36,13 @@ function new(v)
 	return setmetatable(v, metatable)
 end
 
+function zeros(n)
+	local v = {}
+	for i = 1, n do
+		v[i] = 0
+	end
+	return new(v)
+end
 function from_xyzw(v)
 	return new{v.x, v.y, v.z, v.w}
 end
