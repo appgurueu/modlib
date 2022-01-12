@@ -105,9 +105,11 @@ function combinator(f)
 end
 
 function invert(v)
+	local res = {}
 	for key, value in pairs(v) do
-		v[key] = -value
+		res[key] = -value
 	end
+	return new(res)
 end
 
 add, add_scalar = combinator(function(v, w) return v + w end)
