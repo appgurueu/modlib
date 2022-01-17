@@ -23,6 +23,15 @@ function sign(number)
 	if number > 0 then return 1 end
 end
 
+log = setmetatable({}, {__index = function(self, base)
+	local div = math.log(base)
+	local function base_log(number)
+		return math.log(number) / div
+	end
+	self[base] = base_log
+	return base_log
+end})
+
 -- one-based mod
 function onemod(number, modulus)
 	return ((number - 1) % modulus) + 1

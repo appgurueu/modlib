@@ -19,11 +19,15 @@ setfenv(1, setmetatable({}, {
 -- math
 do
 	local function assert_tonumber(num, base)
-		local str = modlib.math.tostring(num, base)
+		local str = math.tostring(num, base)
 		assert(tonumber(str, base) == num, str)
 	end
 	assert_tonumber(134217503, 36)
 	assert_tonumber(3.14, 10)
+	for i = -100, 100 do
+		local log = math.log[2](2^i)
+		assert(_G.math.abs(log - i) < 2^-40) -- Small tolerance for floating-point precision errors 
+	end
 end
 
 -- func
