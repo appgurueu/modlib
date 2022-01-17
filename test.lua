@@ -26,7 +26,9 @@ do
 	assert_tonumber(3.14, 10)
 	for i = -100, 100 do
 		local log = math.log[2](2^i)
-		assert(_G.math.abs(log - i) < 2^-40) -- Small tolerance for floating-point precision errors 
+		assert(_G.math.abs(log - i) < 2^-40) -- Small tolerance for floating-point precision errors
+		assert(math.log(2^i) == _G.math.log(2^i))
+		assert(math.log(2^i, 2) == log)
 	end
 end
 
