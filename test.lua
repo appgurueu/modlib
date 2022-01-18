@@ -61,8 +61,8 @@ do
 		return retval
 	end
 	local memo = func.memoize(fun)
-	assert(memo(arg) == false)
-	assert(memo(arg) == false)
+	assert(memo"test" == false)
+	assert(memo.test == false)
 end
 
 -- string
