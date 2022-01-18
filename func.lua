@@ -1,6 +1,6 @@
 -- Localize globals
-local error, coroutine, math, modlib, unpack
-	= error, coroutine, math, modlib, unpack
+local error, coroutine, math, modlib, unpack, select, setmetatable
+	= error, coroutine, math, modlib, unpack, select, setmetatable
 
 -- Set environment
 local _ENV = {}
@@ -33,6 +33,20 @@ function value(val) return function() return val end end
 function values(...)
 	local args = { ... }
 	return function() return unpack(args) end
+end
+
+function memoize(func)
+	return setmetatable({}, {
+		__index = function(self, key)
+			local value = func(key)
+			self[key] = value
+			return value
+		end,
+		__call = function(self, arg)
+			return self[arg]
+		end,
+		__mode = "k"
+	})
 end
 
 -- Equivalent to `for x, y, z in iterator, state, ... do callback(x, y, z) end`

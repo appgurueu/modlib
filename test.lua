@@ -53,6 +53,16 @@ do
 	end
 	assert(next(tab) == nil)
 	assert(func.aggregate(func.add, 1, 2, 3) == 6)
+	local called = false
+	local function fun(arg)
+		assert(arg == "test")
+		local retval = called
+		called = true
+		return retval
+	end
+	local memo = func.memoize(fun)
+	assert(memo(arg) == false)
+	assert(memo(arg) == false)
 end
 
 -- string
