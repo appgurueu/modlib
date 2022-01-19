@@ -367,8 +367,10 @@ do
 	local text = "<tag> & '\""
 	local escaped = web.html.escape(text)
 	assert(web.html.unescape(escaped) == text)
-	assert(web.html.unescape("&#42;") == _G.string.char(42))
-	assert(web.html.unescape("&#x42;") == _G.string.char(0x42))
+	assert(web.html.unescape"&#42;" == _G.string.char(42))
+	assert(web.html.unescape"&#x42;" == _G.string.char(0x42))
+	assert(web.uri.encode"https://example.com/foo bar" == "https://example.com/foo%20bar")
+	assert(web.uri.encode_component"foo/bar baz" == "foo%2Fbar%20baz")
 end
 
 if not _G.minetest then return end
