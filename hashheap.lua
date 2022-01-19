@@ -13,7 +13,7 @@ function less_than(a, b)
 end
 
 --> empty, duplicate-free min heap with priority queue functionality
-function table_heap.new(less_than)
+function new(less_than)
 	return setmetatable({ less_than = less_than, indices = {} }, metatable)
 end
 
