@@ -1,5 +1,5 @@
 -- Localize globals
-local math, setmetatable, table = math, setmetatable, table
+local math_floor, setmetatable, table_insert = math.floor, setmetatable, table.insert
 
 -- Set environment
 local _ENV = {}
@@ -15,12 +15,12 @@ function new(less_than)
 end
 
 function push(self, value)
-	table.insert(self, value)
+	table_insert(self, value)
 	local function heapify(index)
 		if index == 1 then
 			return
 		end
-		local parent = math.floor(index / 2)
+		local parent = math_floor(index / 2)
 		if self.less_than(self[index], self[parent]) then
 			self[parent], self[index] = self[index], self[parent]
 			heapify(parent)
