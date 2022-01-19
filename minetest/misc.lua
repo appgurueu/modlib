@@ -1,6 +1,6 @@
 -- Localize globals
-local Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, table, type, unpack
-	= Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, table, type, unpack
+local Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, select, table, type, unpack
+	= Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, select, table, type, unpack
 
 -- Set environment
 local _ENV = ...
@@ -29,6 +29,7 @@ function after(seconds, func, ...)
 	local job = setmetatable({
 		time = time + seconds,
 		func = func,
+		["#"] = select("#", ...),
 		...
 	}, job_metatable)
 	jobs:push(job)
@@ -39,7 +40,7 @@ minetest.register_globalstep(function(dtime)
 	local job = jobs[1]
 	while job and job.time <= time do
 		if not job.cancelled then
-			job.func(unpack(job))
+			job.func(unpack(job, 1, job["#"]))
 		end
 		jobs:pop()
 		job = jobs[1]
