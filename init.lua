@@ -48,6 +48,7 @@ for _, file in pairs{
 	"trie",
 	"kdtree",
 	"hashlist",
+	"hashheap",
 	"heap",
 	"ranked_set",
 	"binary",

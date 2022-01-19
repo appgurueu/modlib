@@ -146,21 +146,44 @@ do
 	end
 end
 
--- heap
+-- heaps
 do
 	local n = 100
-	local list = {}
-	for index = 1, n do
-		list[index] = index
+	for _, heap in pairs{heap, hashheap} do
+		local list = {}
+		for index = 1, n do
+			list[index] = index
+		end
+		table.shuffle(list)
+		local heap = heap.new()
+		for index = 1, #list do
+			heap:push(list[index])
+		end
+		for index = 1, #list do
+			local popped = heap:pop()
+			assert(popped == index)
+		end
 	end
-	table.shuffle(list)
-	local heap = heap.new()
-	for index = 1, #list do
-		heap:push(list[index])
-	end
-	for index = 1, #list do
-		local popped = heap:pop()
-		assert(popped == index)
+	do -- just hashheap
+		local heap = hashheap.new()
+		for i = 1, n do
+			heap:push(i)
+		end
+		heap:replace(42, 0)
+		assert(heap:pop() == 0)
+		heap:replace(69, 101)
+		assert(not heap:find_index(69))
+		assert(heap:find_index(101))
+		heap:remove(101)
+		assert(not heap:find_index(101))
+		heap:push(101)
+		local last = 0
+		for _ = 1, 98 do
+			local new = heap:pop()
+			assert(new > last)
+			last = new
+		end
+		assert(heap:pop() == 101)
 	end
 end
 
