@@ -507,7 +507,7 @@ function deepcomplete(table, completions)
 end
 
 function merge_tables(table, other_table)
-	return add_all(copy(table), other_table)
+	return add_all(shallowcopy(table), other_table)
 end
 
 union = merge_tables
