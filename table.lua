@@ -18,6 +18,14 @@ function from_iterator(...)
 	return table
 end
 
+function default(table, value)
+	return setmetatable(table, {
+		__index = function()
+			return value
+		end,
+	})
+end
+
 function map_index(table, func)
 	local mapping_metatable = {
 		__index = function(table, key)
