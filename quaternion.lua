@@ -19,6 +19,10 @@ function from_euler_rotation(rotation)
 	}
 end
 
+function from_euler_rotation_deg(rotation)
+	return from_euler_rotation(vector.apply(rotation, math.rad))
+end
+
 function multiply(self, other)
 	return {
 		other[1] * self[1] - other[2] * self[2] - other[3] * self[3] - other[4] * self[4],
@@ -93,8 +97,7 @@ function to_axis_angle(self)
 	return len == 0 and axis or axis:divide_scalar(-len), 2 * math.atan2(len, self[4])
 end
 
---> {x = pitch, y = yaw, z = roll} euler rotation in degrees
-function to_euler_rotation(self)
+function to_euler_rotation_rad(self)
 	local rotation = {}
 
 	local sinr_cosp = 2 * (self[4] * self[1] + self[2] * self[3])
@@ -114,7 +117,13 @@ function to_euler_rotation(self)
 	local cosy_cosp = 1 - 2 * (self[2] ^ 2 + self[3] ^ 2)
 	rotation.z = math.atan2(siny_cosp, cosy_cosp)
 
-	return vector.apply(rotation, math.deg)
+	return rotation
+end
+
+-- TODO rename this to to_euler_rotation_deg eventually (breaking change)
+--> {x = pitch, y = yaw, z = roll} euler rotation in degrees
+function to_euler_rotation(self)
+	return vector.apply(to_euler_rotation_rad(self), math.deg)
 end
 
 -- See https://github.com/zaki/irrlicht/blob/master/include/quaternion.h#L652
