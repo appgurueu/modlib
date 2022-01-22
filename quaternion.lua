@@ -28,6 +28,10 @@ function multiply(self, other)
 	}
 end
 
+function compose(self, other)
+	return multiply(other, self)
+end
+
 function normalize(self)
 	local len = math.sqrt(self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + self[4] ^ 2)
 	local res = {}
