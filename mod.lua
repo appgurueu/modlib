@@ -136,6 +136,7 @@ function configuration(modname)
 			end
 		end, 1)
 		if modified then
+			-- FIXME mod security messes with this (disallows it if enabled)
 			assert(modlib.file.write(readme_path, readme))
 		end
 	end
