@@ -11,7 +11,6 @@ for _, value in pairs{
 	"schematic",
 	"colorspec",
 	"media",
-	"encode_png",
 } do
 	components[value] = value
 end
