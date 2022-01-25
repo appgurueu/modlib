@@ -11,7 +11,7 @@ local metatables = {
 	-- TODO expand
 }
 
-(...).luon = modlib.luon.new{
+return modlib.luon.new{
 	aux_write = function(_, value)
 		local type = metatables[getmetatable(value)]
 		if type then

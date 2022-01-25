@@ -6,7 +6,7 @@ local _ENV = ...
 setfenv(1, _ENV)
 
 --+ Raycast wrapper with proper flowingliquid intersections
-function raycast(_pos1, _pos2, objects, liquids)
+local function raycast(_pos1, _pos2, objects, liquids)
 	local raycast = minetest.raycast(_pos1, _pos2, objects, liquids)
 	if not liquids then
 		return raycast
@@ -139,3 +139,5 @@ function raycast(_pos1, _pos2, objects, liquids)
 	end
 	return setmetatable({next = next}, {__call = next})
 end
+
+return raycast

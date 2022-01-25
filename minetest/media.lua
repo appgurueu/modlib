@@ -3,9 +3,6 @@ local minetest, modlib, pairs, ipairs
 
 --! experimental
 
-local _ENV = ...
-setfenv(1, _ENV)
-
 -- TODO support for server texture packs (and possibly client TPs in singleplayer?)
 local media_foldernames = {"textures", "sounds", "media", "models", "locale"}
 local media_extensions = modlib.table.set{
@@ -53,4 +50,4 @@ for _, mod in ipairs(modlib.minetest.get_mod_load_order()) do
 	end
 end
 
-media = {paths = paths}
+return {paths = paths}

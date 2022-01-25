@@ -22,7 +22,7 @@ function build_tree(dict)
 end
 if minetest then
 	function build_setting_tree()
-		modlib.conf.settings = build_tree(minetest.settings:to_table())
+		settings = build_tree(minetest.settings:to_table())
 	end
 	-- deprecated, use modlib.mod.configuration instead
 	minetest.mkdir(minetest.get_worldpath().."/config")
@@ -118,7 +118,7 @@ function import(modname, constraints, no_settingtypes)
 		local settingtypes = generate_settingtypes(default_conf, constraints)
 		modlib.file.write(modlib.mod.get_resource(modname, "settingtypes.txt"), settingtypes)
 	end
-	local additional_settings = modlib.conf.settings[modname] or {}
+	local additional_settings = settings[modname] or {}
 	additional_settings = fix_types(additional_settings, constraints)
 	-- TODO implement merge_config_legal(default_conf, ...)
 	config = merge_config(config, additional_settings)

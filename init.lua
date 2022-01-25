@@ -63,17 +63,12 @@ for _, file in pairs{
 	modules[file] = file
 end
 if minetest then
-	for _, file in pairs{
-		"minetest",
-		"log",
-		"player",
-		-- deprecated
-		"conf"
-	} do
-		modules[file] = file
-	end
+	modules.minetest = "minetest"
 end
+
 -- aliases
+-- more aliases are implemented below:
+-- modlib.[mod|log|conf|player] are aliases of modlib.minetest.[mod|log|conf|player] respectively
 modules.string = "text"
 modules.number = "math"
 
@@ -101,6 +96,10 @@ end
 local function load_module(self, module_name_or_alias)
 	local module_name = modules[module_name_or_alias]
 	if not module_name then
+		-- Handle modlib.[log|player] aliases for the minetest.[log|player] modules
+		if module_name_or_alias == "log" or module_name_or_alias == "player" then
+			return modlib.minetest[module_name_or_alias]
+		end
 		-- no such module
 		return
 	end
@@ -142,8 +141,13 @@ modlib.file = assert(loadfile(get_resource"file.lua"))(dir_delim)
 modlib.file.concat_path = concat_path
 
 if minetest then
-	modlib.mod = dofile(get_resource(modlib.modname, "mod.lua"))
-	modlib.mod.get_resource = get_resource
+	-- Force-loading of the minetest, mod and conf modules.
+	-- Also sets modlib.[mod|conf] -> modlib.minetest.[mod|conf] aliases.
+	local ml_mt = modlib.minetest
+	ml_mt.mod.get_resource = get_resource
+	modlib.mod = ml_mt.mod
+	ml_mt.conf.build_setting_tree()
+	modlib.conf = ml_mt.conf
 	-- HACK force load minetest/gametime.lua to ensure that the globalstep is registered earlier than globalsteps of mods depending on modlib
 	dofile(get_resource(modlib.modname, "minetest", "gametime.lua"))
 	local ie = minetest.request_insecure_environment()
@@ -152,7 +156,6 @@ if minetest then
 		-- TODO currently no need to set _G.require, lsqlite3 loads no dependencies that way
 		modlib.persistence = assert(loadfile(get_resource"persistence.lua"))(ie.require)
 	end
-	modlib.conf.build_setting_tree()
 end
 
 -- Run build scripts

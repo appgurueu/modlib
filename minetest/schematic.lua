@@ -2,11 +2,8 @@
 local VoxelArea, ItemStack, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, string, table, type, vector
 	= VoxelArea, ItemStack, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, string, table, type, vector
 
--- Set environment
-local _ENV = ...
-setfenv(1, _ENV)
 
-schematic = {}
+local schematic = {}
 local metatable = {__index = schematic}
 
 function schematic.setmetatable(self)
@@ -186,3 +183,5 @@ function schematic.read_zlib_bluon(path)
 	assert(file:read(4) == "MLZS", "not a modlib zlib compressed bluon schematic")
 	return schematic.setmetatable(read_bluon(modlib.text.inputstream(minetest.decompress(file:read"*a", "deflate"))))
 end
+
+return schematic
