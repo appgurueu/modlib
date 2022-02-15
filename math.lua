@@ -1,6 +1,6 @@
 -- Localize globals
-local math, math_floor, minetest, modlib_table_reverse, os, string_char, table, table_insert, table_concat
-	= math, math.floor, minetest, modlib.table.reverse, os, string.char, table, table.insert, table.concat
+local math, math_floor, minetest, modlib_table_reverse, os, string_char, setmetatable, table_insert, table_concat
+	= math, math.floor, minetest, modlib.table.reverse, os, string.char, setmetatable, table.insert, table.concat
 
 local inf = math.huge
 
