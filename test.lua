@@ -477,9 +477,9 @@ local tests = {
 	liquid_raycast = false
 }
 if tests.b3d then
-	local stream = io.open(mod.get_resource("player_api", "models", "character.b3d"), "r")
-	assert(stream)
+	local stream = assert(io.open(mod.get_resource("player_api", "models", "character.b3d"), "r"))
 	local b3d = b3d.read(stream)
+	stream:close()
 	--! dirty helper method to create truncate tables with 10+ number keys
 	local function _b3d_truncate(table)
 		local count = 1
@@ -502,7 +502,6 @@ if tests.b3d then
 		return table
 	end
 	file.write(mod.get_resource"character.b3d.lua", "return " .. dump(_b3d_truncate(table.copy(b3d))))
-	stream:close()
 end
 local vector, minetest, ml_mt = _G.vector, _G.minetest, minetest
 if tests.liquid_dir then
