@@ -39,7 +39,7 @@ This will prevent strings from being referenced, possibly bloating file size, bu
 
 #### SQLite3 Database Persistence
 
-Uses a SQLite3 database to persistently store a Lua table. **Experimental.**. Obtaining it is a bit trickier, as it requires access to the `lsqlite3` library, which may be passed:
+Uses a SQLite3 database to persistently store a Lua table. **Experimental.** Obtaining it is a bit trickier, as it requires access to the `lsqlite3` library, which may be passed:
 
 ```lua
 local modlib_sqlite3 = persistence.sqlite3(require"lsqlite3")
