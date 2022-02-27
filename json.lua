@@ -39,7 +39,7 @@ local decoding_escapes = {
 
 -- Set up a DFA for number syntax validations
 local number_dfa
-do
+do -- as a RegEx: (0|(1-9)(0-9)*)[.(0-9)+[(e|E)[+|-](0-9)+]]; does not need to handle the first sign
 	-- TODO proper DFA utilities
 	local function set_transitions(state, transitions)
 		for chars, next_state in pairs(transitions) do
