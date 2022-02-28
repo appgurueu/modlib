@@ -332,7 +332,7 @@ do
 				end
 				return assert(json:read_string('"' .. prefix .. str .. suffix .. '"') == prefix .. expected_str .. suffix)
 			end
-			test([[\uD834\uDD1E]],  0x1D11E)
+			test([[\uD834\uDD1E]], 0x1D11E)
 			test([[\uDD1E\uD834]], text.utf8(0xDD1E) .. text.utf8(0xD834))
 			test([[\uD834]], 0xD834)
 			test([[\uDD1E]], 0xDD1E)
@@ -384,7 +384,7 @@ local function test_from_string(string, number)
 	local expected = colorspec.from_number_rgba(number)
 	assertdump(table.equals(spec, expected), {expected = expected, actual = spec})
 end
-local spec = colorspec.from_number(0xDDCCBBAA)
+local spec = colorspec.from_number_rgba(0xDDCCBBAA)
 assertdump(table.equals(spec, {a = 0xAA, b = 0xBB, g = 0xCC, r = 0xDD}), spec)
 test_from_string("aliceblue", 0xf0f8ffff)
 test_from_string("aliceblue#42", 0xf0f8ff42)
