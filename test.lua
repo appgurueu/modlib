@@ -304,7 +304,7 @@ local function serializer_test(is_json, preserve)
 	local mixed = {1, 2, 3}
 	mixed[mixed] = mixed
 	mixed.vec = {x = 1, y = 2, z = 3}
-	mixed.vec2 = modlib.table.copy(mixed.vec)
+	mixed.vec2 = table.copy(mixed.vec)
 	mixed.blah = "blah"
 	assert_preserves(mixed)
 	local a, b, c = {}, {}, {}
@@ -424,7 +424,7 @@ test_logfile(false)
 -- SQLite3
 do
 	local sqlite3 = persistence.sqlite3()
-	local path = modlib.mod.get_resource("modlib", "database.test.sqlite3")
+	local path = mod.get_resource("modlib", "database.test.sqlite3")
 	local p = sqlite3.new(path, {})
 	p:init()
 	p:rewrite()
@@ -451,7 +451,7 @@ do
 	for row in p.database:rows("SELECT * FROM table_entries ORDER BY table_id, key_type, key") do
 		_G.table.insert(rows, row)
 	end
-	assert(modlib.table.equals(rows, {
+	assert(table.equals(rows, {
 		{ 1, 3, "key", 4, 2 },
 		{ 1, 3, "other key", 3, "other value" },
 		{ 2, 3, "a", 2, 1 },
@@ -461,7 +461,7 @@ do
 	p:close()
 	p = sqlite3.new(path, {})
 	p:init()
-	assert(modlib.table.equals(p.root, {
+	assert(table.equals(p.root, {
 		key = { a = 1, b = 2, c = 3 },
 		["other key"] = "other value",
 	}))
