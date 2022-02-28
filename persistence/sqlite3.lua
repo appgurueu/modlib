@@ -97,6 +97,7 @@ function set(self, table, key, value)
 		add_table(self, key)
 		add_table(self, value)
 	end
+	local previous_value = table[key]
 	if type(previous_value) == "table" then
 		decrement_reference_count(self, previous_value)
 	end
