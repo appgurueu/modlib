@@ -291,6 +291,7 @@ local function serializer_test(is_json, preserve)
 		assert_preserves(int)
 		assert_preserves((random() - 0.5) * 2^random(-20, 20))
 	end
+	assert_preserves(2.9145637014948988508e-06)
 	-- Simple tables
 	assert_preserves{hello = "world", welt = "hallo"}
 	assert_preserves{a = 1, b = "hallo", c = "true"}

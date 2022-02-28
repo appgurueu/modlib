@@ -110,24 +110,23 @@ function write_float(write_byte, number, on_write, double)
 		exponent = exponent - 1
 	end
 	local sign_byte = sign + math_floor(exponent / 2)
-	mantissa = mantissa * 0x80
-	local exponent_byte = (exponent % 2) * 0x80 + math_floor(mantissa)
-	mantissa = mantissa % 1
-	local mantissa_bytes = {}
-	-- TODO ensure this check is proper
 	if double == nil then
-		double = mantissa % 2^-23 > 0
+		double = mantissa % 2^-23 ~= 0
 	end
 	if on_write then
 		on_write(double)
 	end
+	mantissa = mantissa * 0x80
+	local exponent_byte = (exponent % 2) * 0x80 + math_floor(mantissa)
+	mantissa = mantissa % 1
+	local mantissa_bytes = {}
 	local len = double and 6 or 2
 	for index = 1, len do
 		mantissa = mantissa * 0x100
 		mantissa_bytes[index] = math_floor(mantissa)
 		mantissa = mantissa % 1
 	end
-	assert(mantissa == 0)
+	assert(mantissa == 0) -- no truncation allowed; round your numbers properly or use auto
 	for index = len, 1, -1 do
 		write_byte(mantissa_bytes[index])
 	end
