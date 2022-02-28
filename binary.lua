@@ -122,13 +122,13 @@ function write_float(write_byte, number, on_write, double)
 		on_write(double)
 	end
 	local len = double and 6 or 2
-	for index = len, 1, -1 do
+	for index = 1, len do
 		mantissa = mantissa * 0x100
 		mantissa_bytes[index] = math_floor(mantissa)
 		mantissa = mantissa % 1
 	end
 	assert(mantissa == 0)
-	for index = 1, len do
+	for index = len, 1, -1 do
 		write_byte(mantissa_bytes[index])
 	end
 	write_byte(exponent_byte)
