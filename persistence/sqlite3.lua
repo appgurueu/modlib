@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS table_entries (
 		-- Null is unused
 		error("unsupported type: " .. type_)
 	end
-	-- Order by key_content to have retrieve list parts in the correct order, making it easier for Lua
+	-- Order by key_content to retrieve list parts in the correct order, making it easier for Lua
 	for table_id, key_type, key, value_type, value in self.database:urows"SELECT * FROM table_entries ORDER BY table_id, key_type, key" do
 		local table = tables[table_id] or {}
 		counts[table] = counts[table] or 1
