@@ -230,11 +230,13 @@ CREATE TABLE IF NOT EXISTS table_entries (
 end
 
 function ptab:rewrite()
+	exec(self, "BEGIN EXCLUSIVE TRANSACTION")
 	exec(self, "DELETE FROM table_entries")
 	self.highest_table_id = 0
 	self.table_ids = {}
 	self.counts = {}
 	add_table(self, self.root)
+	exec(self, "COMMIT TRANSACTION")
 end
 
 function ptab:set(table, key, value)
