@@ -113,8 +113,8 @@ function read(stream)
 				brush.name = string()
 				brush.color = color()
 				brush.shininess = float()
-				brush.blend = float()
-				brush.fx = float()
+				brush.blend = int()
+				brush.fx = int()
 				brush.texture_id = {}
 				for index = 1, brushes.n_texs do
 					brush.texture_id[index] = optional_id()
