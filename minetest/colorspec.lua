@@ -203,7 +203,7 @@ function colorspec.from_string(string)
 	if not number then
 		local name, alpha_text = string:match("^([a-z]+)" .. hex .. "$")
 		if name then
-			if alpha_text:len() ~= 2 then
+			if alpha_text:len() > 2 then
 				return
 			end
 			number = named_colors[name]
@@ -211,6 +211,9 @@ function colorspec.from_string(string)
 				return
 			end
 			alpha = tonumber(alpha_text, 0x10)
+			if alpha_text:len() == 1 then
+				alpha = alpha * 0x11
+			end
 		end
 	end
 	if number then
