@@ -292,6 +292,7 @@ local function serializer_test(is_json, preserve)
 		assert_preserves((random() - 0.5) * 2^random(-20, 20))
 	end
 	assert_preserves(2.9145637014948988508e-06)
+	assert_preserves(1.1496387980481e-07)
 	-- Simple tables
 	assert_preserves{hello = "world", welt = "hallo"}
 	assert_preserves{a = 1, b = "hallo", c = "true"}
@@ -350,7 +351,6 @@ end
 
 -- bluon
 do
-	-- TODO 1.1496387980481e-07 fails due to precision issues
 	serializer_test(false, function(object)
 		local rope = table.rope{}
 		local written, read, input
