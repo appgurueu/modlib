@@ -23,6 +23,10 @@ function sign(number)
 	if number > 0 then return 1 end
 end
 
+function clamp(number, min, max)
+	return math.min(math.max(number, min), max)
+end
+
 log = setmetatable({}, {
 	__index = function(self, base)
 		local div = math.log(base)
