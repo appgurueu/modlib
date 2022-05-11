@@ -352,6 +352,7 @@ function get_animated_bone_properties(self, keyframe, interpolate)
 		for _, property in pairs{"position", "rotation", "scale"} do
 			properties[property] = properties[property] or modlib.table.copy(node[property])
 		end
+		properties.rotation = modlib.quaternion.compose(node.rotation, properties.rotation)
 		if node.bone then
 			properties.bone_name = node.name
 			table.insert(bone_properties, properties)
