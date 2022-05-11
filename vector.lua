@@ -29,6 +29,7 @@ metatable = {
 		if index ~= nil then
 			return rawset(table, index, value)
 		end
+		return rawset(table, key, value)
 	end
 }
 
