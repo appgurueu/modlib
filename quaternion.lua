@@ -24,11 +24,12 @@ function from_euler_rotation_deg(rotation)
 end
 
 function multiply(self, other)
-	return {
-		other[1] * self[1] - other[2] * self[2] - other[3] * self[3] - other[4] * self[4],
-		other[1] * self[2] + other[2] * self[1] - other[3] * self[4] + other[4] * self[3],
-		other[1] * self[3] + other[2] * self[4] + other[3] * self[1] - other[4] * self[2],
-		other[1] * self[4] - other[2] * self[3] + other[3] * self[2] + other[4] * self[1]
+	local X, Y, Z, W = unpack(self)
+	return normalize{
+		(other[4] * X) + (other[1] * W) + (other[2] * Z) - (other[3] * Y);
+		(other[4] * Y) + (other[2] * W) + (other[3] * X) - (other[1] * Z);
+		(other[4] * Z) + (other[3] * W) + (other[1] * Y) - (other[2] * X);
+		(other[4] * W) - (other[1] * X) - (other[2] * Y) - (other[3] * Z);
 	}
 end
 
