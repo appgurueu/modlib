@@ -31,9 +31,9 @@ function generate_settingtypes(self)
 		settingtype = "string"
 	elseif typ == "number" then
 		settingtype = self.int and "int" or "float"
-		if self.min or self.max then
+		if self.range and (self.range.min or self.range.max) then
 			-- TODO handle exclusive min/max
-			type_args = (self.int and "%d %d" or "%f %f"):format(self.min or (2 ^ -30), self.max or (2 ^ 30))
+			type_args = (self.int and "%d %d" or "%f %f"):format(self.range.min or (2 ^ -30), self.range.max or (2 ^ 30))
 		end
 	elseif typ == "table" then
 		local settings = {}
