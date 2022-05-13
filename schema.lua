@@ -29,6 +29,20 @@ function generate_settingtypes(self)
 		default = default and "true" or "false"
 	elseif typ == "string" then
 		settingtype = "string"
+		if self.values then
+			local values = {}
+			for value in pairs(self.values) do
+				if value:find"," then
+					values = nil
+					break
+				end
+				table.insert(values, value)
+			end
+			if values then
+				settingtype = "enum"
+				type_args = table.concat(values, ",")
+			end
+		end
 	elseif typ == "number" then
 		settingtype = self.int and "int" or "float"
 		if self.range and (self.range.min or self.range.max) then
