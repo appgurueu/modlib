@@ -42,12 +42,20 @@ local function collect_media(modname)
 	return media
 end
 
+-- TODO clean this up eventually
 local paths = {}
+local mods = {}
+local overridden_paths = {}
 for _, mod in ipairs(modlib.minetest.get_mod_load_order()) do
 	local mod_media = collect_media(mod.name)
 	for medianame, path in pairs(mod_media) do
+		if paths[medianame] then
+			overridden_paths[medianame] = overridden_paths[medianame] or {}
+			table.insert(overridden_paths[medianame], paths[medianame])
+		end
 		paths[medianame] = path
+		mods[medianame] = mod.name
 	end
 end
 
-return {paths = paths}
+return {paths = paths, mods = mods, overridden_paths = overridden_paths}
