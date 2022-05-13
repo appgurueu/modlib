@@ -182,10 +182,10 @@ function load(self, override, params)
 		end
 	end
 	if override == nil and not converted then
-		if self.default ~= nil then
-			return self.default
-		elseif self.type == "table" then
+		if self.type == "table" and self.default == nil then
 			override = {}
+		else
+			return self.default
 		end
 	end
 	local _error = error
