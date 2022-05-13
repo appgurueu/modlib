@@ -295,9 +295,8 @@ function load(self, override, params)
 			end
 		end
 		assert((not self.list) or modlib.table.count(override) == #override, "list")
-	else
-		assert((not self.values) or self.values[override], "values")
 	end
+	assert((not self.values) or self.values[override], "values")
 	if self.func then self.func(override) end
 	return override
 end
