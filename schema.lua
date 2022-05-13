@@ -40,7 +40,7 @@ function generate_settingtypes(self)
 		if self._level > 0 then
 			-- HACK: Minetest automatically adds the modname
 			-- TODO simple names (not modname.field.other_field)
-			settings = {"[" .. ("*"):rep(self._level) .. self.name .. "]"}
+			settings = {"[" .. ("*"):rep(self._level - 1) .. self.name .. "]"}
 		end
 		local function setting(key, value_scheme)
 			key = tostring(key)
@@ -54,11 +54,19 @@ function generate_settingtypes(self)
 		for key in pairs(self.entries or {}) do
 			table.insert(keys, key)
 		end
-		table.sort(keys)
+		table.sort(keys, function(key, other_key)
+			-- Force leaves before subtrees to prevent them from being accidentally graphically treated as part of the subtree
+			local is_subtree = self.entries[key].type == "table"
+			local other_is_subtree = self.entries[other_key].type == "table"
+			if is_subtree ~= other_is_subtree then
+				return not is_subtree
+			end
+			return key < other_key
+		end)
 		for _, key in ipairs(keys) do
 			setting(key, self.entries[key])
 		end
-		return table.concat(settings, "\n")
+		return table.concat(settings, "\n\n")
 	end
 	if not typ then
 		return ""
