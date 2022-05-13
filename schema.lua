@@ -40,7 +40,7 @@ function generate_settingtypes(self)
 		if self._level > 0 then
 			-- HACK: Minetest automatically adds the modname
 			-- TODO simple names (not modname.field.other_field)
-			settings = {"[" .. table.concat(modlib.table.repetition("*", self._level)) .. self.name .. "]"}
+			settings = {"[" .. ("*"):rep(self._level) .. self.name .. "]"}
 		end
 		local function setting(key, value_scheme)
 			key = tostring(key)
