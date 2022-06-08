@@ -294,6 +294,19 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+### `rolling-96`
+
+* Additions: B3D writer; `mod.configuration()` returns the `conf, schema` now
+* Fixes: `binary`: int & float writing
+
+### `rolling-9x`
+
+Many many fixes
+
+### `rolling-8x`
+
+Fixes, minor additions (such as a `hashheap`)
+
 ### `rolling-74`
 
 * Fixes: Plenty, mostly related to the `minetest` module. Note:
