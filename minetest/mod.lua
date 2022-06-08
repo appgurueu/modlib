@@ -66,6 +66,7 @@ function extend_string(modname, string)
 	include_env(string, rawget(_G, modname), true)
 end
 
+--> conf, schema
 function configuration(modname)
 	modname = modname or minetest.get_current_modname()
 	local schema = modlib.schema.new(assert(include(modname, "schema.lua")))
@@ -141,9 +142,9 @@ function configuration(modname)
 		end
 	end
 	if conf == nil then
-		return schema:load({}, {error_message = true})
+		return schema:load({}, {error_message = true}), schema
 	end
-	return conf
+	return conf, schema
 end
 
 -- Export environment
