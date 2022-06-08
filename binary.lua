@@ -84,12 +84,12 @@ function write_uint(write_byte, uint, bytes)
 end
 
 function write_int(write_byte, int, bytes)
-	local max = 0x100 ^ bytes / 2
+	local max = 0x100 ^ bytes
 	if int < 0 then
-		-- No bound checking is needed: If the int is too small, the uint will be too big
-		int = max - int
+		assert(-int <= max / 2)
+		int = max + int
 	else
-		assert(int < max)
+		assert(int < max / 2)
 	end
 	return write_uint(write_byte, int, bytes)
 end
