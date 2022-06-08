@@ -104,10 +104,14 @@ function write_float(write_byte, number, on_write, double)
 	end
 	local mantissa, exponent = math_frexp(number)
 	exponent = exponent + 127
+	if number == 0 then exponent = 0 end -- zero must be written as a subnormal number
 	if exponent > 1 then
 		-- TODO ensure this deals properly with subnormal numbers
 		mantissa = mantissa * 2 - 1
 		exponent = exponent - 1
+	elseif exponent < 0 then -- number is currently sub-subnormal, subnormalize
+		mantissa = mantissa * 2^(exponent-1)
+		exponent = 0
 	end
 	local sign_byte = sign + math_floor(exponent / 2)
 	if double == nil then
