@@ -1,12 +1,8 @@
 -- Localize globals
 local assert, math, minetest, modlib, pairs, setmetatable, vector = assert, math, minetest, modlib, pairs, setmetatable, vector
 
--- Set environment
-local _ENV = ...
-setfenv(1, _ENV)
-
 --+ Raycast wrapper with proper flowingliquid intersections
-local function raycast(_pos1, _pos2, objects, liquids)
+return function(_pos1, _pos2, objects, liquids)
 	local raycast = minetest.raycast(_pos1, _pos2, objects, liquids)
 	if not liquids then
 		return raycast
@@ -27,7 +23,7 @@ local function raycast(_pos1, _pos2, objects, liquids)
 		if not (def and def.drawtype == "flowingliquid") then
 			return pointed_thing
 		end
-		local corner_levels = get_liquid_corner_levels(_pos)
+		local corner_levels = modlib.minetest.get_liquid_corner_levels(_pos)
 		local full_corner_levels = true
 		for _, corner_level in pairs(corner_levels) do
 			if corner_level[2] < 0.5 then
@@ -139,5 +135,3 @@ local function raycast(_pos1, _pos2, objects, liquids)
 	end
 	return setmetatable({next = next}, {__call = next})
 end
-
-return raycast
