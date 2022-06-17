@@ -194,6 +194,19 @@ function angle(v, w)
 	return math.acos(dot(v, w) / length(v) / length(w))
 end
 
+-- See https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToAngle/
+function axis_angle3(euler_rotation)
+	assert(#euler_rotation == 3)
+	euler_rotation = divide_scalar(euler_rotation, 2)
+	local cos = apply(euler_rotation, math.cos)
+	local sin = apply(euler_rotation, math.sin)
+	return normalize_zero{
+		sin[1] * sin[2] * cos[3] + cos[1] * cos[2] * sin[3],
+		sin[1] * cos[2] * cos[3] + cos[1] * sin[2] * sin[3],
+		cos[1] * sin[2] * cos[3] - sin[1] * cos[2] * sin[3],
+	}, 2 * math.acos(cos[1] * cos[2] * cos[3] - sin[1] * sin[2] * sin[3])
+end
+
 -- Uses Rodrigues' rotation formula
 -- axis must be normalized
 function rotate3(v, axis, angle)
