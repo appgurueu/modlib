@@ -70,24 +70,6 @@ end
 
 metatable.__eq = equals
 
-function less_than(v, w)
-	for k, v in pairs(v) do
-		if v >= w[k] then return false end
-	end
-	return true
-end
-
-metatable.__lt = less_than
-
-function less_or_equal(v, w)
-	for k, v in pairs(v) do
-		if v > w[k] then return false end
-	end
-	return true
-end
-
-metatable.__le = less_or_equal
-
 function combine(v, w, f)
 	local new_vector = {}
 	for key, value in pairs(v) do
