@@ -161,9 +161,5 @@ end
 -- Run build scripts
 -- dofile(modlib.mod.get_resource("modlib", "build", "html_entities.lua"))
 
---[[
---modlib.mod.include"test.lua"
-]]
-
 -- TODO verify localizations suffice
 return modlib

@@ -6,6 +6,9 @@ Multipurpose Minetest Modding Library
 
 No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD or appguru(eu). Notable contributions by [luk3yx](https://github.com/luk3yx) in the form of suggestions, bug reports and fixes.
 
+## Tests
+
+The tests are located in a different repo, [`modlib_test`](https://github.com/appgurueu/modlib_test), as they are quite heavy due to testing the PNG reader using PngSuite. Reading the tests for examples of API usage is recommended.
 ## API
 
 Mostly self-documenting code. Mod namespace is `modlib`, containing all variables & functions.
