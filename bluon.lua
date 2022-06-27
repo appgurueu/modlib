@@ -1,6 +1,6 @@
 -- Localize globals
-local assert, error, ipairs, math_floor, math_huge, modlib, next, pairs, setmetatable, string, table_insert, type, unpack
-	= assert, error, ipairs, math.floor, math.huge, modlib, next, pairs, setmetatable, string, table.insert, type, unpack
+local assert, error, ipairs, math_floor, math_abs, math_huge, modlib, next, pairs, setmetatable, string, table_insert, type, unpack
+	= assert, error, ipairs, math.floor, math.abs, math.huge, modlib, next, pairs, setmetatable, string, table.insert, type, unpack
 
 -- Set environment
 local _ENV = {}
@@ -203,7 +203,7 @@ function write(self, value, stream)
 				stream:write(constant_nan)
 				return
 			end
-			if value % 1 == 0 then
+			if value % 1 == 0 and math_abs(value) < 2^64 then
 				uint_with_type(value > 0 and type_ranges.number_constant or type_ranges.number_negative, value > 0 and value or -value)
 				return
 			end
