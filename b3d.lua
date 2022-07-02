@@ -6,6 +6,8 @@ local read_int, read_single = modlib.binary.read_int, modlib.binary.read_single
 
 local write_int, write_single = modlib.binary.write_int, modlib.binary.write_single
 
+local fround = modlib.math.fround
+
 -- Set environment
 local _ENV = {}
 setfenv(1, _ENV)
@@ -346,7 +348,7 @@ local function write_rope(self)
 	end
 
 	local function float(val)
-		write_single(byte, val)
+		write_single(byte, fround(val))
 	end
 
 	local function float_array(arr, len)
