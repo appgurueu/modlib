@@ -9,7 +9,8 @@ setfenv(1, _ENV)
 --! experimental
 
 local no_op = modlib.func.no_op
-local write_float = modlib.binary.write_float
+local fround = modlib.math.fround
+local write_single, write_double = modlib.binary.write_single, modlib.binary.write_double
 
 local metatable = {__index = _ENV}
 
@@ -122,11 +123,8 @@ function len(self, value)
 		if value % 1 == 0 then
 			return 1 + uint_len(value > 0 and value or -value)
 		end
-		-- HACK use write_float to get the length
 		local bytes = 4
-		write_float(no_op, value, function(double)
-			if double then bytes = 8 end
-		end)
+		if fround(value) ~= value then bytes = 8 end
 		return 1 + bytes
 	end
 	local id = object_ids[value]
@@ -184,11 +182,14 @@ function write(self, value, stream)
 		byte(base + type_offset)
 		uint(type_offset, _uint)
 	end
-	local function float_on_write(double)
-		byte(double and type_ranges.number or type_ranges.number_f32)
-	end
 	local function float(number)
-		write_float(byte, number, float_on_write)
+		if fround(number) == number then
+			byte(type_ranges.number_f32)
+			write_single(byte, number)
+		else
+			byte(type_ranges.number)
+			write_double(byte, number)
+		end
 	end
 	local aux_write = self.aux_write
 	local function _write(value)
