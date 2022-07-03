@@ -293,6 +293,23 @@ A schematic format with support for metadata and baked light data. **Experimenta
 
 ## Release Notes
 
+Rolling releases (corresponding to releases on ContentDB) are made when either:
+
+* A fix for non-experimental, in-use functionality is implemented
+* A sufficient amount of features is published
+
+The following release notes are *not exhaustive*. Refer to the commit log for an exhaustive changelog.
+
+### `rolling-98`
+
+* Fixes: `binary.(read|write)_(float|single|double)` (and thus also `bluon` number serialization)
+  * `write_float` now doesn't provide an "auto" mode anymore, use `modlib.math.fround(x) == x` instead to determine whether `x` fits in a float
+* Removal of the `debug` module in favor of the [`dbg`](https://github.com/appgurueu/dbg) mod
+
+### `rolling-97`
+
+* Removal of tests in favor of a dedicated test repo
+
 ### `rolling-96`
 
 * Additions: B3D writer; `mod.configuration()` returns the `conf, schema` now

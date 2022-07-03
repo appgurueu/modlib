@@ -119,7 +119,7 @@ end
 local rawget, rawset = rawget, rawset
 modlib = setmetatable({
 	-- TODO bump on release
-	version = 97,
+	version = 98,
 	modname = minetest and minetest.get_current_modname(),
 	_RG = setmetatable({}, {
 		__index = function(_, index)
