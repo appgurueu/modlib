@@ -64,7 +64,7 @@ function read_double(read_byte)
 	local mantissa_bits = exponent_byte % 0x10
 	exponent = exponent + (exponent_byte - mantissa_bits) / 0x10
 	mantissa = (mantissa + mantissa_bits) / 0x10
-	if exponent == 0x800 then
+	if exponent == 0x7FF then
 		if mantissa == 0 then
 			return sign * math_huge
 		end
