@@ -277,10 +277,6 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 4. [`json`](https://json.org)
   * Not recommended
 
-## `debug`
-
-`modlib.debug` offers utilities dumping program state in tables.
-
 ### `variables(stacklevel)`
 
 Dumps local variables, upvalues and the function environment of the function at the given stacklevel (default `1`).
