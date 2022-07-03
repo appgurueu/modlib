@@ -147,7 +147,7 @@ function write_single(write_byte, number)
 		else -- normal numbers are stored as 1.<mantissa>
 			mantissa = mantissa * 2 - 1
 			exponent = exponent - 1 + 127 -- mantissa << 1 <=> exponent--
-			assert(exponent <= 0xFF)
+			assert(exponent < 0xFF)
 		end
 
 		local exp_lowest_bit = exponent % 2
@@ -199,7 +199,7 @@ function write_double(write_byte, number)
 		else -- normal numbers are stored as 1.<mantissa>
 			mantissa = mantissa * 2 - 1
 			exponent = exponent - 1 + 1023 -- mantissa << 1 <=> exponent--
-			assert(exponent < 2^12) -- 11 exponent bits
+			assert(exponent < 0x7FF)
 		end
 
 		local exp_low_nibble = exponent % 0x10
