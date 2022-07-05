@@ -9,9 +9,9 @@ function upper_first(text) return text:sub(1, 1):upper() .. text:sub(2) end
 
 function lower_first(text) return text:sub(1, 1):lower() .. text:sub(2) end
 
-function starts_with(text, start) return text:sub(1, start:len()) == start end
+function starts_with(text, prefix) return text:sub(1, #prefix) == prefix end
 
-function ends_with(text, suffix) return text:sub(text:len() - suffix:len() + 1) == suffix end
+function ends_with(text, suffix) return text:sub(-#suffix) == suffix end
 
 function trim(text, to_remove)
 	local j = 1
