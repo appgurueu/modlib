@@ -55,8 +55,10 @@ for filename, comps in pairs{
 		"named_colors",
 		"colorspec_to_colorstring"
 	},
-	collisionboxes = {
-		"get_node_collisionboxes"
+	boxes = {
+		"get_node_boxes",
+		"get_node_collisionboxes",
+		"get_node_selectionboxes",
 	},
 	png = {
 		"decode_png",
