@@ -350,6 +350,15 @@ function count(table)
 	return count
 end
 
+function count_equals(table, count)
+	local k
+	for _ = 1, count do
+		k = next(table, k)
+		if k == nil then return false end -- less than n keys
+	end
+	return next(table, k) == nil -- no (n + 1)th entry
+end
+
 function is_empty(table)
 	return next(table) == nil
 end
