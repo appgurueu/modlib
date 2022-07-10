@@ -32,6 +32,14 @@ function read(filename)
 	return content
 end
 
+function read_binary(filename)
+	local file, err = io.open(filename, "rb")
+	if file == nil then return nil, err end
+	local content = file:read"*a"
+	file:close()
+	return content
+end
+
 function write_unsafe(filename, new_content)
 	local file, err = io.open(filename, "w")
 	if file == nil then return false, err end
