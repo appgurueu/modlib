@@ -1,5 +1,6 @@
 -- Localize globals
-local assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type = assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, string, table, type
+local assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, select, string, table, type
+	= assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, select, string, table, type
 
 -- Set environment
 local _ENV = {}
@@ -43,11 +44,30 @@ function set_case_insensitive_index(table)
 end
 
 --+ nilget(a, "b", "c") == a?.b?.c
-function nilget(value, key, ...)
-	if value == nil or key == nil then
-		return value
+function nilget(value, ...)
+	local n = select("#", ...)
+	for i = 1, n do
+		if value == nil then return nil end
+		value = value[select(i, ...)]
 	end
-	return nilget(value[key], ...)
+	return value
+end
+
+deepget = nilget
+
+--+ `deepset(a, "b", "c", d)` is the same as `a.b = a.b ?? {}; a.b.c = d`
+function deepset(table, ...)
+	local n = select("#", ...)
+	for i = 1, n - 2 do
+		local key = select(i, ...)
+		local parent = table
+		table = parent[key]
+		if table == nil then
+			table = {}
+			parent[key] = table
+		end
+	end
+	table[select(n - 1, ...)] = select(n, ...)
 end
 
 -- Fisher-Yates
