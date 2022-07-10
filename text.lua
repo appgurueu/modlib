@@ -155,27 +155,6 @@ function utf8(number)
 	return string.char(256 - 2 ^ (8 - i - 1) + number) .. result
 end
 
---+ deprecated
-function handle_ifdefs(code, vars)
-	local finalcode = {}
-	local endif
-	local after_endif = -1
-	local ifdef_pos, after_ifdef = string.find(code, "--IFDEF", 1, true)
-	while ifdef_pos do
-		table.insert(finalcode, string.sub(code, after_endif + 2, ifdef_pos - 1))
-		local linebreak = string.find(code, "\n", after_ifdef + 1, true)
-		local varname = string.sub(code, after_ifdef + 2, linebreak - 1)
-		endif, after_endif = string.find(code, "--ENDIF", linebreak + 1, true)
-		if not endif then break end
-		if vars[varname] then
-			table.insert(finalcode, string.sub(code, linebreak + 1, endif - 1))
-		end
-		ifdef_pos, after_ifdef = string.find(code, "--IFDEF", after_endif + 1, true)
-	end
-	table.insert(finalcode, string.sub(code, after_endif + 2))
-	return table.concat(finalcode, "")
-end
-
 local keywords = modlib.table.set{"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
 keywords["goto"] = true -- Lua 5.2 (LuaJIT) support
 
