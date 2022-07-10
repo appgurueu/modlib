@@ -538,6 +538,25 @@ function deepcomplete(table, completions)
 	return table
 end
 
+function merge(table, other_table, merge_func)
+	merge_func = merge_func or merge
+	local res = {}
+	for key, value in pairs(table) do
+		local other_value = other_table[key]
+		if other_value == nil then
+			res[key] = value
+		else
+			res[key] = merge_func(value, other_value)
+		end
+	end
+	for key, value in pairs(other_table) do
+		if table[key] == nil then
+			res[key] = value
+		end
+	end
+	return res
+end
+
 function merge_tables(table, other_table)
 	return add_all(shallowcopy(table), other_table)
 end
