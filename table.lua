@@ -616,6 +616,20 @@ function rpairs(table)
 	end
 end
 
+-- Iterates the hash (= non-list) part of the table. The list part may not be modified while iterating.
+function hpairs(table)
+	local len = #table -- length only has to be determined once as hnext is a closure
+	local function hnext(key)
+		local value
+		key, value = next(table, key)
+		if type(key) == "number" and key % 1 == 0 and key >= 1 and key <= len then -- list entry, skip
+			return hnext(key)
+		end
+		return key, value
+	end
+	return hnext
+end
+
 function best_value(table, is_better_func)
 	local best_key = next(table)
 	if best_key == nil then
