@@ -57,15 +57,6 @@ function init(modname)
 	extend(modname, "main")
 end
 
---! deprecated
-function extend_string(modname, string)
-	if not string then
-		string = modname
-		modname = minetest.get_current_modname()
-	end
-	include_env(string, rawget(_G, modname), true)
-end
-
 --> conf, schema
 function configuration(modname)
 	modname = modname or minetest.get_current_modname()
