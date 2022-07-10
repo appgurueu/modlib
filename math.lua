@@ -1,6 +1,6 @@
 -- Localize globals
-local math, math_floor, minetest, modlib_table_reverse, os, string_char, setmetatable, table_insert, table_concat
-	= math, math.floor, minetest, modlib.table.reverse, os, string.char, setmetatable, table.insert, table.concat
+local assert, math, math_floor, minetest, modlib_table_reverse, os, string_char, select, setmetatable, table_insert, table_concat
+	= assert, math, math.floor, minetest, modlib.table.reverse, os, string.char, select, setmetatable, table.insert, table.concat
 
 local inf = math.huge
 
@@ -25,6 +25,50 @@ end
 
 function clamp(number, min, max)
 	return math.min(math.max(number, min), max)
+end
+
+-- Random integer from 0 to 2^53 - 1 (inclusive)
+local function _randint()
+	return math.random(0, 2^27 - 1) * 2^26 + math.random(0, 2^26 - 1)
+end
+
+-- Random float from 0 to 1 (exclusive)
+local function _randfloat()
+	return _randint() / (2^53)
+end
+
+--+ Increased randomness float random without overflows
+--+ `random()`: Random number from `0` to `1` (exclusive)
+--+ `random(max)`: Random number from `0` to `max` (exclusive)
+--+ `random(min, max)`: Random number from `min` to `max` (exclusive)
+function random(...)
+	local n = select("#", ...)
+	if n == 0 then
+		return _randfloat()
+	end if n == 1 then
+		local max = ...
+		return _randfloat() * max
+	end do assert(n == 2)
+		local min, max = ...
+		return min + (max - min) * _randfloat()
+	end
+end
+
+-- Increased randomness integer random
+--+ `randint()`: Random integer from `0` to `2^53 - 1` (inclusive)
+--+ `randint(max)`: Random integer from `0` to `max` (inclusive)
+--+ `randint(min, max)`: Random integer from `min` to `max` (inclusive)
+function randint(...)
+	local n = select("#", ...)
+	if n == 0 then
+		return _randint()
+	end if n == 1 then
+		local max = ...
+		return math.floor(_randfloat() * max + 0.5)
+	end do assert(n == 2)
+		local min, max = ...
+		return min + math.floor(_randfloat() * (max - min) + 0.5)
+	end
 end
 
 log = setmetatable({}, {
