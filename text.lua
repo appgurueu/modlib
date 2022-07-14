@@ -62,13 +62,17 @@ function trim_spacing(text)
 end
 
 local inputstream_metatable = {
-	__index = {read = function(self, count)
-		local cursor = self.cursor + 1
-		self.cursor = self.cursor + count
-		local text = self.text:sub(cursor, self.cursor)
-		return text ~= "" and text or nil
-	end}
+	__index = {
+		read = function(self, count)
+			local cursor = self.cursor + 1
+			self.cursor = self.cursor + count
+			local text = self.text:sub(cursor, self.cursor)
+			return text ~= "" and text or nil
+		end,
+		seek = function(self) return self.cursor end
+	}
 }
+--> inputstream "handle"; only allows reading characters (given a count), seeking does not accept any arguments
 function inputstream(text)
 	return setmetatable({text = text, cursor = 0}, inputstream_metatable)
 end
