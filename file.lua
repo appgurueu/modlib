@@ -127,6 +127,7 @@ function process_bridge_listen(name, line_consumer, step)
 			line_consumer(line)
 			line = content:read()
 		end
+		content:close()
 		write(bridge.input, "")
 	end)
 end
