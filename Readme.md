@@ -4,7 +4,7 @@ Multipurpose Minetest Modding Library
 
 ## About
 
-No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD or appguru(eu). Notable contributions by [luk3yx](https://github.com/luk3yx) in the form of suggestions, bug reports and fixes.
+No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD or appguru(eu). Notable contributions by [luk3yx](https://github.com/luk3yx) in the form of suggestions, bug reports and fixes. Another [bugfix](https://github.com/appgurueu/modlib/pull/7) by [NobWow](https://github.com/NobWow/).
 
 ## Tests
 
