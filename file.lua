@@ -121,13 +121,9 @@ end
 function process_bridge_listen(name, line_consumer, step)
 	local bridge = process_bridges[name]
 	modlib.minetest.register_globalstep(step or 0.1, function()
-		local content = io.open(bridge.input, "r")
-		local line = content:read()
-		while line do
+		for line in io.lines(bridge.input) do
 			line_consumer(line)
-			line = content:read()
 		end
-		content:close()
 		write(bridge.input, "")
 	end)
 end
