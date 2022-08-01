@@ -240,6 +240,7 @@ function ptab:rewrite()
 end
 
 function ptab:set(table, key, value)
+	exec(self, "BEGIN EXCLUSIVE TRANSACTION")
 	local previous_value = table[key]
 	if previous_value == value then
 		-- no change
@@ -247,6 +248,7 @@ function ptab:set(table, key, value)
 	end
 	set(self, table, key, value)
 	table[key] = value
+	exec(self, "COMMIT TRANSACTION")
 end
 
 function ptab:set_root(key, value)
