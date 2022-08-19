@@ -220,17 +220,14 @@ end
 
 -- Functional wrappers for logical operators, suffixed with _ to avoid a syntax error
 
-function not_(a)
-	return not a
-end
+function not_(a) return not a end
+_ENV["not"] = not_
 
-function and_(a, b)
-	return a and b
-end
+function and_(a, b) return a and b end
+_ENV["and"] = and_
 
-function or_(a, b)
-	return a or b
-end
+function or_(a, b) return a or b end
+_ENV["or"] = or_
 
 -- Export environment
 return _ENV
