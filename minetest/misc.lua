@@ -19,6 +19,8 @@ local jobs = modlib.heap.new(function(a, b)
 end)
 local job_metatable = {
 	__index = {
+		-- TODO (...) proper (instant rather than deferred) cancellation:
+		-- Keep index [job] = index, swap with last element and heapify
 		cancel = function(self)
 			self.cancelled = true
 		end
