@@ -240,11 +240,12 @@ function register_on_leaveplayer(func)
 	return minetest["register_on_" .. (minetest.is_singleplayer() and "shutdown" or "leaveplayer")](func)
 end
 
---! experimental
+do local mod_info
 function get_mod_info()
+	if mod_info then return mod_info end
+	mod_info = {}
 	-- TODO validate modnames
 	local modnames = minetest.get_modnames()
-	local mod_info = {}
 	for _, mod in pairs(modnames) do
 		local info
 		local function read_file(filename)
@@ -283,12 +284,13 @@ function get_mod_info()
 		mod_info[mod] = info
 	end
 	return mod_info
-end
+end end
 
---! experimental
+do local mod_load_order
 function get_mod_load_order()
+	if mod_load_order then return mod_load_order end
+	mod_load_order = {}
 	local mod_info = get_mod_info()
-	local mod_load_order = {}
 	-- If there are circular soft dependencies, it is possible that a mod is loaded, but not in the right order
 	-- TODO somehow maximize the number of soft dependencies fulfilled in case of circular soft dependencies
 	local function load(mod)
@@ -321,4 +323,4 @@ function get_mod_load_order()
 		assert(load(mod))
 	end
 	return mod_load_order
-end
+end end
