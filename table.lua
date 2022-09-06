@@ -301,15 +301,10 @@ function shallowcopy(table)
 end
 
 function deepcopy_noncircular(table)
-	local function _copy(value)
-		if type(value) == "table" then
-			return deepcopy_noncircular(value)
-		end
-		return value
-	end
+	if type(table) ~= "table" then return table end
 	local copy = {}
 	for key, value in pairs(table) do
-		copy[_copy(key)] = _copy(value)
+		copy[deepcopy_noncircular(key)] = deepcopy_noncircular(value)
 	end
 	return copy
 end
@@ -317,10 +312,11 @@ end
 function deepcopy(table)
 	local copies = {}
 	local function _deepcopy(table)
-		if copies[table] then
-			return copies[table]
+		local copy = copies[table]
+		if copy then
+			return copy
 		end
-		local copy = {}
+		copy = {}
 		copies[table] = copy
 		local function _copy(value)
 			if type(value) == "table" then
