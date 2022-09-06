@@ -339,7 +339,7 @@ function deepcopy(table)
 	return _deepcopy(table)
 end
 
-tablecopy = deepcopy
+tablecopy = deepcopy --! deprecated alias
 copy = deepcopy
 
 function count(table)
