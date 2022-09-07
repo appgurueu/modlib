@@ -49,15 +49,6 @@ function memoize(func)
 	})
 end
 
--- Equivalent to `for x, y, z in iterator, state, ... do callback(x, y, z) end`
-function iterate(callback, iterator, state, ...)
-	local function loop(...)
-		if ... == nil then return end
-		callback(...)
-		return loop(iterator(state, ...))
-	end
-	return loop(iterator(state, ...))
-end
 
 function for_generator(caller, ...)
 	local co = coroutine.create(function(...)

@@ -4,6 +4,16 @@ local add = modlib.func.add
 --+ Otherwise they will be applied to the indices.
 local iterator = {}
 
+-- Equivalent to `for x, y, z in iterator, state, ... do callback(x, y, z) end`
+function iterator.foreach(callback, iterator, state, ...)
+	local function loop(...)
+		if ... == nil then return end
+		callback(...)
+		return loop(iterator(state, ...))
+	end
+	return loop(iterator(state, ...))
+end
+
 function iterator.range(from, to, step)
 	if not step then
 		if not to then
