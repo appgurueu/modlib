@@ -1,6 +1,6 @@
 -- Localize globals
-local error, coroutine, math, modlib, unpack, select, setmetatable
-	= error, coroutine, math, modlib, unpack, select, setmetatable
+local error, coroutine, modlib, unpack, select, setmetatable
+	= error, coroutine, modlib, unpack, select, setmetatable
 
 -- Set environment
 local _ENV = {}
@@ -92,62 +92,6 @@ function aggregate(binary_func, total, ...)
 	return total
 end
 
---+ For all functions which aggregate over single values, use modlib.table.ivalues - not ipairs - for lists!
---+ Otherwise they will be applied to the indices.
-iterator = {}
-
-function iterator.aggregate(binary_func, total, ...)
-	for value in ... do
-		total = binary_func(total, value)
-	end
-	return total
-end
-
-function iterator.min(less_than_func, ...)
-	local min
-	for value in ... do
-		if min == nil or less_than_func(value, min) then
-			min = value
-		end
-	end
-	return min
-end
-
-function iterator.count(...)
-	local count = 0
-	for _ in ... do
-		count = count + 1
-	end
-	return count
-end
-
-function iterator.sum(...)
-	return iterator.aggregate(add, ...)
-end
-
-function iterator.average(...)
-	local count = 0
-	local sum = 0
-	for value in ... do
-		count = count + 1
-		sum = sum + value
-	end
-	return sum / count
-end
-
---: ... **restartable** iterator
--- While a single pass method for calculating the standard deviation exists, it is highly inaccurate
-function iterator.standard_deviation(...)
-	local avg = iterator.average(...)
-	local count = 0
-	local sum = 0
-	for value in ... do
-		count = count + 1
-		sum = sum + (value - avg)^2
-	end
-	return math.sqrt(sum / count)
-end
-
 function override_chain(func, override)
 	return function(...)
 		func(...)
@@ -162,63 +106,35 @@ end
 
 -- Functional wrappers for Lua's builtin metatable operators (arithmetic, concatenation, length, comparison, indexing, call)
 
-function add(a, b)
-	return a + b
-end
+function add(a, b) return a + b end
 
-function mul(a, b)
-	return a * b
-end
+function mul(a, b) return a * b end
 
-function div(a, b)
-	return a / b
-end
+function div(a, b) return a / b end
 
-function mod(a, b)
-	return a % b
-end
+function mod(a, b) return a % b end
 
-function pow(a, b)
-	return a ^ b
-end
+function pow(a, b) return a ^ b end
 
-function unm(a)
-	return -a
-end
+function unm(a) return -a end
 
-function concat(a, b)
-	return a .. b
-end
+function concat(a, b) return a .. b end
 
-function len(a)
-	return #a
-end
+function len(a) return #a end
 
-function eq(a, b)
-	return a == b
-end
+function eq(a, b) return a == b end
 
-function lt(a, b)
-	return a < b
-end
+function lt(a, b) return a < b end
 
-function le(a, b)
-	return a <= b
-end
+function le(a, b) return a <= b end
 
-function index(object, key)
-	return object[key]
-end
+function index(object, key) return object[key] end
 
-function newindex(object, key, value)
-	object[key] = value
-end
+function newindex(object, key, value) object[key] = value end
 
-function call(object, ...)
-	object(...)
-end
+function call(object, ...) object(...) end
 
--- Functional wrappers for logical operators, suffixed with _ to avoid a syntax error
+-- Functional wrappers for logical operators, suffixed with _ for syntactical convenience
 
 function not_(a) return not a end
 _ENV["not"] = not_

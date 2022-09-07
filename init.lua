@@ -40,6 +40,7 @@ for _, file in pairs{
 	"schema",
 	"file",
 	"func",
+	"iterator",
 	"math",
 	"table",
 	"text",
