@@ -49,18 +49,6 @@ function memoize(func)
 	})
 end
 
--- Does not use select magic, stops at the first nil value
-function aggregate(binary_func, total, ...)
-	if total == nil then return end
-	local function _aggregate(value, ...)
-		if value == nil then return end
-		total = binary_func(total, value)
-		return _aggregate(...)
-	end
-	_aggregate(...)
-	return total
-end
-
 function override_chain(func, override)
 	return function(...)
 		func(...)

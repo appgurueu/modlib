@@ -43,6 +43,7 @@ for _, file in pairs{
 	"iterator",
 	"math",
 	"table",
+	"vararg",
 	"text",
 	"vector",
 	"quaternion",
