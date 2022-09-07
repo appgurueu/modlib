@@ -1,5 +1,5 @@
-local coroutine_create, coroutine_resume, coroutine_yield, coroutine_status, unpack
-	= coroutine.create, coroutine.resume, coroutine.yield, coroutine.status, unpack
+local coroutine_create, coroutine_resume, coroutine_yield, coroutine_status, unpack, select
+	= coroutine.create, coroutine.resume, coroutine.yield, coroutine.status, unpack, select
 
 local add = modlib.func.add
 
@@ -23,7 +23,7 @@ function iterator.for_generator(caller, ...)
 			return coroutine_yield(...)
 		end, ...)
 	end)
-	local args = {...}
+	local args, n_args = {...}, select("#", ...)
 	return function()
 		if coroutine_status(co) == "dead" then
 			return
@@ -34,7 +34,7 @@ function iterator.for_generator(caller, ...)
 			end
 			return ...
 		end
-		return _iterate(coroutine_resume(co, unpack(args)))
+		return _iterate(coroutine_resume(co, unpack(args, 1, n_args)))
 	end
 end
 
