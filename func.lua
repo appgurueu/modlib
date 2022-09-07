@@ -1,6 +1,6 @@
 -- Localize globals
-local error, coroutine, modlib, unpack, select, setmetatable
-	= error, coroutine, modlib, unpack, select, setmetatable
+local modlib, unpack, select, setmetatable
+	= modlib, unpack, select, setmetatable
 
 -- Set environment
 local _ENV = {}
@@ -47,28 +47,6 @@ function memoize(func)
 		end,
 		__mode = "k"
 	})
-end
-
-
-function for_generator(caller, ...)
-	local co = coroutine.create(function(...)
-		return caller(function(...)
-			return coroutine.yield(...)
-		end, ...)
-	end)
-	local args = {...}
-	return function()
-		if coroutine.status(co) == "dead" then
-			return
-		end
-		local function _iterate(status, ...)
-			if not status then
-				error((...))
-			end
-			return ...
-		end
-		return _iterate(coroutine.resume(co, unpack(args)))
-	end
 end
 
 -- Does not use select magic, stops at the first nil value

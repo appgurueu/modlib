@@ -1,3 +1,6 @@
+local coroutine_create, coroutine_resume, coroutine_yield, coroutine_status, unpack
+	= coroutine.create, coroutine.resume, coroutine.yield, coroutine.status, unpack
+
 local add = modlib.func.add
 
 --+ For all functions which aggregate over single values, use modlib.table.ivalues - not ipairs - for lists!
@@ -12,6 +15,27 @@ function iterator.foreach(callback, iterator, state, ...)
 		return loop(iterator(state, ...))
 	end
 	return loop(iterator(state, ...))
+end
+
+function iterator.for_generator(caller, ...)
+	local co = coroutine_create(function(...)
+		return caller(function(...)
+			return coroutine_yield(...)
+		end, ...)
+	end)
+	local args = {...}
+	return function()
+		if coroutine_status(co) == "dead" then
+			return
+		end
+		local function _iterate(status, ...)
+			if not status then
+				error((...))
+			end
+			return ...
+		end
+		return _iterate(coroutine_resume(co, unpack(args)))
+	end
 end
 
 function iterator.range(from, to, step)
