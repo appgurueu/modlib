@@ -45,6 +45,7 @@ for _, file in pairs{
 	"table",
 	"vararg",
 	"text",
+	"utf8",
 	"vector",
 	"quaternion",
 	"trie",

@@ -138,27 +138,6 @@ magic_charset = "[" .. table.concat(magic_charset) .. "]"
 
 function escape_magic_chars(text) return text:gsub("(" .. magic_charset .. ")", "%%%1") end
 
-function utf8(number)
-	if number <= 0x007F then
-		-- Single byte
-		return string.char(number)
-	end
-	if number < 0x00A0 or number > 0x10FFFF then
-		-- Out of range
-		return
-	end
-	local result = ""
-	local i = 0
-	while true do
-		local remainder = number % 64
-		result = string.char(128 + remainder) .. result
-		number = (number - remainder) / 64
-		i = i + 1
-		if number <= 2 ^ (8 - i - 2) then break end
-	end
-	return string.char(256 - 2 ^ (8 - i - 1) + number) .. result
-end
-
 local keywords = modlib.table.set{"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
 keywords["goto"] = true -- Lua 5.2 (LuaJIT) support
 

@@ -101,7 +101,7 @@ for i = 0, 5 do
 end
 
 -- TODO SAX vs DOM
-local utf8 = modlib.text.utf8
+local utf8_char = modlib.utf8.char
 function read(self, read_)
 	local index = 0
 	local char
@@ -149,7 +149,7 @@ function read(self, read_)
 		end
 	end
 	local function utf8_codepoint(codepoint)
-		return syntax_assert(utf8(codepoint), "invalid codepoint")
+		return syntax_assert(utf8_char(codepoint), "invalid codepoint")
 	end
 	local function string()
 		local chars = {}
