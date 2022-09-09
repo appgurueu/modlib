@@ -8,6 +8,10 @@ setfenv(1, _ENV)
 
 no_op = function() end
 
+-- TODO fix this being ugly AF
+
+-- TODO switch all of these to vargs
+
 function curry(func, ...)
 	local args = { ... }
 	return function(...) return func(unpack(args), ...) end
@@ -47,6 +51,12 @@ function memoize(func)
 		end,
 		__mode = "k"
 	})
+end
+
+function compose(func, other_func)
+	return function(...)
+		return func(other_func(...))
+	end
 end
 
 function override_chain(func, override)
