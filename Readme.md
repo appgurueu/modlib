@@ -286,14 +286,6 @@ This is best left explicit. First, you shouldn't be using numbered field keys if
 4. [`json`](https://json.org)
   * Not recommended
 
-### `variables(stacklevel)`
-
-Dumps local variables, upvalues and the function environment of the function at the given stacklevel (default `1`).
-
-### `stack(stacklevel)`
-
-Dumps function info & variables for all functions in stack, starting with stacklevel (default `1`).
-
 ## `minetest`
 
 ### `schematic`
