@@ -187,6 +187,10 @@ function dot(v, w)
 	return sum
 end
 
+function reflect(v, normal --[[**normalized** plane normal vector]])
+	return subtract(v, multiply_scalar(normal, 2 * dot(v, normal))) -- reflection of v at the plane
+end
+
 --+ Angle between two vectors
 --> Signed angle in radians
 function angle(v, w)
