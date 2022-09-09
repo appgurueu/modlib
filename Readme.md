@@ -18,7 +18,7 @@ Mostly self-documenting code. Mod namespace is `modlib`, containing all variable
 
 #### Lua Log Files
 
-A data log file based on Lua statements. **Experimental.** High performance. Example from `test.lua`:
+A data log file based on Lua statements. High performance. Example from `test.lua`:
 
 ```lua
 local logfile = persistence.lua_log_file.new(mod.get_resource"logfile.test.lua", {})
@@ -84,7 +84,7 @@ The method `defragment_ids` should not have to be used in practice (if it has to
 
 ### Bluon
 
-Binary Lua object notation. **Experimental.** Handling of subnormal numbers (very small floats) may be broken.
+Binary Lua object notation.
 
 #### `new(def)`
 
@@ -289,7 +289,7 @@ Dumps function info & variables for all functions in stack, starting with stackl
 
 ### `schematic`
 
-A schematic format with support for metadata and baked light data. **Experimental.**
+A schematic format with support for metadata and baked light data.
 
 ## Release Notes
 

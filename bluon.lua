@@ -6,9 +6,6 @@ local assert, error, ipairs, math_floor, math_abs, math_huge, modlib, next, pair
 local _ENV = {}
 setfenv(1, _ENV)
 
---! experimental
-
-local no_op = modlib.func.no_op
 local fround = modlib.math.fround
 local write_single, write_double = modlib.binary.write_single, modlib.binary.write_double
 

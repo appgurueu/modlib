@@ -4,7 +4,6 @@ local modlib, setmetatable, pairs, assert, error, table, table_insert, table_con
 local _ENV = {}
 setfenv(1, _ENV)
 
---! experimental
 -- See https://tools.ietf.org/id/draft-ietf-json-rfc4627bis-09.html#unichars and https://json.org
 
 -- Null

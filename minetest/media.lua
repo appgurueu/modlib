@@ -1,8 +1,6 @@
 local minetest, modlib, pairs, ipairs
 	= minetest, modlib, pairs, ipairs
 
---! experimental
-
 -- TODO support for server texture packs (and possibly client TPs in singleplayer?)
 local media_foldernames = {"textures", "sounds", "media", "models", "locale"}
 local media_extensions = modlib.table.set{

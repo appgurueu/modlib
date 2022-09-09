@@ -3,8 +3,6 @@ local assert, error, math_huge, modlib, minetest, setmetatable, type, table_inse
 
 local sqlite3 = ...
 
---! experimental
-
 --[[
 	Currently uses reference counting to immediately delete tables which aren't reachable from the root table anymore, which has two issues:
 	1. Deletion might trigger a large deletion chain
