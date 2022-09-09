@@ -75,6 +75,8 @@ end
 
 function add(a, b) return a + b end
 
+function sub(a, b) return a - b end
+
 function mul(a, b) return a * b end
 
 function div(a, b) return a / b end
@@ -91,9 +93,15 @@ function len(a) return #a end
 
 function eq(a, b) return a == b end
 
+function neq(a, b) return a ~= b end
+
 function lt(a, b) return a < b end
 
+function gt(a, b) return a > b end
+
 function le(a, b) return a <= b end
+
+function ge(a, b) return a >= b end
 
 function index(object, key) return object[key] end
 
