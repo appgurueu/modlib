@@ -13,6 +13,10 @@ function starts_with(text, prefix) return text:sub(1, #prefix) == prefix end
 
 function ends_with(text, suffix) return text:sub(-#suffix) == suffix end
 
+function contains(str, substr, plain)
+	return not not str:find(substr, 1, plain == nil and true or plain)
+end
+
 function trim(text, to_remove)
 	local j = 1
 	for i = 1, string.len(text) do
