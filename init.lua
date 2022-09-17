@@ -71,7 +71,7 @@ end
 
 -- aliases
 -- more aliases are implemented below:
--- modlib.[mod|log|conf|player] are aliases of modlib.minetest.[mod|log|conf|player] respectively
+-- modlib.[mod|conf] are aliases of modlib.minetest.[mod|conf] respectively
 modules.string = "text"
 modules.number = "math"
 
@@ -99,10 +99,6 @@ end
 local function load_module(self, module_name_or_alias)
 	local module_name = modules[module_name_or_alias]
 	if not module_name then
-		-- Handle modlib.[log|player] aliases for the minetest.[log|player] modules
-		if module_name_or_alias == "log" then
-			return modlib.minetest.log
-		end
 		-- no such module
 		return
 	end

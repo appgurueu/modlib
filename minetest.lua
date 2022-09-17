@@ -3,7 +3,6 @@ local _ENV = {}
 local components = {}
 for _, value in pairs{
 	"mod",
-	"log",
 	"conf", -- deprecated
 	"luon",
 	"raycast",
