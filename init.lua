@@ -128,11 +128,6 @@ modlib = setmetatable({
 			return rawset(_G, index, value)
 		end
 	}),
-	assertdump = minetest and function(v, value)
-		if not v then
-			error(dump(value), 2)
-		end
-	end
 }, { __index = load_module })
 
 -- Force load file module to pass dir_delim & to set concat_path
