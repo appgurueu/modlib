@@ -4,7 +4,6 @@ local components = {}
 for _, value in pairs{
 	"mod",
 	"log",
-	"player",
 	"conf", -- deprecated
 	"luon",
 	"raycast",

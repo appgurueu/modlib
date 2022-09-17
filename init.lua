@@ -100,8 +100,8 @@ local function load_module(self, module_name_or_alias)
 	local module_name = modules[module_name_or_alias]
 	if not module_name then
 		-- Handle modlib.[log|player] aliases for the minetest.[log|player] modules
-		if module_name_or_alias == "log" or module_name_or_alias == "player" then
-			return modlib.minetest[module_name_or_alias]
+		if module_name_or_alias == "log" then
+			return modlib.minetest.log
 		end
 		-- no such module
 		return
