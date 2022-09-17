@@ -56,15 +56,6 @@ function get_color_table(player)
 	return sender_color or { r = 255, g = 255, b = 255 }
 end
 
---! deprecated in favor of modlib.minetest.colorspec
-function get_color_int(player)
-	local sender_color = player:get_properties().nametag_color
-	if sender_color then
-		sender_color = sender_color.b + sender_color.g * 0x100 + sender_color.r * 0x10000
-	else sender_color = 0xFFFFFF end
-	return sender_color
-end
-
 minetest.register_on_joinplayer(function(player)
 	local playername = player:get_player_name()
 	create_player_data(playername)
