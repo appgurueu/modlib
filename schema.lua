@@ -318,7 +318,11 @@ function load(self, override, params)
 		end
 		assert((not self.list) or modlib.table.count(override) == #override, "list")
 	end
-	assert((not self.values) or self.values[override], "values")
+	-- Apply the values check only for primitive types where table indexing is by value;
+	-- the `values` field has a different meaning for tables (constraint all values must fulfill)
+	if self.type ~= "table" then
+		assert((not self.values) or self.values[override], "values")
+	end
 	if self.func then self.func(override) end
 	return override
 end
