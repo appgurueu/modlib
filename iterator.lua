@@ -109,4 +109,33 @@ function iterator.standard_deviation(...)
 	return (sum / count)^.5
 end
 
+-- Comprehensions ("collectors")
+
+-- Shorthand for `for k, v in ... do t[k] = v end`
+function iterator.to_table(...)
+	local t = {}
+	for k, v in ... do
+		t[k] = v
+	end
+	return t
+end
+
+-- Shorthand for `for k in ... do t[#t + 1] = k end`
+function iterator.to_list(...)
+	local t = {}
+	for k in ... do
+		t[#t + 1] = k
+	end
+	return t
+end
+
+-- Shorthand for `for k in ... do t[k] = true end`
+function iterator.to_set(...)
+	local t = {}
+	for k in ... do
+		t[k] = true
+	end
+	return t
+end
+
 return iterator
