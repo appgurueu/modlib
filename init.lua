@@ -53,7 +53,6 @@ for _, file in pairs{
 	"hashlist",
 	"hashheap",
 	"heap",
-	"ranked_set",
 	"binary",
 	"b3d",
 	"json",
