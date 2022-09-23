@@ -17,50 +17,6 @@ function contains(str, substr, plain)
 	return not not str:find(substr, 1, plain == nil and true or plain)
 end
 
-function trim(text, to_remove)
-	local j = 1
-	for i = 1, string.len(text) do
-		if text:sub(i, i) ~= to_remove then
-			j = i
-			break
-		end
-	end
-	local k = 1
-	for i = string.len(text), j, -1 do
-		if text:sub(i, i) ~= to_remove then
-			k = i
-			break
-		end
-	end
-	return text:sub(j, k)
-end
-
-function trim_begin(text, to_remove)
-	local j = 1
-	for i = 1, string.len(text) do
-		if text:sub(i, i) ~= to_remove then
-			j = i
-			break
-		end
-	end
-	return text:sub(j)
-end
-
-trim_left = trim_begin
-
-function trim_end(text, to_remove)
-	local k = 1
-	for i = string.len(text), 1, -1 do
-		if text:sub(i, i) ~= to_remove then
-			k = i
-			break
-		end
-	end
-	return text:sub(1, k)
-end
-
-trim_right = trim_end
-
 function trim_spacing(text)
 	return text:match"^%s*(.-)%s*$"
 end
