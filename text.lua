@@ -45,6 +45,27 @@ function hexdump(text)
 	return table.concat(dump)
 end
 
+-- Iterator of possibly empty substrings between two matches of the delimiter
+-- Filter the iterator to exclude empty strings or consider using `:gmatch"[...]+"` instead
+function spliterator(str, delim, plain)
+	local last_delim_end = 0
+	return function()
+		if last_delim_end >= #str then
+			return
+		end
+
+		local delim_start, delim_end = str:find(delim, last_delim_end + 1, plain)
+		local substr
+		if delim_start then
+			substr = str:sub(last_delim_end + 1, delim_start - 1)
+		else
+			substr = str:sub(last_delim_end + 1)
+		end
+		last_delim_end = delim_end or #str
+		return substr
+	end
+end
+
 function split(text, delimiter, limit, plain)
 	limit = limit or math.huge
 	local parts = {}
