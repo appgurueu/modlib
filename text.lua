@@ -123,5 +123,27 @@ function is_identifier(text)
 	return (not keywords[text]) and text:match"^[A-Za-z_][A-Za-z%d_]*$"
 end
 
+local function inextchar(text, i)
+	if i >= #text then return end
+	i = i + 1
+	return i, text:sub(i, i)
+end
+
+function ichars(text, start)
+	-- Iterator over `index, character`
+	return inextchar, text, (start or 1) - 1
+end
+
+local function inextbyte(text, i)
+	if i >= #text then return end
+	i = i + 1
+	return i, text:byte(i, i)
+end
+
+function ibytes(text, start)
+	-- Iterator over `index, byte`
+	return inextbyte, text, (start or 1) - 1
+end
+
 -- Export environment
 return _ENV
