@@ -45,24 +45,25 @@ function hexdump(text)
 	return table.concat(dump)
 end
 
-function split(text, delimiter, limit, is_regex)
+function split(text, delimiter, limit, plain)
 	limit = limit or math.huge
-	local no_regex = not is_regex
 	local parts = {}
 	local occurences = 1
 	local last_index = 1
-	local index = string.find(text, delimiter, 1, no_regex)
+	local index = string.find(text, delimiter, 1, plain)
 	while index and occurences < limit do
 		table.insert(parts, string.sub(text, last_index, index - 1))
 		last_index = index + string.len(delimiter)
-		index = string.find(text, delimiter, index + string.len(delimiter), no_regex)
+		index = string.find(text, delimiter, index + string.len(delimiter), plain)
 		occurences = occurences + 1
 	end
 	table.insert(parts, string.sub(text, last_index))
 	return parts
 end
 
-function split_without_limit(text, delimiter, is_regex) return split(text, delimiter, nil, is_regex) end
+function split_without_limit(text, delimiter, plain)
+	return split(text, delimiter, nil, plain)
+end
 
 split_unlimited = split_without_limit
 

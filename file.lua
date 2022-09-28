@@ -19,7 +19,7 @@ end
 get_extension = split_extension
 
 function split_path(filepath)
-	return modlib.text.split(filepath, dir_delim)
+	return modlib.text.split_unlimited(filepath, dir_delim, true)
 end
 
 -- concat_path is set by init.lua to avoid code duplication

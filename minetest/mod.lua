@@ -62,7 +62,7 @@ local warn_parent_leaf = "modlib: setting %s used both as parent setting and as 
 local function build_tree(dict)
 	local tree = {}
 	for key, value in pairs(dict) do
-		local path = modlib.text.split_unlimited(key, ".")
+		local path = modlib.text.split_unlimited(key, ".", true)
 		local subtree = tree
 		for i = 1, #path - 1 do
 			local index = tonumber(path[i]) or path[i]
