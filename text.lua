@@ -1,5 +1,6 @@
 -- Localize globals
-local math, modlib, pairs, setmetatable, string, table = math, modlib, pairs, setmetatable, string, table
+local assert, math, modlib, setmetatable, string, table
+	= assert, math, modlib, setmetatable, string, table
 
 -- Set environment
 local _ENV = {}
@@ -45,12 +46,14 @@ function hexdump(text)
 	return table.concat(dump)
 end
 
--- Iterator of possibly empty substrings between two matches of the delimiter
--- Filter the iterator to exclude empty strings or consider using `:gmatch"[...]+"` instead
 function spliterator(str, delim, plain)
+	assert(delim ~= "")
 	local last_delim_end = 0
+
+	-- Iterator of possibly empty substrings between two matches of the delimiter
+	-- To exclude empty strings, filter the iterator or use `:gmatch"[...]+"` instead
 	return function()
-		if last_delim_end >= #str then
+		if not last_delim_end then
 			return
 		end
 
@@ -61,7 +64,7 @@ function spliterator(str, delim, plain)
 		else
 			substr = str:sub(last_delim_end + 1)
 		end
-		last_delim_end = delim_end or #str
+		last_delim_end = delim_end
 		return substr
 	end
 end
