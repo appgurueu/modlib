@@ -1,36 +1,11 @@
 -- Localize globals
-local assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type, unpack = assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type, unpack
+local assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type
+	= assert, dump, error, ipairs, minetest, modlib, pairs, pcall, table, tonumber, type
 
 -- Set environment
 local _ENV = {}
 setfenv(1, _ENV)
 
--- not deprecated
--- TODO find a better way to deal with settings used as both parent & leaf, ideally preserving the data of both (store in boolean field?)
-local warn_parent_leaf = "modlib.minetest.conf.build_tree: setting %s used both as parent setting and as leaf, ignoring children"
-function build_tree(dict)
-	local tree = {}
-	for key, value in pairs(dict) do
-		local path = modlib.text.split_unlimited(key, ".")
-		local subtree = tree
-		for i = 1, #path - 1 do
-			local index = tonumber(path[i]) or path[i]
-			subtree[index] = subtree[index] or {}
-			subtree = subtree[index]
-			if type(subtree) ~= "table" then
-				minetest.log("warning", warn_parent_leaf:format(table.concat({unpack(path, 1, i)}, ".")))
-				break
-			end
-		end
-		if type(subtree) == "table" then
-			if type(subtree[path[#path]]) == "table" then
-				minetest.log("warning", warn_parent_leaf:format(key))
-			end
-			subtree[path[#path]] = value
-		end
-	end
-	return tree
-end
 if minetest then
 	function build_setting_tree()
 		settings = build_tree(minetest.settings:to_table())

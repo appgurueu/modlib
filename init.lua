@@ -139,8 +139,6 @@ if minetest then
 	local ml_mt = modlib.minetest
 	ml_mt.mod.get_resource = get_resource
 	modlib.mod = ml_mt.mod
-	ml_mt.conf.build_setting_tree()
-	modlib.conf = ml_mt.conf
 	-- HACK force load minetest/gametime.lua to ensure that the globalstep is registered earlier than globalsteps of mods depending on modlib
 	dofile(get_resource(modlib.modname, "minetest", "gametime.lua"))
 	local ie = minetest.request_insecure_environment()
