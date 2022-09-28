@@ -101,24 +101,13 @@ function is_hexadecimal(byte)
 	return byte >= zero and byte <= nine or byte >= letter_a and byte <= letter_f
 end
 
-magic_chars = {
-	"%",
-	"(",
-	")",
-	".",
-	"+",
-	"-",
-	"*",
-	"?",
-	"[",
-	"^",
-	"$"
-}
-local magic_charset = {}
-for _, magic_char in pairs(magic_chars) do table.insert(magic_charset, "%" .. magic_char) end
-magic_charset = "[" .. table.concat(magic_charset) .. "]"
+magic_charset = "[" .. ("%^$+-*?.[]()"):gsub(".", "%%%1") .. "]"
 
-function escape_magic_chars(text) return text:gsub("(" .. magic_charset .. ")", "%%%1") end
+function escape_pattern(text)
+	return text:gsub(magic_charset, "%%%1")
+end
+
+escape_magic_chars = escape_pattern
 
 local keywords = modlib.table.set{"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
 keywords["goto"] = true -- Lua 5.2 (LuaJIT) support
