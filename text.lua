@@ -145,5 +145,19 @@ function ibytes(text, start)
 	return inextbyte, text, (start or 1) - 1
 end
 
+local function _random_bytes(count)
+	if count == 0 then return end
+	return math.random(0, 0xFF), _random_bytes(count - 1)
+end
+
+function random_bytes(
+	-- number, how many random bytes the string should have, defaults to 1
+	-- limited by stack size
+	count
+)
+	count = count or 1
+	return string.char(_random_bytes(count))
+end
+
 -- Export environment
 return _ENV
