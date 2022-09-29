@@ -91,9 +91,35 @@ end
 
 split_unlimited = split_without_limit
 
-function split_lines(text, limit) return modlib.text.split(text, "\r?\n", limit, true) end
+--! Does not support Macintosh pre-OSX CR-only line endings
+--! Deprecated in favor of the `lines` iterator below
+function split_lines(text, limit)
+	return modlib.text.split(text, "\r?\n", limit, true)
+end
 
-function lines(text) return text:gmatch"[^\r\n]*" end
+-- When reading from a file, directly use `io.lines` instead
+-- Lines are possibly empty substrings separated by CR, LF or CRLF
+-- A trailing linefeed is ignored
+function lines(str)
+	local line_start = 1
+	-- Line iterator
+	return function()
+		if line_start > #str then
+			return
+		end
+		local linefeed_start, _, linefeed = str:find("([\r\n][\r\n]?)", line_start)
+		local line
+		if linefeed_start then
+			line = str:sub(line_start, linefeed_start - 1)
+			line_start = linefeed_start + (linefeed == "\r\n" and 2 or 1)
+		else
+			line = str:sub(line_start)
+			line_start = #str + 1
+		end
+		return line
+	end
+end
+
 
 local zero = string.byte"0"
 local nine = string.byte"9"
