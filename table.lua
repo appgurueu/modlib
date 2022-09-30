@@ -292,6 +292,41 @@ function equals_references(table, other_table)
 	return _equals(table, other_table, {})
 end
 
+-- Supports circular tables; does not support table keys
+--> `true` if a mapping of references exists, `false` otherwise
+function same(a, b)
+	local same = {}
+	local function is_same(a, b)
+		if type(a) ~= "table" or type(b) ~= "table" then
+			return a == b
+		end
+		if same[a] or same[b] then
+			return same[a] == b and same[b] == a
+		end
+		if a == b then
+			return true
+		end
+
+		same[a], same[b] = b, a
+		local count = 0
+		for k, v in pairs(a) do
+			count = count + 1
+			assert(type(k) ~= "table", "table keys not supported")
+			if not is_same(v, b[k], same) then
+				return false
+			end
+		end
+		for _ in pairs(b) do
+			count = count - 1
+			if count < 0 then
+				return false
+			end
+		end
+		return true
+	end
+	return is_same(a, b)
+end
+
 function shallowcopy(table)
 	local copy = {}
 	for key, value in pairs(table) do
