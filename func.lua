@@ -6,11 +6,11 @@ local modlib, unpack, select, setmetatable
 local _ENV = {}
 setfenv(1, _ENV)
 
-no_op = function() end
+function no_op() end
 
--- TODO fix this being ugly AF
+function identity(...) return ... end
 
--- TODO switch all of these to vargs
+-- TODO switch all of these to proper vargs
 
 function curry(func, ...)
 	local args = { ... }
@@ -72,6 +72,8 @@ function call_by_value(func, ...)
 end
 
 -- Functional wrappers for Lua's builtin metatable operators (arithmetic, concatenation, length, comparison, indexing, call)
+
+-- TODO (?) add operator table `["+"] = add, ...`
 
 function add(a, b) return a + b end
 
