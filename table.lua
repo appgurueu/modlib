@@ -672,6 +672,7 @@ function max(table)
 	return best_value(table, function(value, other_value) return value > other_value end)
 end
 
+--! deprecated
 function default_comparator(value, other_value)
 	if value == other_value then
 		return 0
@@ -682,6 +683,7 @@ function default_comparator(value, other_value)
 	return -1
 end
 
+--! deprecated, use `binary_search(list, value, less_than)` instead
 --> index if element found
 --> -index for insertion if not found
 function binary_search_comparator(comparator)
@@ -703,12 +705,32 @@ function binary_search_comparator(comparator)
 	end
 end
 
-binary_search = binary_search_comparator(default_comparator)
+function binary_search(
+	list -- sorted list
+	, value -- value to be be searched for
+	, less_than -- function(a, b) return a < b end
+)
+	less_than = less_than or function(a, b) return a < b end
+	local min, max = 1, #list
+	while min <= max do
+		local mid = math.floor((min + max) / 2)
+		local element = list[mid]
+		if less_than(value, element) then
+			max = mid - 1
+		elseif less_than(element, value) then
+			min = mid + 1
+		else -- neither smaller nor larger => must be equal
+			return mid -- index if found
+		end
+	end
+	return nil, min -- nil, insertion index if not found
+end
 
 --> whether the list is sorted in ascending order
-function is_sorted(list, comparator)
+function is_sorted(list, less_than --[[function(a, b) return a < b end]])
+	less_than = less_than or function(a, b) return a < b end
 	for index = 2, #list do
-		if comparator(list[index - 1], list[index]) >= 0 then
+		if less_than(list[index], list[index - 1]) then
 			return false
 		end
 	end
