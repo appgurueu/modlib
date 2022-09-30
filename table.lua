@@ -400,6 +400,12 @@ function is_empty(table)
 	return next(table) == nil
 end
 
+function clear(table)
+	for k in pairs(table) do
+		table[k] = nil
+	end
+end
+
 function foreach(table, func)
 	for k, v in pairs(table) do
 		func(k, v)
