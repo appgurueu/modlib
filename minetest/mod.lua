@@ -58,6 +58,8 @@ function init(modname)
 	extend(modname, "main")
 end
 
+-- TODO `require` relative to current mod
+
 local warn_parent_leaf = "modlib: setting %s used both as parent setting and as leaf, ignoring children"
 local function build_tree(dict)
 	local tree = {}
