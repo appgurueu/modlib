@@ -1,6 +1,6 @@
 -- Localize globals
-local assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, select, string, table, type
-	= assert, ipairs, math, next, pairs, rawget, rawset, setmetatable, select, string, table, type
+local assert, ipairs, math, next, pairs, rawget, rawset, getmetatable, setmetatable, select, string, table, type
+	= assert, ipairs, math, next, pairs, rawget, rawset, getmetatable, setmetatable, select, string, table, type
 
 -- Set environment
 local _ENV = {}
@@ -300,16 +300,20 @@ function shallowcopy(table)
 	return copy
 end
 
-function deepcopy_noncircular(table)
+function deepcopy_tree(table)
 	if type(table) ~= "table" then return table end
 	local copy = {}
 	for key, value in pairs(table) do
-		copy[deepcopy_noncircular(key)] = deepcopy_noncircular(value)
+		copy[deepcopy_tree(key)] = deepcopy_tree(value)
 	end
 	return copy
 end
+deepcopy_noncircular = deepcopy_tree
 
-function deepcopy(table)
+function deepcopy(
+	table -- table to copy; reference equality will be preserved
+	, strip_metatables -- whether to strip metatables; falsy by default; metatables are not copied
+)
 	local copies = {}
 	local function _deepcopy(table)
 		local copy = copies[table]
@@ -317,6 +321,9 @@ function deepcopy(table)
 			return copy
 		end
 		copy = {}
+		if not strip_metatables then
+			setmetatable(copy, getmetatable(table))
+		end
 		copies[table] = copy
 		local function _copy(value)
 			if type(value) == "table" then
