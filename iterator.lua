@@ -62,6 +62,33 @@ function iterator.aggregate(binary_func, total, ...)
 	return total
 end
 
+-- Like `iterator.aggregate`, but does not expect a `total`
+function iterator.reduce(binary_func, iterator, state, control_var)
+	local total = iterator(state, control_var)
+	if total == nil then
+		return -- nothing if the iterator is empty
+	end
+	for value in iterator, state, total do
+		total = binary_func(total, value)
+	end
+	return total
+end
+iterator.fold = iterator.reduce
+
+function iterator.any(...)
+	for val in ... do
+		if val then return true end
+	end
+	return false
+end
+
+function iterator.all(...)
+	for val in ... do
+		if not val then return false end
+	end
+	return true
+end
+
 function iterator.min(less_than_func, ...)
 	local min
 	for value in ... do
