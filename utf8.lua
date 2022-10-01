@@ -3,6 +3,9 @@ local assert, error, select, string_char, table_concat
 
 local utf8 = {}
 
+-- Overly permissive pattern that greedily matches a single UTF-8 codepoint
+utf8.charpattern = "[%z-\127\194-\253][\128-\191]*"
+
 function utf8.is_valid_codepoint(codepoint)
 	-- Must be in bounds & must not be a surrogate
 	return codepoint <= 0x10FFFF and (codepoint < 0xD800 or codepoint > 0xDFFF)
@@ -46,14 +49,10 @@ function utf8.char(...)
 	return table_concat(chars)
 end
 
--- Overly permissive pattern that greedily matches a single UTF-8 codepoint
-utf8.charpattern = "[%z-\127\194-\253][\128-\191]*"
-
-local function utf8_codepoint(str)
-	local first_byte = str:byte()
+local function utf8_next_codepoint(str, i)
+	local first_byte = str:byte(i)
 	if first_byte < 0x80 then
-		assert(#str == 1, "invalid UTF-8")
-		return first_byte
+		return i + 1, first_byte
 	end
 
 	local len, head_bits
@@ -64,23 +63,40 @@ local function utf8_codepoint(str)
 	elseif first_byte >= 0xF0 and first_byte <= 0xF7 then -- 11110_000 to 11110_111
 		len, head_bits = 4, first_byte % 0x8 -- last 3 bits
 	else error"invalid UTF-8" end
-	assert(#str == len, "invalid UTF-8")
 
 	local codepoint = 0
 	local pow = 1
-	for i = len, 2, -1 do
-		local byte = str:byte(i)
+	for j = i + len - 1, i + 1, -1 do
+		local byte = assert(str:byte(j), "invalid UTF-8")
 		local val_bits = byte % 0x40 -- extract last 6 bits xxxxxx from 10xxxxxx
 		assert(byte - val_bits == 0x80) -- assert that first two bits are 10
 		codepoint = codepoint + val_bits * pow
 		pow = pow * 0x40
 	end
-	return codepoint + head_bits * pow
+	return i + len, codepoint + head_bits * pow
 end
 
-function utf8.codepoint(...)
-	if select("#", ...) == 0 then return end
-	return utf8_codepoint(...), utf8.codepoint(select(2, ...))
+function utf8.codepoint(str, i, j)
+	i, j = i or 1, j or #str
+	if i > j then return end
+	local codepoint
+	i, codepoint = utf8_next_codepoint(str, i)
+	assert(i - j <= 1, "invalid UTF-8")
+	return codepoint, utf8.codepoint(str, i)
+end
+
+-- Iterator to loop over the UTF-8 characters as `index, codepoint`
+function utf8.codes(text, i)
+	i = i or 1
+	return function()
+		if i > #text then
+			return
+		end
+		local prev_index = i
+		local codepoint
+		i, codepoint = utf8_next_codepoint(text, i)
+		return prev_index, codepoint
+	end
 end
 
 return utf8
