@@ -2,6 +2,8 @@
 local assert, ipairs, math, next, pairs, rawget, rawset, getmetatable, setmetatable, select, string, table, type
 	= assert, ipairs, math, next, pairs, rawget, rawset, getmetatable, setmetatable, select, string, table, type
 
+local lt = modlib.func.lt
+
 -- Set environment
 local _ENV = {}
 setfenv(1, _ENV)
@@ -716,30 +718,35 @@ function hpairs(table)
 	return hnext
 end
 
-function best_value(table, is_better_func)
-	local best_key = next(table)
-	if best_key == nil then
-		return
+function min_key(table, less_than)
+	less_than = less_than or lt
+	local min_key = next(table)
+	if min_key == nil then
+		return -- empty table
 	end
-	local candidate_key = best_key
-	while true do
-		candidate_key = next(table, candidate_key)
-		if candidate_key == nil then
-			return best_key
-		end
-		if is_better_func(candidate_key, best_key) then
-			best_key = candidate_key
+	for candidate_key in next, table, min_key do
+		if less_than(candidate_key, min_key) then
+			min_key = candidate_key
 		end
 	end
+	return min_key
 end
 
-function min(table)
-	return best_value(table, function(value, other_value) return value < other_value end)
+function min_value(table, less_than)
+	less_than = less_than or lt
+	local min_key, min_value = next(table)
+	if min_key == nil then
+		return -- empty table
+	end
+	for candidate_key, candidate_value in next, table, min_key do
+		if less_than(candidate_value, min_value) then
+			min_key, min_value = candidate_key, candidate_value
+		end
+	end
+	return min_value, min_key
 end
 
-function max(table)
-	return best_value(table, function(value, other_value) return value > other_value end)
-end
+-- TODO move all of the below functions to modlib.list eventually
 
 --! deprecated
 function default_comparator(value, other_value)
@@ -779,7 +786,7 @@ function binary_search(
 	, value -- value to be be searched for
 	, less_than -- function(a, b) return a < b end
 )
-	less_than = less_than or function(a, b) return a < b end
+	less_than = less_than or lt
 	local min, max = 1, #list
 	while min <= max do
 		local mid = math.floor((min + max) / 2)
