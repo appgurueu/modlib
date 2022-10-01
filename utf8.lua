@@ -1,4 +1,5 @@
-local string_char, table_concat = string.char, table.concat
+local assert, error, select, string_char, table_concat
+	= assert, error, select, string.char, table.concat
 
 local utf8 = {}
 
@@ -7,28 +8,36 @@ function utf8.is_valid_codepoint(codepoint)
 	return codepoint <= 0x10FFFF and (codepoint < 0xD800 or codepoint > 0xDFFF)
 end
 
-local function utf8_char(codepoint)
-	if codepoint <= 0x007F then -- single byte
-		return string_char(codepoint) -- UTF-8 encoded string
-	end
-	local result = ""
-	local i = 0
-	repeat
-		local remainder = codepoint % 64
-		result = string_char(128 + remainder) .. result
-		codepoint = (codepoint - remainder) / 64
-		i = i + 1
-	until codepoint <= 2 ^ (8 - i - 2)
-
-	return string_char(0x100 - 2 ^ (8 - i - 1) + codepoint) .. result -- UTF-8 encoded string
+local function utf8_bytes(codepoint)
+	if codepoint <= 0x007F then
+		return codepoint
+	end if codepoint <= 0x7FF then
+		local payload_2 = codepoint % 0x40
+		codepoint = (codepoint - payload_2) / 0x40
+		return 0xC0 + codepoint, 0x80 + payload_2
+	end if codepoint <= 0xFFFF then
+		local payload_3 = codepoint % 0x40
+		codepoint = (codepoint - payload_3) / 0x40
+		local payload_2 = codepoint % 0x40
+		codepoint = (codepoint - payload_2) / 0x40
+		return 0xE0 + codepoint, 0x80 + payload_2, 0x80 + payload_3
+	end if codepoint <= 0x10FFFF then
+		local payload_4 = codepoint % 0x40
+		codepoint = (codepoint - payload_4) / 0x40
+		local payload_3 = codepoint % 0x40
+		codepoint = (codepoint - payload_3) / 0x40
+		local payload_2 = codepoint % 0x40
+		codepoint = (codepoint - payload_2) / 0x40
+		return 0xF0 + codepoint, 0x80 + payload_2, 0x80 + payload_3, 0x80 + payload_4
+	end error"codepoint out of range"
 end
 
 function utf8.char(...)
 	local n_args = select("#", ...)
-	if n_args == 1 then return utf8_char(...) end
+	if n_args == 0 then return end
 	local chars = {}
 	for i = 1, n_args do
-		chars[i] = utf8_char(select(i, ...))
+		chars[i] = string_char(utf8_bytes(select(i, ...)))
 	end
 	return table_concat(chars)
 end
