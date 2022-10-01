@@ -42,4 +42,7 @@ function utf8.char(...)
 	return table_concat(chars)
 end
 
+-- Overly permissive pattern that greedily matches a single UTF-8 codepoint
+utf8.charpattern = "[%z-\127\194-\253][\128-\191]*"
+
 return utf8
