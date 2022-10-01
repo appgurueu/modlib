@@ -815,7 +815,7 @@ end
 
 function reverse(table)
 	local len = #table
-	for index = 1, math.floor(len / 2) do
+	for index = 1, len / 2 do
 		local index_from_end = len + 1 - index
 		table[index_from_end], table[index] = table[index], table[index_from_end]
 	end
@@ -828,6 +828,61 @@ function repetition(value, count)
 		table[index] = value
 	end
 	return table
+end
+
+function slice(list, from, to)
+	from, to = from or 1, to or #list
+	local res = {}
+	for i = from, to do
+		res[#res + 1] = list[i]
+	end
+	return res
+end
+
+-- JS-ish array splice
+function splice(
+	list, -- to modify
+	start, -- index (inclusive) for where to start modifying the array (defaults to after the last element)
+	delete_count, -- how many elements to remove (defaults to `0`)
+	... -- elements to insert after `start`
+)
+	start, delete_count = start or (#list + 1), delete_count or 0
+	if start < 0 then
+		start = start + #list + 1
+	end
+
+	local add_count = select("#", ...)
+	local shift = add_count - delete_count
+	if shift > 0 then -- shift up
+		for i = #list, start + delete_count, -1 do
+			list[i + shift] = list[i]
+		end
+	elseif shift < 0 then -- shift down
+		for i = start, #list do
+			list[i] = list[i - shift]
+		end
+	end
+
+	-- Add elements
+	for i = 1, add_count do
+		list[start + i - 1] = select(i, ...)
+	end
+
+	return list
+end
+
+-- Equivalent to to_list[to], ..., to_list[to + count] = from_list[from], ..., from_list[from + count]
+function move(from_list, from, to, count, to_list)
+	from, to, count, to_list = from or 1, to or 1, count or #from_list, to_list or from_list
+	if to_list ~= from_list or to < from then
+		for i = 0, count do
+			to_list[to + i] = from_list[from + i]
+		end
+	else -- iterate in reverse order
+		for i = count, 0, -1 do
+			to_list[to + i] = from_list[from + i]
+		end
+	end
 end
 
 -- Export environment
