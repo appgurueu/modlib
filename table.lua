@@ -327,17 +327,36 @@ function same(a, b)
 	return is_same(a, b)
 end
 
-function shallowcopy(table)
+function shallowcopy(
+	table -- table to copy
+	, strip_metatables -- whether to strip metatables; falsy by default; metatables are not copied
+)
+	if type(table) ~= "table" then
+		return table
+	end
+
 	local copy = {}
+	if not strip_metatables then
+		setmetatable(copy, getmetatable(table))
+	end
 	for key, value in pairs(table) do
 		copy[key] = value
 	end
 	return copy
 end
 
-function deepcopy_tree(table)
-	if type(table) ~= "table" then return table end
+function deepcopy_tree(
+	table -- table; may not contain circular references; cross references will be copied multiple times
+	, strip_metatables -- whether to strip metatables; falsy by default; metatables are not copied
+)
+	if type(table) ~= "table" then
+		return table
+	end
+
 	local copy = {}
+	if not strip_metatables then
+		setmetatable(copy, getmetatable(table))
+	end
 	for key, value in pairs(table) do
 		copy[deepcopy_tree(key)] = deepcopy_tree(value)
 	end
@@ -361,13 +380,15 @@ function deepcopy(
 		end
 		copies[table] = copy
 		local function _copy(value)
-			if type(value) == "table" then
-				if copies[value] then
-					return copies[value]
-				end
-				return _deepcopy(value)
+			if type(value) ~= "table" then
+				return value
 			end
-			return value
+
+			if copies[value] then
+				return copies[value]
+			end
+
+			return _deepcopy(value)
 		end
 		for key, value in pairs(table) do
 			copy[_copy(key)] = _copy(value)
@@ -495,7 +516,7 @@ end
 function process(tab, func)
 	local results = {}
 	for key, value in pairs(tab) do
-		table.insert(results, func(key,value))
+		table.insert(results, func(key, value))
 	end
 	return results
 end
