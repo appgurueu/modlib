@@ -77,11 +77,13 @@ modules.number = "math"
 
 local parent_dir
 if not minetest then
+	-- TOFIX
 	local init_path = arg and arg[0]
 	parent_dir = init_path and init_path:match"^.[/\\]" or ""
 end
 
-local dir_delim = rawget(_G, "DIR_DELIM") or (rawget(_G, "package") and package.config and assert(package.config:match("^(.-)[\r\n]"))) or "/"
+local dir_delim = rawget(_G, "DIR_DELIM") -- Minetest
+	or (rawget(_G, "package") and package.config and assert(package.config:match("^(.-)[\r\n]"))) or "/"
 
 local function concat_path(path)
 	return table.concat(path, dir_delim)
@@ -116,19 +118,43 @@ local function load_module(self, module_name_or_alias)
 end
 
 local rawget, rawset = rawget, rawset
-modlib = setmetatable({
-	-- TODO bump on release
-	version = 98,
-	modname = minetest and minetest.get_current_modname(),
-	_RG = setmetatable({}, {
-		__index = function(_, index)
-			return rawget(_G, index)
-		end,
-		__newindex = function(_, index, value)
-			return rawset(_G, index, value)
-		end
-	}),
-}, { __index = load_module })
+modlib = setmetatable({}, { __index = load_module })
+
+-- TODO bump on release
+modlib.version = 98
+
+if minetest then
+	modlib.modname = minetest.get_current_modname()
+end
+
+-- Raw globals
+modlib._RG = setmetatable({}, {
+	__index = function(_, index)
+		return rawget(_G, index)
+	end,
+	__newindex = function(_, index, value)
+		return rawset(_G, index, value)
+	end
+})
+
+-- Globals merged with modlib
+modlib.G = setmetatable({}, {__index = function(self, module_name)
+	local module = load_module(self, module_name)
+	if module == nil then
+		return _G[module_name]
+	end
+	if _G[module_name] then
+		setmetatable(module, {__index = _G[module_name]})
+	end
+	return module
+end})
+
+-- "Imports" modlib by changing the environment of the calling function
+--! This alters environments at the expense of performance. Use with caution.
+--! Prefer localizing modlib library functions or API tables if possible.
+function modlib.set_environment()
+	setfenv(2, setmetatable({}, {__index = modlib.G}))
+end
 
 -- Force load file module to pass dir_delim & to set concat_path
 modlib.file = assert(loadfile(get_resource"file.lua"))(dir_delim)
