@@ -32,9 +32,7 @@ if minetest then
 	modules.minetest = "minetest"
 end
 
--- aliases
--- more aliases are implemented below:
--- modlib.[mod|conf] are aliases of modlib.minetest.[mod|conf] respectively
+-- modlib.mod is an alias for modlib.minetest.mod
 modules.string = "text"
 modules.number = "math"
 
@@ -124,8 +122,8 @@ modlib.file = assert(loadfile(get_resource"file.lua"))(dir_delim)
 modlib.file.concat_path = concat_path
 
 if minetest then
-	-- Force-loading of the minetest, mod and conf modules.
-	-- Also sets modlib.[mod|conf] -> modlib.minetest.[mod|conf] aliases.
+	-- Force-loading of the minetest & mod modules
+	-- Also sets modlib.mod -> modlib.minetest.mod alias.
 	local ml_mt = modlib.minetest
 	ml_mt.mod.get_resource = get_resource
 	modlib.mod = ml_mt.mod
