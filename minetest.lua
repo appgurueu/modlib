@@ -8,6 +8,7 @@ for _, value in pairs{
 	"schematic",
 	"colorspec",
 	"media",
+	"obj",
 } do
 	components[value] = value
 end
