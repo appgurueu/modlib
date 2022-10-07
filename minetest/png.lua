@@ -77,7 +77,7 @@ local adam7_passes = {
 	y_min = { 0, 0, 4, 0, 2, 0, 1 },
 	x_step = { 8, 8, 4, 4, 2, 2, 1 },
 	y_step = { 8, 8, 8, 4, 4, 2, 2 },
-}
+};
 
 (...).decode_png = function(stream)
 	local chunk_crc
