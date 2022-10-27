@@ -61,20 +61,26 @@ local function get_node_boxes(pos, type)
 	end
 	if box_type == "connected" then
 		boxes = table.copy(boxes)
-		local connect_sides = {
-			top = {x = 0, y = 1, z = 0},
-			bottom = {x = 0, y = -1, z = 0},
-			front = {x = 0, y = 0, z = -1},
-			left = {x = -1, y = 0, z = 0},
-			back = {x = 0, y = 0, z = 1},
-			right = {x = 1, y = 0, z = 0}
+		local connect_sides = { -- don't use a dictionary, they must remain in this order
+			{"top", {x = 0, y = 1, z = 0}},
+			{"bottom", {x = 0, y = -1, z = 0}},
+			{"front", {x = 0, y = 0, z = -1}},
+			{"left", {x = -1, y = 0, z = 0}},
+			{"back", {x = 0, y = 0, z = 1}},
+			{"right", {x = 1, y = 0, z = 0}},
 		}
 		if node_def.connect_sides then
-			for side in pairs(connect_sides) do
-				if not node_def.connect_sides[side] then
-					connect_sides[side] = nil
+			local include = {}
+			for _, side in ipairs(node_def.connect_sides) do
+				include[side] = true
+			end
+			local new_connect_sides = {}
+			for _, pair in ipairs(connect_sides) do
+				if include[pair[1]] then
+					table.insert(new_connect_sides, pair)
 				end
 			end
+			connect_sides = new_connect_sides
 		end
 		local function add_collisionbox(key)
 			for _, box in ipairs(get_boxes(def_box[key] or {})) do
@@ -93,12 +99,12 @@ local function get_node_boxes(pos, type)
 			end
 		end
 		local connected, connected_sides
-		for side, direction in pairs(connect_sides) do
-			local neighbor = minetest.get_node(vector.add(pos, direction))
+		for _, pair in pairs(connect_sides) do
+			local neighbor = minetest.get_node(vector.add(pos, pair[2]))
 			local connects = connects_to(neighbor.name)
 			connected = connected or connects
-			connected_sides = connected_sides or (side ~= "top" and side ~= "bottom")
-			add_collisionbox((connects and "connect_" or "disconnected_") .. side)
+			connected_sides = connected_sides or (pair[1] ~= "top" and pair[1] ~= "bottom")
+			add_collisionbox((connects and "connect_" or "disconnected_") .. pair[1])
 		end
 		if not connected then
 			add_collisionbox("disconnected")
