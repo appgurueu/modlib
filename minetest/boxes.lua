@@ -1,6 +1,6 @@
 -- Localize globals
-local assert, ipairs, math, minetest, pairs, table, type, vector
-	= assert, ipairs, math, minetest, pairs, table, type, vector
+local assert, ipairs, math, minetest, table, type, vector
+	= assert, ipairs, math, minetest, table, type, vector
 
 -- Set environment
 local _ENV = ...
@@ -34,7 +34,7 @@ local function get_node_boxes(pos, type)
 	if box_type == "leveled" then
 		boxes = table.copy(boxes)
 		local level = (paramtype2 == "leveled" and node.param2 or node_def.leveled or 0) / 255 - 0.5
-		for _, box in pairs(boxes) do
+		for _, box in ipairs(boxes) do
 			box[5] = level
 		end
 	elseif box_type == "wallmounted" then
@@ -88,18 +88,18 @@ local function get_node_boxes(pos, type)
 			end
 		end
 		local matchers = {}
-		for _, nodename_or_group in pairs(node_def.connects_to or {}) do
+		for _, nodename_or_group in ipairs(node_def.connects_to or {}) do
 			table.insert(matchers, nodename_matcher(nodename_or_group))
 		end
 		local function connects_to(nodename)
-			for _, matcher in pairs(matchers) do
+			for _, matcher in ipairs(matchers) do
 				if matcher(nodename) then
 					return true
 				end
 			end
 		end
 		local connected, connected_sides
-		for _, pair in pairs(connect_sides) do
+		for _, pair in ipairs(connect_sides) do
 			local neighbor = minetest.get_node(vector.add(pos, pair[2]))
 			local connects = connects_to(neighbor.name)
 			connected = connected or connects
@@ -127,7 +127,7 @@ local function get_node_boxes(pos, type)
 			if axis == 2 then
 				sin = -sin
 			end
-			for _, box in pairs(boxes) do
+			for _, box in ipairs(boxes) do
 				for off = 0, 3, 3 do
 					local axis_1, axis_2 = other_axis_1 + off, other_axis_2 + off
 					local value_1, value_2 = box[axis_1], box[axis_2]
