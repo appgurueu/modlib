@@ -11,11 +11,13 @@ local function get_boxes(box_or_boxes)
 	return type(box_or_boxes[1]) == "number" and {box_or_boxes} or box_or_boxes
 end
 
+local has_boxes_prop = {collision_box = "walkable", selection_box = "pointable"}
+
 --> list of collisionboxes in Minetest format
 local function get_node_boxes(pos, type)
 	local node = minetest.get_node(pos)
 	local node_def = minetest.registered_nodes[node.name]
-	if (not node_def) or node_def.walkable == false then
+	if not node_def or node_def[has_boxes_prop[type]] == false then
 		return {}
 	end
 	local boxes = {{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}}
