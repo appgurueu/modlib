@@ -13,6 +13,18 @@ end
 
 local has_boxes_prop = {collision_box = "walkable", selection_box = "pointable"}
 
+-- Required for raycast box IDs to be accurate
+local connect_sides_order = {"top", "bottom", "front", "left", "back", "right"}
+
+local connect_sides_directions = {
+	top = vector.new(0, 1, 0),
+	bottom = vector.new(0, -1, 0),
+	front = vector.new(0, 0, -1),
+	left = vector.new(-1, 0, 0),
+	back = vector.new(0, 0, 1),
+	right = vector.new(1, 0, 0),
+}
+
 --> list of collisionboxes in Minetest format
 local function get_node_boxes(pos, type)
 	local node = minetest.get_node(pos)
@@ -63,19 +75,11 @@ local function get_node_boxes(pos, type)
 	end
 	if box_type == "connected" then
 		boxes = table.copy(boxes)
-		local connect_sides = {
-			top = {x = 0, y = 1, z = 0},
-			bottom = {x = 0, y = -1, z = 0},
-			front = {x = 0, y = 0, z = -1},
-			left = {x = -1, y = 0, z = 0},
-			back = {x = 0, y = 0, z = 1},
-			right = {x = 1, y = 0, z = 0}
-		}
-		if node_def.connect_sides then
-			for side in pairs(connect_sides) do
-				if not node_def.connect_sides[side] then
-					connect_sides[side] = nil
-				end
+		local connect_sides = connect_sides_directions -- (ab)use directions as a "set" of sides
+		if node_def.connect_sides then -- build set of sides from given list
+			connect_sides = {}
+			for _, side in ipairs(node_def.connect_sides) do
+				connect_sides[side] = true
 			end
 		end
 		local function add_collisionbox(key)
@@ -84,8 +88,8 @@ local function get_node_boxes(pos, type)
 			end
 		end
 		local matchers = {}
-		for _, nodename_or_group in pairs(node_def.connects_to or {}) do
-			table.insert(matchers, nodename_matcher(nodename_or_group))
+		for i, nodename_or_group in ipairs(node_def.connects_to or {}) do
+			matchers[i] = nodename_matcher(nodename_or_group)
 		end
 		local function connects_to(nodename)
 			for _, matcher in pairs(matchers) do
@@ -95,12 +99,15 @@ local function get_node_boxes(pos, type)
 			end
 		end
 		local connected, connected_sides
-		for side, direction in pairs(connect_sides) do
-			local neighbor = minetest.get_node(vector.add(pos, direction))
-			local connects = connects_to(neighbor.name)
-			connected = connected or connects
-			connected_sides = connected_sides or (side ~= "top" and side ~= "bottom")
-			add_collisionbox((connects and "connect_" or "disconnected_") .. side)
+		for _, side in ipairs(connect_sides_order) do
+			if connect_sides[side] then
+				local direction = connect_sides_directions[side]
+				local neighbor = minetest.get_node(vector.add(pos, direction))
+				local connects = connects_to(neighbor.name)
+				connected = connected or connects
+				connected_sides = connected_sides or (side ~= "top" and side ~= "bottom")
+				add_collisionbox((connects and "connect_" or "disconnected_") .. side)
+			end
 		end
 		if not connected then
 			add_collisionbox("disconnected")
