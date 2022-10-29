@@ -2,9 +2,15 @@
 
 Multipurpose Minetest Modding Library
 
-## About
+## At a glance
 
-No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD or appguru(eu). Notable contributions by [luk3yx](https://github.com/luk3yx) in the form of suggestions, bug reports and fixes. Another [bugfix](https://github.com/appgurueu/modlib/pull/7) by [NobWow](https://github.com/NobWow/). Requires Lua 5.1 / LuaJIT.
+No dependencies. Licensed under the MIT License. Written by Lars Mueller aka LMD or appguru(eu). Requires Lua 5.1 / LuaJIT.
+
+### Acknowledgement
+
+* [luk3yx](https://github.com/luk3yx): Various suggestions, bug reports and fixes
+* [grorp](https://github.com/grorp) (Gregor Parzefall): [Bug reports & proposed fixes for node box code](https://github.com/appgurueu/modlib/pull/8)
+* [NobWow](https://github.com/NobWow/): [Another bugfix](https://github.com/appgurueu/modlib/pull/7)
 
 ### Principles
 
