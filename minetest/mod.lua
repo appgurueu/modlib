@@ -6,6 +6,16 @@ local Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loads
 local _ENV = {}
 setfenv(1, _ENV)
 
+local loaded = {}
+function require(filename)
+	local modname = minetest.get_current_modname()
+	loaded[modname] = loaded[modname] or {}
+	-- Minetest ensures that `/` works even on Windows (path normalization)
+	loaded[modname][filename] = loaded[modname][filename] -- already loaded?
+		or dofile(minetest.get_modpath(modname) .. "/" .. filename:gsub("%.", "/") .. ".lua")
+	return loaded[modname][filename]
+end
+
 function loadfile_exports(filename)
 	local env = setmetatable({}, {__index = _G})
 	local file = assert(loadfile(filename))
