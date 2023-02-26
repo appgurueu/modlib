@@ -412,7 +412,7 @@ local function write_rope(self)
 						int(vertices.tex_coord_sets)
 						int(vertices.tex_coord_set_size)
 						for _, vertex in ipairs(vertices) do
-							if vertex.pos then vector3(vertex.pos) end
+							vector3(vertex.pos)
 							if vertex.normal then vector3(vertex.normal) end
 							if vertex.color then color(vertex.color) end
 							for tex_coord_set = 1, vertices.tex_coord_sets do
