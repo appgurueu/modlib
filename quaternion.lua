@@ -37,11 +37,15 @@ function compose(self, other)
 	return multiply(other, self)
 end
 
+function len(self)
+	return (self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + self[4] ^ 2) ^ 0.5
+end
+
 function normalize(self)
-	local len = math.sqrt(self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + self[4] ^ 2)
+	local l = len(self)
 	local res = {}
 	for key, value in pairs(self) do
-		res[key] = value / len
+		res[key] = value / l
 	end
 	return res
 end
