@@ -11,6 +11,7 @@ for _, file in pairs{
 	"text",
 	"utf8",
 	"vector",
+	"matrix4",
 	"quaternion",
 	"trie",
 	"kdtree",
