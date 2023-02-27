@@ -617,6 +617,10 @@ do
 			func -- `function(write_byte) ... return count, min, max end` to be called to write to the buffer view;
 			     -- the count of elements written must be returned; min and max may be returned
 		)
+			-- Always add padding to obtain a multiple of 4
+			-- TODO (?) don't add padding if it isn't required
+			table.insert(buffer_rope, ("\0"):rep(offset % 4))
+			offset = math.ceil(offset / 4) * 4
 			local bytes_written = 0
 			local count, min, max = func(function(byte)
 				table.insert(buffer_rope, string_char(byte))
