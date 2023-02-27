@@ -961,7 +961,7 @@ do
 							return #anim.inv_bind_mats
 						end),
 						joints = anim.joints,
-						skeleton = anim.joints[1],
+						skeleton = node_id,
 					})
 					skin_id = #skins - 1 -- 0-based
 				end
