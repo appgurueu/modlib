@@ -989,6 +989,7 @@ do
 		end
 
 		local buffer_string = table.concat(buffer_rope)
+		local base64 = assert(minetest.encode_base64, "b3d:to_gltf needs `minetest.encode_base64`!")(buffer_string)
 		return {
 			asset = {
 				generator = "modlib b3d:to_gltf",
@@ -1004,7 +1005,7 @@ do
 				{
 					byteLength = #buffer_string,
 					uri = "data:application/octet-stream;base64,"
-						.. assert(minetest.encode_base64, "b3d:to_gltf needs `minetest.encode_base64`!")(buffer_string)
+						.. base64 .. ("="):rep(#base64 % 4) -- Blender requires base64 padding
 				},
 			},
 			-- Meshes & nodes
