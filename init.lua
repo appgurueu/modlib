@@ -23,6 +23,7 @@ for _, file in pairs{
 	"json",
 	"luon",
 	"bluon",
+	"base64",
 	"persistence",
 	"debug",
 	"web"
