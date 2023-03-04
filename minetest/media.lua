@@ -43,16 +43,19 @@ end
 local paths = {}
 local mods = {}
 local overridden_paths = {}
+local overridden_mods = {}
 for _, mod in ipairs(modlib.minetest.get_mod_load_order()) do
 	local mod_media = collect_media(mod.name)
 	for medianame, path in pairs(mod_media) do
 		if paths[medianame] then
 			overridden_paths[medianame] = overridden_paths[medianame] or {}
 			table.insert(overridden_paths[medianame], paths[medianame])
+			overridden_mods[medianame] = overridden_mods[medianame] or {}
+			table.insert(overridden_mods[medianame], mods[medianame])
 		end
 		paths[medianame] = path
 		mods[medianame] = mod.name
 	end
 end
 
-return {paths = paths, mods = mods, overridden_paths = overridden_paths}
+return {paths = paths, mods = mods, overridden_paths = overridden_paths, overridden_mods = overridden_mods}
