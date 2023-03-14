@@ -819,10 +819,16 @@ do
 					return 3 * #triangle_set.vertex_ids
 				end)
 				-- Each triangle set is equivalent to one glTF "primitive"
+				local brush_id = triangle_set.brush_id or mesh.brush_id
+				if brush_id == 0 then -- default brush
+					brush_id = nil -- TODO (?) add default material if there are UVs
+				else
+					brush_id = brush_id - 1 -- 0-based
+				end
 				primitives[i] = {
 					attributes = attributes,
 					indices = index_accessor,
-					material = (triangle_set.brush_id or mesh.brush_id) - 1, -- 0-based
+					material = brush_id,
 					-- `mode = 4` (triangles) is the default already, no need to set it
 				}
 			end
@@ -996,7 +1002,7 @@ do
 			},
 			-- Textures
 			textures = textures[1] and textures, -- glTF does not allow empty lists
-			materials = materials,
+			materials = materials[1] and materials,
 			-- Accessors, buffer views & buffers
 			accessors = accessors,
 			bufferViews = buffer_views,
