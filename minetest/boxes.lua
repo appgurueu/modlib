@@ -52,15 +52,15 @@ local function get_node_boxes(pos, type)
 			box[5] = level
 		end
 	elseif box_type == "wallmounted" then
-		-- TODO complete if only wall_top is given
 		local dir = minetest.wallmounted_to_dir((paramtype2 == "colorwallmounted" and node.param2 % 8 or node.param2) or 0)
 		local box
+		-- The (undocumented!) node box defaults below are taken from `NodeBox::reset`
 		if dir.y > 0 then
-			box = def_box.wall_top
+			box = def_box.wall_top or {-0.5, 0.5 - 1/16, -0.5, 0.5, 0.5, 0.5}
 		elseif dir.y < 0 then
-			box = def_box.wall_bottom
+			box = def_box.wall_bottom or {-0.5, -0.5, -0.5, 0.5, -0.5 + 1/16, 0.5}
 		else
-			box = def_box.wall_side
+			box = def_box.wall_side or {-0.5, -0.5, -0.5, -0.5 + 1/16, 0.5, 0.5}
 			if dir.z > 0 then
 				box = {box[3], box[2], -box[4], box[6], box[5], -box[1]}
 			elseif dir.z < 0 then
