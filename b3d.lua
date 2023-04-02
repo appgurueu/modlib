@@ -705,7 +705,7 @@ do
 		end
 
 		local meshes = {}
-		local function add_mesh(mesh, weights)
+		local function add_mesh(mesh, weights, add_neutral_bone)
 			local attributes = {}
 
 			local vertices = mesh.vertices
@@ -761,6 +761,7 @@ do
 				local max_count = 0
 				local joint_ids = {}
 				local normalized_weights = {}
+				-- Handle (supposedly) animated/dynamic vertices (can still be static by having zero weights)
 				for vertex_id, joint_weights in pairs(weights) do
 					local total_weight = 0
 					local count = 0
@@ -768,13 +769,26 @@ do
 						total_weight = total_weight + weight
 						count = count + 1
 					end
-					joint_ids[vertex_id] = {}
-					normalized_weights[vertex_id] = {}
-					for joint, weight in pairs(joint_weights) do
-						table.insert(joint_ids[vertex_id], joint)
-						table.insert(normalized_weights[vertex_id], weight / total_weight)
+					if total_weight > 0 then -- animated?
+						joint_ids[vertex_id] = {}
+						normalized_weights[vertex_id] = {}
+						for joint, weight in pairs(joint_weights) do
+							table.insert(joint_ids[vertex_id], joint)
+							table.insert(normalized_weights[vertex_id], weight / total_weight)
+						end
+						max_count = math.max(max_count, count)
 					end
-					max_count = math.max(max_count, count)
+				end
+				-- Now search for static vertices
+				for vertex_id in ipairs(mesh.vertices) do
+					if not joint_ids[vertex_id] then
+						-- Vertex isn't influenced by any bones => Add a dummy neutral bone to influence this vertex
+						-- See https://github.com/KhronosGroup/glTF/issues/2269
+						-- and https://github.com/KhronosGroup/glTF-Blender-IO/pull/1552/
+						joint_ids[vertex_id] = {add_neutral_bone()}
+						normalized_weights[vertex_id] = {1}
+						max_count = math.max(max_count, 1) -- it is (theoretically) possible that all vertices are static
+					end
 				end
 				assert(max_count > 0) -- TODO (?) warning for max_count > 4
 				for set_start = 1, max_count, 4 do -- Iterate sets of 4 bones
@@ -783,9 +797,10 @@ do
 					attributes[("JOINTS_%d"):format(set_id)] = add_accessor("VEC4", "unsigned_short", false, function(write_byte)
 						for vertex_id in ipairs(mesh.vertices) do
 							for i = set_start, set_start + 3 do
-								assert(#normalized_weights[vertex_id] == #joint_ids[vertex_id])
-								local id = (joint_ids[vertex_id] or {})[i] or 0
-								local weight = (normalized_weights[vertex_id] or {})[i] or 0
+								local vrt_joint_ids, vrt_norm_weights = assert(joint_ids[vertex_id]), assert(normalized_weights[vertex_id])
+								assert(#vrt_joint_ids == #vrt_norm_weights)
+								local id = vrt_joint_ids[i] or 0
+								local weight = vrt_norm_weights[i] or 0
 								if weight == 0 then
 									id = 0 -- required by the glTF spec
 								end
@@ -955,10 +970,33 @@ do
 			for _, child in ipairs(node.children) do
 				table.insert(children, add_node(child, bind_mat, fps, anim))
 			end
-			local mesh, skin_id
+			local mesh, skin_id, neutral_node_id
 			if node.mesh then
-				mesh = add_mesh(node.mesh, anim.weights)
+				local neutral_joint_id
+				-- Lazily adds a placeholder for the neutral joint, returns joint ID
+				local function add_neutral_joint()
+					if neutral_joint_id then
+						return neutral_joint_id
+					end
+					neutral_node_id = #nodes -- 0-based
+					table.insert(nodes, {
+						name = "neutral_bone",
+						-- We need to flip the hierarchy: The neutral bone must be a parent of the mesh root;
+						-- if it were a sibling, there would be no common skeleton root (accepted by Blender but not by glTF validator);
+						-- if it were a child, transformations of the mesh root would affect it and it wouldn't be a neutral bone anymore.
+						children = {node_id},
+						-- translation, scale, rotation all default to identity
+					})
+					neutral_joint_id = #anim.joints -- 0-based
+					table.insert(anim.joints, neutral_node_id)
+					return neutral_joint_id -- 0-based
+				end
+				mesh = add_mesh(node.mesh, anim.weights, add_neutral_joint)
 				if anim.joints and anim.joints[1] then
+					if neutral_joint_id then
+						-- Duplicate the inverse bind matrix of the parent (which the neutral bone will be a child of)
+						table.insert(anim.inv_bind_mats, bind_mat or mat4.identity())
+					end
 					table.insert(skins, {
 						inverseBindMatrices = add_accessor("MAT4", "float", nil, function(write_byte)
 							for _, inv_bind_mat in ipairs(anim.inv_bind_mats) do
@@ -973,7 +1011,7 @@ do
 							return #anim.inv_bind_mats
 						end),
 						joints = anim.joints,
-						skeleton = node_id,
+						skeleton = neutral_node_id, -- make the neutral bone the skeleton root
 					})
 					skin_id = #skins - 1 -- 0-based
 				end
@@ -988,7 +1026,8 @@ do
 				scale = node.scale,
 				rotation = quaternion_to_gltf(node.rotation),
 			}
-			return node_id -- 0-based
+			-- If a neutral bone exists, return the neutral bone (which has the node as a child) instead of the node
+			return neutral_node_id or node_id -- 0-based
 		end
 
 		local scene, scenes
