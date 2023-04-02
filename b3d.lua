@@ -725,7 +725,9 @@ do
 			if has_normals then
 				attributes.NORMAL = add_accessor("VEC3", "float", false, function(write_byte)
 					for _, vertex in ipairs(mesh.vertices) do
-						write_translation(write_byte, vertex.normal)
+						-- Some B3D models don't seem to have their normals normalized.
+						-- TODO (?) raise a warning when handling this gracefully
+						write_translation(write_byte, modlib.vector.normalize(vertex.normal))
 					end
 					return #mesh.vertices
 				end)
