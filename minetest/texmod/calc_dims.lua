@@ -1,5 +1,3 @@
-local texmod = ...
-
 local cd = {}
 
 local function calc_dims(self, get_file_dims)
