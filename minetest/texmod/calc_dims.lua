@@ -74,4 +74,9 @@ function cd:sheet(get_dims)
 	return math.floor(base_w / self.w), math.floor(base_h / self.h)
 end
 
+function cd:png()
+	local png = modlib.minetest.decode_png(modlib.text.inputstream(self.data))
+	return png.width, png.height
+end
+
 return calc_dims
