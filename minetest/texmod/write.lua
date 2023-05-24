@@ -13,9 +13,6 @@ function pw:combine(w)
 	end
 end
 
--- Consider [inventorycube{a{b{c inside [combine: no need to escape &'s (but :'s need to be escaped)
--- Consider [combine inside inventorycube: need to escape &'s 
-
 function pw:inventorycube(w)
 	assert(not w.inventorycube, "[inventorycube may not be nested")
 	local function write_side(side)
@@ -118,6 +115,9 @@ function pw:lowpart(w)
 	w.colon(); w.int(self.percent); w.colon(); w.esctex(self.over)
 end
 
+-- Set of "non-modifiers" which do not modify a base image
+local non_modifiers = {file = true, png = true, combine = true, inventorycube = true}
+
 return function(self, write_str)
 	-- We could use a metatable here, but it wouldn't really be worth it;
 	-- it would save us instantiating a handful of closures at the cost of constant `__index` events
@@ -153,10 +153,12 @@ return function(self, write_str)
 			w.hat()
 		end
 		if tex.type == "overlay" then
-			if tex.over.type ~= "file" then -- TODO also exclude [png, [combine and [inventorycube (generators)
-				w.str"("; w.tex(tex.over); w.str")"
-			else
+			if non_modifiers[tex.over.type] then
 				w.tex(tex.over)
+			else
+				-- Make sure the modifier is first applied to its base image
+				-- and only after this overlaid on top of `tex.base`
+				w.str"("; w.tex(tex.over); w.str")"
 			end
 		else
 			w.str"["
