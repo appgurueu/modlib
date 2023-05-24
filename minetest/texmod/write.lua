@@ -143,7 +143,7 @@ return function(self, write_str)
 		w.str(("%d"):format(int))
 	end
 	function w.tex(tex)
-		if tex.type == "filename" then
+		if tex.type == "file" then
 			assert(not tex.filename:find"[:^\\&{[]", "invalid character in filename")
 			w.str(tex.filename)
 			return
@@ -153,7 +153,7 @@ return function(self, write_str)
 			w.hat()
 		end
 		if tex.type == "overlay" then
-			if tex.over.type ~= "filename" then -- TODO also exclude [png, [combine and [inventorycube (generators)
+			if tex.over.type ~= "file" then -- TODO also exclude [png, [combine and [inventorycube (generators)
 				w.str"("; w.tex(tex.over); w.str")"
 			else
 				w.tex(tex.over)

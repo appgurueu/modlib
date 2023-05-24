@@ -12,7 +12,7 @@ setmetatable(texmod, {__call = new})
 
 function texmod.file(filename)
 	return new{
-		type = "filename",
+		type = "file",
 		filename = filename
 	}
 end
