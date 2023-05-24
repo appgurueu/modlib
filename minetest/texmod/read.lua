@@ -1,17 +1,6 @@
 local texmod = ...
 local colorspec = modlib.minetest.colorspec
 
-local transforms = {
-	[0] = {},
-	{rotation_deg = 90},
-	{rotation_deg = 180},
-	{rotation_deg = 270},
-	{flip_axis = "x"},
-	{flip_axis = "x", rotation_deg = 90},
-	{flip_axis = "y"},
-	{flip_axis = "y", rotation_deg = 90},
-}
-
 -- Generator readers
 
 local gr = {}
@@ -89,23 +78,35 @@ function pr.invert(r)
 	return channels
 end
 
-function pr.transform(r)
-	if r:match"I" then
-		return
+do
+	local transforms = {
+		[0] = {},
+		{rotation_deg = 90},
+		{rotation_deg = 180},
+		{rotation_deg = 270},
+		{flip_axis = "x"},
+		{flip_axis = "x", rotation_deg = 90},
+		{flip_axis = "y"},
+		{flip_axis = "y", rotation_deg = 90},
+	}
+	function pr.transform(r)
+		if r:match"I" then
+			return
+		end
+		local flip_axis
+		if r:match"F" then
+			flip_axis = assert(r:match_charset"[XY]", "axis expected"):lower()
+		end
+		local rot_deg
+		if r:match"R" then
+			rot_deg = r:int()
+		end
+		if flip_axis or rot_deg then
+			return flip_axis, rot_deg
+		end
+		local transform = assert(transforms[r:int()], "out of range")
+		return transform.flip_axis, transform.rotation_deg
 	end
-	local flip_axis
-	if r:match"F" then
-		flip_axis = assert(r:match_charset"[XY]", "axis expected"):lower()
-	end
-	local rot_deg
-	if r:match"R" then
-		rot_deg = r:int()
-	end
-	if flip_axis or rot_deg then
-		return flip_axis, rot_deg
-	end
-	local transform = assert(transforms[r:int()], "out of range")
-	return transform.flip_axis, transform.rotation_deg
 end
 
 function pr.verticalframe(r)
