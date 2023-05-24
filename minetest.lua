@@ -9,6 +9,7 @@ for _, value in pairs{
 	"colorspec",
 	"media",
 	"obj",
+	"texmod",
 } do
 	components[value] = value
 end
