@@ -90,15 +90,16 @@ do
 		{flip_axis = "y", rotation_deg = 90},
 	}
 	function pr.transform(r)
-		if r:match"I" then
+		-- Note: While it isn't documented, `[transform` is indeed case-insensitive.
+		if r:match_charset"[iI]" then
 			return
 		end
 		local flip_axis
-		if r:match"F" then
-			flip_axis = assert(r:match_charset"[XY]", "axis expected"):lower()
+		if r:match_charset"[fF]" then
+			flip_axis = assert(r:match_charset"[xXyY]", "axis expected"):lower()
 		end
 		local rot_deg
-		if r:match"R" then
+		if r:match_charset"[rR]" then
 			rot_deg = r:int()
 		end
 		if flip_axis or rot_deg then
