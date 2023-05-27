@@ -51,28 +51,7 @@ function pw:invert(w)
 end
 
 function pw:transform(w)
-	local rot_deg, flip_axis = self.rotation_deg or 0, self.flip_axis
-	if rot_deg == 0 and flip_axis == nil then
-		w.str"I"
-	elseif rot_deg == 0 then
-		w.str(assert(({x = "FX", y = "FY"})[flip_axis]))
-	elseif flip_axis == nil then
-		w.str"R"; w.int(self.rotation_deg)
-	elseif rot_deg == 90 then
-		w.str(assert(({x = "FX", y = "FY"})[flip_axis]))
-		w.str"R90"
-	elseif rot_deg == 180 then
-		-- Rotating by 180° is equivalent to flipping both axes;
-		-- if one axis was already flipped, that is undone -
-		-- thus it is equivalent to flipping the other axis
-		w.str(assert(({x = "FY", y = "FX"})[flip_axis]))
-	elseif rot_deg == 270 then
-		-- Rotating by 270° is equivalent to first rotating by 180°, then rotating by 90°;
-		-- first flipping an axis and then rotating by 180°
-		-- is equivalent to flipping the other axis as shown above
-		w.str(assert(({x = "FY", y = "FX"})[flip_axis]))
-		w.str"R90"
-	end
+	w.int(self.idx)
 end
 
 function pw:verticalframe(w)

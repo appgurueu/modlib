@@ -123,35 +123,106 @@ function texmod:invert(channels --[[set with keys "r", "g", "b", "a"]])
 end
 
 function texmod:flip(flip_axis --[["x" or "y"]])
-	assert(flip_axis == "x" or flip_axis == "y")
-	return new{
-		type = "transform",
-		base = self,
-		flip_axis = flip_axis
-	}
+	return self:transform(assert(
+		(flip_axis == "x" and "fx")
+		or (flip_axis == "y" and "fy")
+		or (not flip_axis and "i")))
 end
 
 function texmod:rotate(deg)
+	assert(deg % 90 == 0)
 	deg = deg % 360
-	assert(deg % 90 == 0, "only multiples of 90° supported")
-	return new{
-		type = "transform",
-		base = self,
-		rotation_deg = deg
-	}
+	return self:transform(("r%d"):format(deg))
 end
 
--- First flip, then rotate counterclockwise
-function texmod:transform(flip_axis, rotation_deg)
-	assert(flip_axis == nil or flip_axis == "x" or flip_axis == "y")
-	rotation_deg = (rotation_deg or 0) % 360
-	assert(rotation_deg % 90 == 0, "only multiples of 90° supported")
-	return new{
-		type = "transform",
-		base = self,
-		rotation_deg = rotation_deg ~= 0 and rotation_deg or nil,
-		flip_axis = flip_axis
+-- D4 group transformations (see https://proofwiki.org/wiki/Definition:Dihedral_Group_D4),
+-- represented using indices into a table of matrices
+-- TODO (...) try to come up with a more elegant solution
+do
+	-- Matrix multiplication for composition: First applies a, then b <=> b * a
+	local function mat_2x2_compose(a, b)
+		local a_1_1, a_1_2, a_2_1, a_2_2 = unpack(a)
+		local b_1_1, b_1_2, b_2_1, b_2_2 = unpack(b)
+		return {
+			a_1_1 * b_1_1 + a_2_1 * b_1_2, a_1_2 * b_1_1 + a_2_2 * b_1_2;
+			a_1_1 * b_2_1 + a_2_1 * b_2_2, a_1_2 * b_2_1 + a_2_2 * b_2_2
+		}
+	end
+	local r90 ={
+		0, -1;
+		1, 0
 	}
+	local fx = {
+		-1, 0;
+		0, 1
+	}
+	local fy = {
+		1, 0;
+		0, -1
+	}
+	local r180 = mat_2x2_compose(r90, r90)
+	local r270 = mat_2x2_compose(r180, r90)
+	local fxr90 = mat_2x2_compose(fx, r90)
+	local fyr90 = mat_2x2_compose(fy, r90)
+	local transform_mats = {[0] = {1, 0; 0, 1}, r90, r180, r270, fx, fxr90, fy, fyr90}
+	local transform_idx_by_name = {i = 0, r90 = 1, r180 = 2, r270 = 3, fx = 4, fxr90 = 5, fy = 6, fyr90 = 7}
+	-- Lookup tables for getting the flipped axis / rotation angle
+	local flip_by_idx = {
+		[4] = "x",
+		[5] = "x",
+		[6] = "y",
+		[7] = "y",
+	}
+	local rot_by_idx = {
+		[1] = 90,
+		[2] = 180,
+		[3] = 270,
+		[5] = 90,
+		[7] = 90,
+	}
+	local idx_by_mat_2x2 = {}
+	local function transform_idx(mat)
+		-- note: assumes mat[i] in {-1, 0, 1}
+		return mat[1] + 3*(mat[2] + 3*(mat[3] + 3*mat[4]))
+	end
+	for i = 0, 7 do
+		idx_by_mat_2x2[transform_idx(transform_mats[i])] = i
+	end
+	-- Compute a multiplication table
+	local composition_idx = {}
+	local function ij_idx(i, j)
+		return i*8 + j
+	end
+	for i = 0, 7 do
+		for j = 0, 7 do
+			composition_idx[ij_idx(i, j)] = assert(idx_by_mat_2x2[
+				transform_idx(mat_2x2_compose(transform_mats[i], transform_mats[j]))])
+		end
+	end
+	function texmod:transform(...)
+		if select("#", ...) == 0 then return self end
+		local idx = ...
+		if type(idx) == "string" then
+			idx = assert(transform_idx_by_name[idx:lower()])
+		end
+		local base = self
+		if self.type == "transform" then
+			-- Merge with a `^[transform` base image
+			assert(transform_mats[idx])
+			base = self.base
+			idx = composition_idx[ij_idx(self.idx, idx)]
+		end
+		assert(transform_mats[idx])
+		if idx == 0 then return base end -- identity
+		return new{
+			type = "transform",
+			base = base,
+			idx = idx,
+			-- Redundantly store this information for convenience. Do not modify!
+			flip_axis = flip_by_idx[idx],
+			rotation_deg = rot_by_idx[idx] or 0,
+		}:transform(select(2, ...))
+	end
 end
 
 function texmod:verticalframe(framecount, frame)

@@ -79,34 +79,25 @@ function pr.invert(r)
 end
 
 do
-	local transforms = {
-		[0] = {},
-		{rotation_deg = 90},
-		{rotation_deg = 180},
-		{rotation_deg = 270},
-		{flip_axis = "x"},
-		{flip_axis = "x", rotation_deg = 90},
-		{flip_axis = "y"},
-		{flip_axis = "y", rotation_deg = 90},
-	}
 	function pr.transform(r)
-		-- Note: While it isn't documented, `[transform` is indeed case-insensitive.
 		if r:match_charset"[iI]" then
-			return
+			return pr.transform(r)
 		end
-		local flip_axis
+		local idx = r:match_charset"[0-7]"
+		if idx then
+			return tonumber(idx), pr.transform(r)
+		end
 		if r:match_charset"[fF]" then
-			flip_axis = assert(r:match_charset"[xXyY]", "axis expected"):lower()
+			local flip_axis = assert(r:match_charset"[xXyY]", "axis expected")
+			return "f" .. flip_axis, pr.transform(r)
 		end
-		local rot_deg
 		if r:match_charset"[rR]" then
-			rot_deg = r:int()
+			local deg = r:match_str"%d"
+			-- Be strict here: Minetest won't recognize other ways to write these numbers (or other numbers)
+			assert(deg == "90" or deg == "180" or deg == "270")
+			return ("r%d"):format(deg), pr.transform(r)
 		end
-		if flip_axis or rot_deg then
-			return flip_axis, rot_deg
-		end
-		local transform = assert(transforms[r:int()], "out of range")
-		return transform.flip_axis, transform.rotation_deg
+		-- return nothing, we're done
 	end
 end
 
