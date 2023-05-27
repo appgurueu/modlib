@@ -297,7 +297,7 @@ function texmod:colorize(color, ratio)
 	if ratio == "alpha" then
 		assert(color.alpha or 0xFF == 0xFF)
 	else
-		ratio = ratio or color.alpha
+		ratio = ratio or color.alpha or 0xFF
 		assert_uint8(ratio)
 		if color.alpha == ratio then
 			ratio = nil
