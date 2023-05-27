@@ -166,6 +166,22 @@ function pr.lowpart(r)
 	return percent, r:subtexp()
 end
 
+-- Build a prefix tree of parameter readers to greedily match the longest texture modifier prefix;
+-- just matching `%a+` and looking it up in a table
+-- doesn't work since `[transform` may be followed by a lowercase transform name
+-- TODO (?...) consolidate with `modlib.trie`
+local texmod_reader_trie = {}
+for _, readers in pairs{pr, gr} do
+	for type in pairs(readers) do
+		local subtrie = texmod_reader_trie
+		for char in type:gmatch"." do
+			subtrie[char] = subtrie[char] or {}
+			subtrie = subtrie[char]
+		end
+		subtrie.type = type
+	end
+end
+
 -- Reader methods. We use `r` instead of the `self` "sugar" for consistency (and to save us some typing).
 local rm = {}
 
@@ -185,6 +201,7 @@ function rm.peek(r)
 	end
 end
 function rm.popchar(r)
+	assert(not r.eof, "unexpected eof")
 	r.escapes = 0
 	while true do
 		r.character = r:read_char()
@@ -277,7 +294,7 @@ function rm.basexp(r)
 		return res
 	end
 	if r:match"[" then
-		local type = r:match_str"[a-z]"
+		local type = r:match_str"%a"
 		local gen_reader = gr[type]
 		if not gen_reader then
 			error("invalid texture modifier: " .. type)
@@ -288,17 +305,25 @@ function rm.basexp(r)
 end
 function rm.colorspec(r)
 	-- Leave exact validation up to colorspec, only do a rough greedy charset matching
-	return assert(colorspec.from_string(r:match_str"[#%xa-z]"))
+	return assert(colorspec.from_string(r:match_str"[#%x%a]"))
 end
 function rm.texp(r)
 	local base = r:basexp()
 	while r:hat() do
 		if r:match"[" then
-			local type = r:match_str"[a-z]"
-			local param_reader, gen_reader = pr[type], gr[type]
-			if not (param_reader or gen_reader) then
-				error("invalid texture modifier: " .. type)
+			local reader_subtrie = texmod_reader_trie
+			while true do
+				local next_subtrie = reader_subtrie[r:peek()]
+				if next_subtrie then
+					reader_subtrie = next_subtrie
+					r:pop()
+				else
+					break
+				end
 			end
+			local type = assert(reader_subtrie.type, "invalid texture modifier")
+			local param_reader, gen_reader = pr[type], gr[type]
+			assert(param_reader or gen_reader)
 			if param_reader then
 				base = base[type](base, param_reader(r))
 			elseif gen_reader then
