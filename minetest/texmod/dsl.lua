@@ -11,6 +11,8 @@ setmetatable(texmod, {__call = new})
 -- Constructors / "generators"
 
 function texmod.file(filename)
+	-- See `TEXTURENAME_ALLOWED_CHARS` in Minetest (`src/network/networkprotocol.h`)
+	assert(not filename:find"[^%w_.-]", "invalid characters in file name")
 	return new{
 		type = "file",
 		filename = filename

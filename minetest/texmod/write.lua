@@ -123,7 +123,6 @@ return function(self, write_str)
 	end
 	function w.tex(tex)
 		if tex.type == "file" then
-			assert(not tex.filename:find"[:^\\&{[]", "invalid character in filename")
 			w.str(tex.filename)
 			return
 		end

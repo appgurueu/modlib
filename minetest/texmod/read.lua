@@ -251,6 +251,9 @@ function rm.fname(r)
 	-- This is overly permissive, as is Minetest;
 	-- we just allow arbitrary characters up until a character which may terminate the name.
 	-- Inside an inventorycube, `&` also terminates names.
+	-- Note that the constructor will however - unlike Minetest - perform validation.
+	-- We could leverage the knowledge of the allowed charset here already,
+	-- but that might lead to more confusing error messages.
 	return r:match_str(r.invcube and "[^:^&){]" or "[^:^){]")
 end
 function rm.subtexp(r)
