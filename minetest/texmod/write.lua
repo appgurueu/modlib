@@ -87,7 +87,7 @@ function pw:colorize(w)
 end
 
 function pw:mask(w)
-	w.colon(); w.esctex(self.mask)
+	w.colon(); w.esctex(self._mask)
 end
 
 function pw:lowpart(w)

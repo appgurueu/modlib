@@ -311,11 +311,11 @@ function texmod:colorize(color, ratio)
 	}
 end
 
-function texmod:mask(mask)
+function texmod:mask(_mask)
 	return new{
 		type = "mask",
 		base = self,
-		mask = mask
+		_mask = _mask
 	}
 end
 
