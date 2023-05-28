@@ -199,10 +199,10 @@ function colorspec.from_hsv(
 end
 
 function colorspec.from_string(string)
-	local hex = "#([A-Fa-f%d]+)"
+	string = string:lower() -- names and hex are case-insensitive
 	local number, alpha = named_colors[string], 0xFF
 	if not number then
-		local name, alpha_text = string:match("^([a-z]+)" .. hex .. "$")
+		local name, alpha_text = string:match("^([a-z]+)#(%x+)$")
 		if name then
 			if alpha_text:len() > 2 then
 				return
@@ -220,7 +220,7 @@ function colorspec.from_string(string)
 	if number then
 		return colorspec.from_number_rgba(number * 0x100 + alpha)
 	end
-	local hex_text = string:match("^" .. hex .. "$")
+	local hex_text = string:match("^#(%x+)$")
 	if not hex_text then
 		return
 	end
