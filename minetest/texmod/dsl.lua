@@ -270,8 +270,8 @@ texmod.crack_with_opacity = texmod.cracko
 function texmod:sheet(w, h, x, y)
 	assert(w % 1 == 0 and w >= 1)
 	assert(h % 1 == 0 and h >= 1)
-	assert(x % 1 == 0 and x < w)
-	assert(y % 1 == 0 and y < w)
+	assert(x % 1 == 0 and x >= 0)
+	assert(y % 1 == 0 and y >= 0)
 	return new{
 		type = "sheet",
 		base = self,
