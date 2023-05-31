@@ -17,6 +17,7 @@ do
 	cd.makealpha = base_dim
 	cd.lowpart = base_dim
 	cd.mask = base_dim
+	cd.multiply = base_dim
 	cd.colorize = base_dim
 end
 
