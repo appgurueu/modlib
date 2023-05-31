@@ -6,9 +6,10 @@ local function component(component_name, ...)
 end
 
 local texmod, metatable = component"dsl"
-texmod.write = component"write"
+local methods = metatable.__index
+methods.write = component"write"
 texmod.read = component("read", texmod)
-texmod.calc_dims = component("calc_dims", texmod)
+methods.calc_dims = component("calc_dims", texmod)
 
 function metatable:__tostring()
 	local rope = {}

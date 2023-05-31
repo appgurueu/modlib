@@ -35,9 +35,38 @@ function gr.combine(r)
 	return w, h, blits
 end
 
+function gr.fill(r)
+	r:expect":"
+	local w = r:int()
+	r:expect"x"
+	local h = r:int()
+	r:expect":"
+	-- Be strict(er than Minetest): Do not accept x, y for a base
+	local color = r:colorspec()
+	return w, h, color
+end
+
 -- Parameter readers
 
 local pr = {}
+
+function pr.fill(r)
+	r:expect":"
+	local w = r:int()
+	r:expect"x"
+	local h = r:int()
+	r:expect":"
+	if assert(r:peek(), "unexpected eof"):find"%d" then
+		local x = r:int()
+		r:expect","
+		local y = r:int()
+		r:expect":"
+		local color = r:colorspec()
+		return w, h, x, y, color
+	end
+	local color = r:colorspec()
+	return w, h, color
+end
 
 function pr.brighten() end
 
@@ -137,6 +166,7 @@ function pr.multiply(r)
 	r:expect":"
 	return r:colorspec()
 end
+pr.screen = pr.multiply
 
 function pr.colorize(r)
 	r:expect":"
@@ -151,6 +181,41 @@ function pr.colorize(r)
 		r:expect(c)
 	end
 	return color, "alpha"
+end
+
+function pr.colorizehsl(r)
+	r:expect":"
+	local hue = r:int()
+	if not r:match":" then
+		return hue
+	end
+	local saturation = r:int()
+	if not r:match":" then
+		return hue, saturation
+	end
+	local lightness = r:int()
+	return hue, saturation, lightness
+end
+pr.hsl = pr.colorizehsl
+
+function pr.contrast(r)
+	r:expect":"
+	local contrast = r:int()
+	if not r:match":" then
+		return contrast
+	end
+	local brightness = r:int()
+	return contrast, brightness
+end
+
+function pr.overlay(r)
+	r:expect":"
+	return r:subtexp()
+end
+
+function pr.hardlight(r)
+	r:expect":"
+	return r:subtexp(r)
 end
 
 function pr.mask(r)
@@ -325,12 +390,14 @@ function rm.texp(r)
 			local param_reader, gen_reader = pr[type], gr[type]
 			assert(param_reader or gen_reader)
 			if param_reader then
+				-- Note: It is important that this takes precedence to properly handle `[fill`
 				base = base[type](base, param_reader(r))
 			elseif gen_reader then
-				base = base:overlay(texmod[type](gen_reader(r)))
+				base = base:blit(texmod[type](gen_reader(r)))
 			end
+			-- TODO (?...) we could consume leftover parameters here to be as lax as Minetest
 		else
-			base = base:overlay(r:basexp())
+			base = base:blit(r:basexp())
 		end
 	end
 	return base

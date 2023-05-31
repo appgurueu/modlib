@@ -26,6 +26,15 @@ function pw:inventorycube(w)
 	write_side"right"
 end
 
+-- Handles both the generator & the modifier
+function pw:fill(w)
+	w.colon(); w.int(self.w); w.str"x"; w.int(self.h)
+	if self.base then
+		w.colon(); w.int(self.x); w.str","; w.int(self.y)
+	end
+	w.colon(); w.str(self.color:to_string())
+end
+
 -- No parameters to write
 pw.brighten = modlib.func.no_op
 pw.noalpha = modlib.func.no_op
@@ -68,6 +77,11 @@ function pw:sheet(w)
 	w.colon(); w.int(self.w); w.str"x"; w.int(self.h); w.colon(); w.int(self.x); w.str","; w.int(self.y)
 end
 
+function pw:screen(w)
+	w.colon()
+	w.str(self.color:to_string())
+end
+
 function pw:multiply(w)
 	w.colon()
 	w.str(self.color:to_string())
@@ -84,6 +98,20 @@ function pw:colorize(w)
 			w.int(self.ratio)
 		end
 	end
+end
+
+function pw:colorizehsl(w)
+	w.colon(); w.int(self.hue); w.colon(); w.int(self.saturation); w.colon(); w.int(self.lightness)
+end
+pw.hsl = pw.colorizehsl
+
+function pw:contrast(w)
+	w.colon(); w.int(self.contrast); w.colon(); w.int(self.brightness)
+end
+
+-- We don't have to handle `[overlay`; the DSL normalizes everything to `[hardlight`
+function pw:hardlight(w)
+	w.colon(); w.esctex(self.over)
 end
 
 function pw:mask(w)
@@ -130,7 +158,7 @@ return function(self, write_str)
 			w.tex(tex.base)
 			w.hat()
 		end
-		if tex.type == "overlay" then
+		if tex.type == "blit" then -- simply `^`
 			if non_modifiers[tex.over.type] then
 				w.tex(tex.over)
 			else

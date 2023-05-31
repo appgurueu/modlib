@@ -19,6 +19,10 @@ do
 	cd.mask = base_dim
 	cd.multiply = base_dim
 	cd.colorize = base_dim
+	cd.colorizehsl = base_dim
+	cd.hsl = base_dim
+	cd.screen = base_dim
+	cd.contrast = base_dim
 end
 
 do
@@ -27,10 +31,23 @@ do
 	cd.combine = wh
 end
 
-function cd:overlay(get_dims)
-	local base_w, base_h = calc_dims(self.base, get_dims)
-	local over_w, over_h = calc_dims(self.over, get_dims)
-	return math.max(base_w, over_w), math.max(base_h, over_h)
+function cd:fill(get_dims)
+	if self.base then return calc_dims(self.base, get_dims) end
+	return self.w, self.h
+end
+
+do
+	local function upscale_to_higher_res(self, get_dims)
+		local base_w, base_h = calc_dims(self.base, get_dims)
+		local over_w, over_h = calc_dims(self.over, get_dims)
+		if base_w * base_h > over_w * over_h then
+			return base_w, base_h
+		end
+		return over_w, over_h
+	end
+	cd.blit = upscale_to_higher_res
+	cd.overlay = upscale_to_higher_res
+	cd.hardlight = upscale_to_higher_res
 end
 
 function cd:transform(get_dims)

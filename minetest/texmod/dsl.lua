@@ -1,5 +1,8 @@
+local colorspec = modlib.minetest.colorspec
+
 local texmod = {}
-local metatable = {__index = texmod}
+local mod = {}
+local metatable = {__index = mod}
 
 local function new(self)
 	return setmetatable(self, metatable)
@@ -52,31 +55,65 @@ function texmod.inventorycube(top, left, right)
 	}
 end
 
+-- As a base generator, `fill` ignores `x` and `y`. Leave them as `nil`.
+function texmod.fill(w, h, color)
+	assert(w % 1 == 0 and w > 0)
+	assert(h % 1 == 0 and h > 0)
+	return new{
+		type = "fill",
+		w = w,
+		h = h,
+		color = colorspec.from_any(color)
+	}
+end
+
 -- Methods / "modifiers"
 
-function texmod:overlay(overlay)
+local function assert_int_range(num, min, max)
+	assert(num % 1 == 0 and num >= min and num <= max)
+end
+
+-- As a modifier, `fill` takes `x` and `y`
+function mod:fill(w, h, x, y, color)
+	assert(w % 1 == 0 and w > 0)
+	assert(h % 1 == 0 and h > 0)
+	assert(x % 1 == 0 and x >= 0)
+	assert(y % 1 == 0 and y >= 0)
 	return new{
-		type = "overlay",
+		type = "fill",
+		base = self,
+		w = w,
+		h = h,
+		x = x,
+		y = y,
+		color = colorspec.from_any(color)
+	}
+end
+
+-- This is the real "overlay", associated with `^`.
+function mod:blit(overlay)
+	return new{
+		type = "blit",
 		base = self,
 		over = overlay
 	}
 end
 
-function texmod:brighten()
+function mod:brighten()
 	return new{
 		type = "brighten",
 		base = self,
 	}
 end
 
-function texmod:noalpha()
+function mod:noalpha()
 	return new{
 		type = "noalpha",
 		base = self
 	}
 end
 
-function texmod:resize(w, h)
+function mod:resize(w, h)
 	assert(w % 1 == 0 and w > 0)
 	assert(h % 1 == 0 and h > 0)
 	return new{
@@ -88,10 +125,10 @@ function texmod:resize(w, h)
 end
 
 local function assert_uint8(num)
-	assert(num % 1 == 0 and num >= 0 and num <= 0xFF)
+	assert_int_range(num, 0, 0xFF)
 end
 
-function texmod:makealpha(r, g, b)
+function mod:makealpha(r, g, b)
 	assert_uint8(r); assert_uint8(g); assert_uint8(b)
 	return new{
 		type = "makealpha",
@@ -100,7 +137,7 @@ function texmod:makealpha(r, g, b)
 	}
 end
 
-function texmod:opacity(ratio)
+function mod:opacity(ratio)
 	assert_uint8(ratio)
 	return new{
 		type = "opacity",
@@ -113,7 +150,7 @@ local function tobool(val)
 	return not not val
 end
 
-function texmod:invert(channels --[[set with keys "r", "g", "b", "a"]])
+function mod:invert(channels --[[set with keys "r", "g", "b", "a"]])
 	return new{
 		type = "invert",
 		base = self,
@@ -124,14 +161,14 @@ function texmod:invert(channels --[[set with keys "r", "g", "b", "a"]])
 	}
 end
 
-function texmod:flip(flip_axis --[["x" or "y"]])
+function mod:flip(flip_axis --[["x" or "y"]])
 	return self:transform(assert(
 		(flip_axis == "x" and "fx")
 		or (flip_axis == "y" and "fy")
 		or (not flip_axis and "i")))
 end
 
-function texmod:rotate(deg)
+function mod:rotate(deg)
 	assert(deg % 90 == 0)
 	deg = deg % 360
 	return self:transform(("r%d"):format(deg))
@@ -201,7 +238,7 @@ do
 				transform_idx(mat_2x2_compose(transform_mats[i], transform_mats[j]))])
 		end
 	end
-	function texmod:transform(...)
+	function mod:transform(...)
 		if select("#", ...) == 0 then return self end
 		local idx = ...
 		if type(idx) == "string" then
@@ -227,7 +264,7 @@ do
 	end
 end
 
-function texmod:verticalframe(framecount, frame)
+function mod:verticalframe(framecount, frame)
 	assert(framecount >= 1)
 	assert(frame >= 0)
 	return new{
@@ -258,16 +295,16 @@ local function crack(self, name, ...)
 	}
 end
 
-function texmod:crack(...)
+function mod:crack(...)
 	return crack(self, "crack", ...)
 end
 
-function texmod:cracko(...)
+function mod:cracko(...)
 	return crack(self, "cracko", ...)
 end
-texmod.crack_with_opacity = texmod.cracko
+mod.crack_with_opacity = mod.cracko
 
-function texmod:sheet(w, h, x, y)
+function mod:sheet(w, h, x, y)
 	assert(w % 1 == 0 and w >= 1)
 	assert(h % 1 == 0 and h >= 1)
 	assert(x % 1 == 0 and x >= 0)
@@ -282,18 +319,24 @@ function texmod:sheet(w, h, x, y)
 	}
 end
 
-local colorspec = modlib.minetest.colorspec
-
-function texmod:multiply(color)
+function mod:screen(color)
 	return new{
-		type = "multiply",
+		type = "screen",
 		base = self,
-		color = colorspec.from_any(color) -- copies a given colorspec
+		color = colorspec.from_any(color),
 	}
 end
 
-function texmod:colorize(color, ratio)
-	color = colorspec.from_any(color) -- copies a given colorspec
+function mod:multiply(color)
+	return new{
+		type = "multiply",
+		base = self,
+		color = colorspec.from_any(color)
+	}
+end
+
+function mod:colorize(color, ratio)
+	color = colorspec.from_any(color)
 	if ratio == "alpha" then
 		assert(color.alpha or 0xFF == 0xFF)
 	else
@@ -311,15 +354,62 @@ function texmod:colorize(color, ratio)
 	}
 end
 
-function texmod:mask(_mask)
+local function hsl(type, s_def, s_max, l_def)
+	return function(self, h, s, l)
+		s, l = s or s_def, l or l_def
+		assert_int_range(h, -180, 180)
+		assert_int_range(s, 0, s_max)
+		assert_int_range(l, -100, 100)
+		return new{
+			type = type,
+			base = self,
+			hue = h,
+			saturation = s,
+			lightness = l,
+		}
+	end
+end
+
+mod.colorizehsl = hsl("colorizehsl", 50, 100, 0)
+mod.hsl = hsl("hsl", 0, math.huge, 0)
+
+function mod:contrast(contrast, brightness)
+	brightness = brightness or 0
+	assert_int_range(contrast, -127, 127)
+	assert_int_range(brightness, -127, 127)
 	return new{
-		type = "mask",
+		type = "contrast",
 		base = self,
-		_mask = _mask
+		contrast = contrast,
+		brightness = brightness,
 	}
 end
 
-function texmod:lowpart(percent, overlay)
+function mod:mask(mask_texmod)
+	return new{
+		type = "mask",
+		base = self,
+		_mask = mask_texmod
+	}
+end
+
+function mod:hardlight(overlay)
+	return new{
+		type = "hardlight",
+		base = self,
+		over = overlay
+	}
+end
+
+-- Overlay *blend*.
+-- This was unfortunately named `[overlay` in Minetest,
+-- and so is named `:overlay` for consistency.
+--! Do not confuse this with the simple `^` used for blitting
+function mod:overlay(overlay)
+	return overlay:hardlight(self)
+end
+
+function mod:lowpart(percent, overlay)
 	assert(percent % 1 == 0 and percent >= 0 and percent <= 100)
 	return new{
 		type = "lowpart",
