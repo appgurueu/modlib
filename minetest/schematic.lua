@@ -10,12 +10,13 @@ function schematic.setmetatable(self)
 	return setmetatable(self, metatable)
 end
 
-function schematic.create(self, pos_min, pos_max)
-	self.size = vector.subtract(pos_max, pos_min)
+function schematic.create(params, pos_min, pos_max)
+	pos_min, pos_max = vector.sort(pos_min, pos_max)
+	local size = vector.add(vector.subtract(pos_max, pos_min), 1)
 	local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
 	local emin, emax = voxelmanip:read_from_map(pos_min, pos_max)
 	local voxelarea = VoxelArea:new{ MinEdge = emin, MaxEdge = emax }
-	local nodes, light_values, param2s = {}, self.light_values and {}, {}
+	local nodes, light_values, param2s = {}, params.light_values and {}, {}
 	local vm_nodes, vm_light_values, vm_param2s = voxelmanip:get_data(), light_values and voxelmanip:get_light_data(), voxelmanip:get_param2_data()
 	local node_names, node_ids = {}, {}
 	local i = 0
@@ -32,33 +33,35 @@ function schematic.create(self, pos_min, pos_max)
 		end
 		i = i + 1
 		nodes[i] = id
-		if self.light_values then
+		if params.light_values then
 			light_values[i] = vm_light_values[index]
 		end
 		param2s[i] = vm_param2s[index]
 	end
-	local metas = self.metas
-	if metas or metas == nil then
-		local indexing = vector.add(self.size, 1)
+	local metas
+	if params.metas or params.metas == nil then
 		metas = {}
 		for _, pos in ipairs(minetest.find_nodes_with_meta(pos_min, pos_max)) do
 			local meta = minetest.get_meta(pos):to_table()
 			if next(meta.fields) ~= nil or next(meta.inventory) ~= nil then
 				local relative = vector.subtract(pos, pos_min)
-				metas[((relative.z * indexing.y) + relative.y) * indexing.x + relative.x] = meta
+				metas[((relative.z * size.y) + relative.y) * size.x + relative.x] = meta
 			end
 		end
 	end
-	self.node_names = node_names
-	self.nodes = nodes
-	self.light_values = light_values
-	self.param2s = param2s
-	self.metas = metas
-	return schematic.setmetatable(self)
+	return schematic.setmetatable({
+		size = size,
+		node_names = node_names,
+		nodes = nodes,
+		light_values = light_values,
+		param2s = param2s,
+		metas = metas,
+	})
 end
 
 function schematic:write_to_voxelmanip(voxelmanip, pos_min)
-	local pos_max = vector.add(pos_min, self.size)
+	local size = self.size
+	local pos_max = vector.subtract(vector.add(pos_min, size), 1) -- `pos_max` is inclusive
 	local emin, emax = voxelmanip:read_from_map(pos_min, pos_max)
 	local voxelarea = VoxelArea:new{ MinEdge = emin, MaxEdge = emax }
 	local nodes, light_values, param2s, metas = self.nodes, self.light_values, self.param2s, self.metas
@@ -86,13 +89,12 @@ function schematic:write_to_voxelmanip(voxelmanip, pos_min)
 	end
 	voxelmanip:set_param2_data(vm_param2s)
 	if metas then
-		local indexing = vector.add(self.size, 1)
 		for index, meta in pairs(metas) do
-			local floored = math.floor(index / indexing.x)
+			local floored = math.floor(index / size.x)
 			local relative = {
-				x = index % indexing.x,
-				y = floored % indexing.y,
-				z = math.floor(floored / indexing.y)
+				x = index % size.x,
+				y = floored % size.y,
+				z = math.floor(floored / size.y)
 			}
 			minetest.get_meta(vector.add(relative, pos_min)):from_table(meta)
 		end
@@ -100,7 +102,7 @@ function schematic:write_to_voxelmanip(voxelmanip, pos_min)
 end
 
 function schematic:place(pos_min)
-	local pos_max = vector.add(pos_min, self.size)
+	local pos_max = vector.subtract(vector.add(pos_min, self.size), 1) -- `pos_max` is inclusive
 	local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
 	self:write_to_voxelmanip(voxelmanip, pos_min)
 	voxelmanip:write_to_map(not self.light_values)
@@ -113,18 +115,22 @@ local function table_to_byte_string(tab)
 end
 
 local function write_bluon(self, stream)
-	local metas, light_values, param2s = self.metas, self.light_values, self.param2s
-	self.metas = modlib.table.copy(metas)
-	for _, meta in pairs(self.metas) do
+	local metas = modlib.table.copy(self.metas)
+	for _, meta in pairs(metas) do
 		for _, list in pairs(meta.inventory) do
 			for index, stack in pairs(list) do
 				list[index] = stack:to_string()
 			end
 		end
 	end
-	self.light_values, self.param2s = table_to_byte_string(light_values), table_to_byte_string(param2s)
-	modlib.bluon:write(self, stream)
-	self.metas, self.light_values, self.param2s = metas, light_values, param2s
+	modlib.bluon:write({
+		size = self.size,
+		node_names = self.node_names,
+		nodes = self.nodes,
+		light_values = table_to_byte_string(self.light_values),
+		param2s = table_to_byte_string(self.param2s),
+		metas = metas,
+	}, stream)
 end
 
 function schematic:write_bluon(path)
