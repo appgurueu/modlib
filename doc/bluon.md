@@ -44,23 +44,41 @@ Checking whether the stream has been fully consumed by doing `assert(not stream:
 
 ## Format
 
-* `nil`: nothing (`""`)
+Bluon uses a "tagged union" binary format:
+Values are stored as a one-byte tag followed by the contents of the union.
+For frequently used "constants", only a tag is used.
+
+`nil` is an exception; since it can't appear in tables, it gets no tag.
+If the value to be written by Bluon is `nil`, Bluon simply writes *nothing*.
+
+The following is an enumeration of tag numbers, which are assigned *in this order*.
+
 * `false`: 0
 * `true`: 1
 * Numbers:
   * Constants: 0, nan, +inf, -inf
-  * Integers: Little endian `U8`, `U16`, `U32`, `U64`, `-U8`, `-U16`, `-U32`, `-U64`
+  * Integers: Little endian:
+  	* Unsigned: `U8`, `U16`, `U32`, `U64`
+  	* Negative: `-U8`, `-U16`, `-U32`, `-U64`
   * Floats: Little endian `F32`, `F64`
 * Strings:
   * Constant: `""`
-  * Length as unsigned integer: `T8`, `T16`, `T32`, `T64`
+  * Length is written as unsigned integer according to the tag: `S8`, `S16`, `S32`, `S64`
+	* followed by the raw bytes
 * Tables:
-  * List and map part count as unsigned integers
-  * `L0`, `L8`, `L16`, `L32`, `L64` times `M0`, `M8`, `M16`, `M32`, `M64`
+  * Tags: `M0`, `M8`, `M16`, `M32`, `M64` times `L0`, `L8`, `L16`, `L32`, `L64`
+  * `M` is more significant than `L`: The order of the cartesian product is `M0L0`, `M0L1`, ...
+  * List and map part count encoded as unsigned integers according to the tag,
+    list part count comes first
+  * followed by all values in the list part written as Bluon
+  * followed by all key-value pairs in the map part written as Bluon
+    (first the key is written as Bluon, then the value)
 * Reference:
   * Reference ID as unsigned integer: `R8`, `R16`, `R32`, `R64`
-* Reserved types:
-  * Everything <= 55 => 200 free types
+  * References a previously encountered table or string by an index:
+    All tables and strings are numbered in the order they occur in the Bluon
+* Reserved tags:
+  * All tags <= 55 are reserved. This gives 200 free tags.
 
 ## Features
 

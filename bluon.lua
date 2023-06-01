@@ -45,7 +45,7 @@ for _, type in ipairs{
 	{"number", 1};
 	{"string_constant", 1};
 	{"string", uint_types};
-	-- (T0, T8, T16, T32, T64) x (L0, L8, L16, L32, L64)
+	-- (M0, M8, M16, M32, M64) x (L0, L8, L16, L32, L64)
 	{"table", (uint_types + 1) ^ 2};
 	{"reference", uint_types}
 } do
