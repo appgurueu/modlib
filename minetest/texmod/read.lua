@@ -215,12 +215,12 @@ end
 
 function pr.hardlight(r)
 	r:expect":"
-	return r:subtexp(r)
+	return r:subtexp()
 end
 
 function pr.mask(r)
 	r:expect":"
-	return r:subtexp(r)
+	return r:subtexp()
 end
 
 function pr.lowpart(r)
