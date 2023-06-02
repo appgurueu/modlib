@@ -250,18 +250,24 @@ end
 -- Reader methods. We use `r` instead of the `self` "sugar" for consistency (and to save us some typing).
 local rm = {}
 
-function rm.peek(r)
+function rm.peek(r, parenthesized)
 	if r.eof then return end
 	local expected_escapes = 0
 	if r.level > 0 then
 		-- Premature optimization my beloved (this is `2^(level-1)`)
 		expected_escapes = math.ldexp(0.5, r.level)
 	end
-	if r.character:match"[&^:]" then
-		if r.escapes == expected_escapes then return r.character end
+	if r.character:match"[&^:]" then -- "special" characters - these need to be escaped
+		if r.escapes == expected_escapes then
+			return r.character
+		elseif parenthesized and r.character == "^" and r.escapes < expected_escapes then
+			-- Special handling for `^` inside `(...)`: This is undocumented behavior but works in Minetest
+			r.warn"parenthesized caret (`^`) with too few escapes"
+			return r.character
+		end
 	elseif r.escapes <= expected_escapes then
 		return r.character
-	elseif r.escapes >= 2*expected_escapes then
+	end if r.escapes >= 2*expected_escapes then
 		return "\\"
 	end
 end
@@ -301,8 +307,11 @@ function rm.expect(r, char)
 		error(("%q expected"):format(char))
 	end
 end
-function rm.hat(r)
-	return r:match(r.invcube and "&" or "^")
+function rm.hat(r, parenthesized)
+	if r:peek(parenthesized) == (r.invcube and "&" or "^") then
+		r:pop()
+		return true
+	end
 end
 function rm.match_charset(r, set)
 	local char = r:peek()
@@ -354,7 +363,7 @@ function rm.invcubeside(r)
 end
 function rm.basexp(r)
 	if r:match"(" then
-		local res = r:texp()
+		local res = r:texp(true)
 		r:expect")"
 		return res
 	end
@@ -372,9 +381,9 @@ function rm.colorspec(r)
 	-- Leave exact validation up to colorspec, only do a rough greedy charset matching
 	return assert(colorspec.from_string(r:match_str"[#%x%a]"))
 end
-function rm.texp(r)
-	local base = r:basexp()
-	while r:hat() do
+function rm.texp(r, parenthesized)
+	local base = r:basexp() -- TODO (?) make optional - warn about omitting the base
+	while r:hat(parenthesized) do
 		if r:match"[" then
 			local reader_subtrie = texmod_reader_trie
 			while true do
@@ -404,15 +413,17 @@ function rm.texp(r)
 end
 
 local mt = {__index = rm}
-return function(read_char)
+return function(read_char, warn --[[function(str)]])
 	local r = setmetatable({
 		level = 0,
 		invcube = false,
+		parenthesized = false,
 		eof = false,
 		read_char = read_char,
+		warn = warn or error,
 	}, mt)
 	r:popchar()
-	local res = r:texp()
+	local res = r:texp(false)
 	assert(r.eof, "eof expected")
 	return res
 end

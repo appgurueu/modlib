@@ -17,13 +17,13 @@ function metatable:__tostring()
 	return table.concat(rope)
 end
 
-function texmod.read_string(str)
+function texmod.read_string(str, warn --[[function(warn_str)]])
 	local i = 0
 	return texmod.read(function()
 		i = i + 1
 		if i > #str then return end
 		return str:sub(i, i)
-	end)
+	end, warn)
 end
 
 return texmod
