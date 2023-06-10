@@ -1,6 +1,6 @@
 local dir_delim = ...
 -- Localize globals
-local io, minetest, modlib, string = io, minetest, modlib, string
+local assert, io, minetest, modlib, string, pcall = assert, io, minetest, modlib, string, pcall
 
 -- Set environment
 local _ENV = {}
@@ -23,6 +23,20 @@ function split_path(filepath)
 end
 
 -- concat_path is set by init.lua to avoid code duplication
+
+-- Lua 5.4 has `<close>` for this, but we're restricted to 5.1,
+-- so we need to roll our own `try  f = io.open(...); return func(f) finally f:close() end`.
+function with_open(filename, mode, func --[[function(file), called with `file = io.open(filename, mode)`]])
+	local file = assert(io.open(filename, mode or "r"))
+	-- Throw away the stacktrace. The alternative would be to use `xpcall`
+	-- to bake the stack trace into the error string using `debug.traceback`.
+	-- Lua will have prepended `<source>:<line>:` already however.
+	return (function(status, ...)
+		file:close()
+		assert(status, ...)
+		return ...
+	end)(pcall(func, file))
+end
 
 function read(filename)
 	local file, err = io.open(filename, "r")
