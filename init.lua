@@ -26,7 +26,8 @@ for _, file in pairs{
 	"base64",
 	"persistence",
 	"debug",
-	"web"
+	"web",
+	"tex"
 } do
 	modules[file] = file
 end

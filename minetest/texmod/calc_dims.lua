@@ -46,7 +46,6 @@ do
 		return over_w, over_h
 	end
 	cd.blit = upscale_to_higher_res
-	cd.overlay = upscale_to_higher_res
 	cd.hardlight = upscale_to_higher_res
 end
 

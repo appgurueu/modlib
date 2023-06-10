@@ -9,7 +9,8 @@ local texmod, metatable = component"dsl"
 local methods = metatable.__index
 methods.write = component"write"
 texmod.read = component("read", texmod)
-methods.calc_dims = component("calc_dims", texmod)
+methods.calc_dims = component"calc_dims"
+methods.gen_tex = component"gen_tex"
 
 function metatable:__tostring()
 	local rope = {}
