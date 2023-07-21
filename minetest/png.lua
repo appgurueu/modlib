@@ -17,6 +17,19 @@ local function bit_xor(a, b)
 	return res
 end
 
+-- Try to use `bit` library (if available) for a massive speed boost
+local bit = rawget(_G, "bit")
+if bit then
+	local bxor = bit.bxor
+	function bit_xor(a, b)
+		local res = bxor(a, b)
+		if res < 0 then -- convert signed to unsigned
+			return res + 2^32
+		end
+		return res
+	end
+end
+
 local crc_table = {}
 for i = 0, 255 do
 	local c = i
