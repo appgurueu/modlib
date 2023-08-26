@@ -33,8 +33,6 @@ function mat4.translation(vec)
 	}
 end
 
-
-
 -- See https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 function mat4.rotation(unit_quat)
 	assert(#unit_quat == 4)
@@ -58,7 +56,22 @@ function mat4.scale(vec)
 	}
 end
 
+-- Apply `self` to a 4d modlib vector `vec`
+function mat4:apply(vec)
+	assert(#vec == 4)
+	local res = {}
+	for i = 1, 4 do
+		local sum = 0
+		for j = 1, 4 do
+			sum = sum + self[i][j] * vec[j]
+		end
+		res[i] = sum
+	end
+	return vec.new(res)
+end
+
 -- Multiplication: First apply other, then self
+--> Matrix product `self * other`
 function mat4:multiply(other)
 	local res = {}
 	for i = 1, 4 do
