@@ -107,6 +107,7 @@ function mat4.irrlicht_transpose_rotation(unit_quat)
 		{0,                    0,                   0,                   1}
 	})
 end
+--https://github.com/minetest/irrlicht/blob/1d4672bd92fb20c63806ef4bf0179a1aeecff16b/include/matrix4.h#L806C24-L806C24
 function mat4.irrlicht_set_translation(pos)
 	assert(pos, "no translation given to irrlicht_set_translation")
 	local new = mat4.identity()
