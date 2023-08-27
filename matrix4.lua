@@ -35,7 +35,8 @@ end
 
 -- See https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 function mat4.rotation(unit_quat)
-	assert(#unit_quat == 4)
+	assert(unit_quat, "attempt to creat rotation matrix from a nil value")
+	assert(#unit_quat == 4, "vector longer ten expected.")
 	local x, y, z, w = unpack(unit_quat) -- TODO (?) assert unit quaternion
 	return mat4.new{
 		{1 - 2*(y^2 + z^2), 2*(x*y - z*w),     2*(x*z + y*w),      0},
@@ -46,7 +47,8 @@ function mat4.rotation(unit_quat)
 end
 
 function mat4.scale(vec)
-	assert(#vec == 3)
+	assert(unit_quat, "attempt to creat scale matrix from a nil value")
+	assert(#vec == 3, "vector longer ten expected.")
 	local x, y, z = unpack(vec)
 	return mat4.new{
 		{x, 0, 0, 0},
@@ -58,6 +60,7 @@ end
 
 -- Apply `self` to a 4d modlib vector `vec`
 function mat4:apply(vec)
+	assert(vec, "attempt to apply matrix to a nil value")
 	assert(#vec == 4)
 	local res = {}
 	for i = 1, 4 do
@@ -67,12 +70,17 @@ function mat4:apply(vec)
 		end
 		res[i] = sum
 	end
-	return vec.new(res)
+	if vec.new then
+		return vec.new(res)
+	else
+		return res
+	end
 end
 
 -- Multiplication: First apply other, then self
 --> Matrix product `self * other`
 function mat4:multiply(other)
+	assert(vec, "attempt to multiply matrix with a nil value")
 	local res = {}
 	for i = 1, 4 do
 		res[i] = {}
@@ -90,31 +98,6 @@ end
 -- Composition: First apply self, then other
 function mat4:compose(other)
 	return other:multiply(self) -- equivalent to `other * self` in terms of matrix multiplication
-end
-
--- https://github.com/minetest/irrlicht/blob/master/include/quaternion.h#L465
--- replicates irrlicht behavior for transposing a quat from a b3d into a matrix.
-function mat4.irrlicht_transpose_rotation(unit_quat)
-	assert(unit_quat, "no rotation given to irrlicht_transpose_rotation")
-	local x = unit_quat[1]
-	local y = unit_quat[2]
-	local z = unit_quat[3]
-	local w = unit_quat[4]
-	return mat4.new({
-		{1 - 2*y*y - 2*z*z,    2*x*y - 2*z*w,       2*x*z + 2*y*w,       0},
-		{2*x*y + 2*z*w,        1 - 2*x*x - 2*z*z,   2*z*y - 2*x*w,       0},
-		{2*x*z - 2*y*w,        2*z*y + 2*x*w,       1 - 2*x*x - 2*y*y,   0},
-		{0,                    0,                   0,                   1}
-	})
-end
---https://github.com/minetest/irrlicht/blob/1d4672bd92fb20c63806ef4bf0179a1aeecff16b/include/matrix4.h#L806C24-L806C24
-function mat4.irrlicht_set_translation(pos)
-	assert(pos, "no translation given to irrlicht_set_translation")
-	local new = mat4.identity()
-	new[4][1] = pos.x or pos[1]
-	new[4][2] = pos.y or pos[2]
-	new[4][3] = pos.z or pos[3]
-	return new
 end
 
 -- Matrix inversion using Gauss-Jordan elimination
