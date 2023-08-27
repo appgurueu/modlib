@@ -92,6 +92,30 @@ function mat4:compose(other)
 	return other:multiply(self) -- equivalent to `other * self` in terms of matrix multiplication
 end
 
+-- https://github.com/minetest/irrlicht/blob/master/include/quaternion.h#L465
+-- replicates irrlicht behavior for transposing a quat from a b3d into a matrix.
+function mat4.irrlicht_transpose_rotation(unit_quat)
+	assert(unit_quat, "no rotation given to irrlicht_transpose_rotation")
+	local x = unit_quat[1]
+	local y = unit_quat[2]
+	local z = unit_quat[3]
+	local w = unit_quat[4]
+	return mat4.new({
+		{1 - 2*y*y - 2*z*z,    2*x*y - 2*z*w,       2*x*z + 2*y*w,       0},
+		{2*x*y + 2*z*w,        1 - 2*x*x - 2*z*z,   2*z*y - 2*x*w,       0},
+		{2*x*z - 2*y*w,        2*z*y + 2*x*w,       1 - 2*x*x - 2*y*y,   0},
+		{0,                    0,                   0,                   1}
+	})
+end
+function mat4.irrlicht_set_translation(pos)
+	assert(pos, "no translation given to irrlicht_set_translation")
+	local new = mat4.identity()
+	new[4][1] = pos.x or pos[1]
+	new[4][2] = pos.y or pos[2]
+	new[4][3] = pos.z or pos[3]
+	return new
+end
+
 -- Matrix inversion using Gauss-Jordan elimination
 do
 	-- Fundamental operations
