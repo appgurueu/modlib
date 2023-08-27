@@ -47,7 +47,7 @@ function mat4.rotation(unit_quat)
 end
 
 function mat4.scale(vec)
-	assert(unit_quat, "attempt to creat scale matrix from a nil value")
+	assert(vec, "attempt to creat scale matrix from a nil value")
 	assert(#vec == 3, "vector longer ten expected.")
 	local x, y, z = unpack(vec)
 	return mat4.new{
@@ -80,7 +80,7 @@ end
 -- Multiplication: First apply other, then self
 --> Matrix product `self * other`
 function mat4:multiply(other)
-	assert(vec, "attempt to multiply matrix with a nil value")
+	assert(other, "attempt to multiply matrix with a nil value")
 	local res = {}
 	for i = 1, 4 do
 		res[i] = {}
