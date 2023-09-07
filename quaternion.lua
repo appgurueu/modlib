@@ -60,6 +60,8 @@ function conjugate(self)
 end
 
 function inverse(self)
+	-- TODO this is just a fancy normalization *of the conjungate*,
+	-- which for rotations is the inverse
 	return modlib.vector.divide_scalar(conjugate(self), self[1] ^ 2 + self[2] ^ 2 + self[3] ^ 2 + self[4] ^ 2)
 end
 
@@ -136,29 +138,27 @@ function to_euler_rotation_irrlicht(self)
 	local x, y, z, w = unpack(self)
 	local test = 2 * (y * w - x * z)
 
-	local function _calc()
-		if math.abs(test - 1) <= 1e-6 then
-			return {
-				z = -2 * math.atan2(x, w),
-				x = 0,
-				y = math.pi/2
-			}
-		end
-		if math.abs(test + 1) <= 1e-6 then
-			return {
+	local rot
+	if math.abs(test - 1) <= 1e-6 then
+		rot = {
+			z = -2 * math.atan2(x, w),
+			x = 0,
+			y = math.pi/2
+		}
+	elseif math.abs(test + 1) <= 1e-6 then
+		rot = {
 				z = 2 * math.atan2(x, w),
 				x = 0,
 				y = math.pi/-2
 			}
-		end
-		return {
+	else
+		rot = {
 			z = math.atan2(2 * (x * y + z * w), x ^ 2 - y ^ 2 - z ^ 2 + w ^ 2),
 			x = math.atan2(2 * (y * z + x * w), -x ^ 2 - y ^ 2 + z ^ 2 + w ^ 2),
 			y = math.asin(math.min(math.max(test, -1), 1))
 		}
 	end
-
-	return vector.apply(_calc(), math.deg)
+	return vector.apply(rot, math.deg)
 end
 
 -- Export environment
