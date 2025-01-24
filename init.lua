@@ -85,7 +85,7 @@ local rawget, rawset = rawget, rawset
 modlib = setmetatable({}, { __index = load_module })
 
 -- TODO bump on release
-modlib.version = 102
+modlib.version = 103
 
 if minetest then
 	modlib.modname = minetest.get_current_modname()
