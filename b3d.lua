@@ -1117,19 +1117,9 @@ function get_animated_bone_properties(self, keyframe, interpolate)
 			modlib.table.add_all(properties, get_frame_values(node.keys))
 		end
 
-		if not properties.position then -- animation not present, fall back to node position
-			properties.position = modlib.table.copy(node.position)
-		end
-
-		if properties.rotation then -- animation is relative to node rotation
-			properties.rotation = modlib.quaternion.compose(node.rotation, properties.rotation)
-		else
-			properties.rotation = modlib.table.copy(node.rotation)
-		end
-
-		if not properties.scale then -- animation not present, fall back to node scale
-			properties.scale = modlib.table.copy(node.scale)
-		end
+		properties.position = properties.position or modlib.table.copy(node.position)
+		properties.rotation = properties.rotation or modlib.table.copy(node.rotation)
+		properties.scale = properties.scale or modlib.table.copy(node.scale)
 
 		if node.bone then
 			properties.bone_name = node.name
