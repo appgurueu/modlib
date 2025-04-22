@@ -25,7 +25,6 @@ for _, file in pairs{
 	"bluon",
 	"base64",
 	"persistence",
-	"debug",
 	"web",
 	"tex"
 } do
