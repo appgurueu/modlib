@@ -229,7 +229,10 @@ function write(self, value, stream)
 				byte(type_ranges.string + 1)
 				return
 			end
-			local list_len = #value
+			local list_len = 0
+			while value[list_len + 1] ~= nil do
+				list_len = list_len + 1
+			end
 			local kv_len = 0
 			for key, _ in pairs(value) do
 				if is_map_key(key, list_len) then
