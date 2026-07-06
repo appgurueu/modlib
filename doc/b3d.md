@@ -40,7 +40,7 @@ local out_dir_path = modpath .. "/gltf"
 for _, filename in ipairs(minetest.get_dir_list(dir_path, false --[[only files]])) do
 	-- First read the B3D
 	local in_file = assert(io.open(dir_path .. "/" .. filename, "rb"))
-	local model = assert(b3d.read(in_file))
+	local model = assert(modlib.b3d.read(in_file))
 	in_file:close()
 	-- Then write the glTF
 	local out_file = io.open(out_dir_path .. "/" .. filename .. ".gltf", "wb")
