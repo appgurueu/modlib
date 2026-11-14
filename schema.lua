@@ -1,5 +1,5 @@
 -- Localize globals
-local assert, error, ipairs, math, minetest, modlib, pairs, setmetatable, table, tonumber, tostring, type = assert, error, ipairs, math, minetest, modlib, pairs, setmetatable, table, tonumber, tostring, type
+local assert, error, ipairs, math, core, modlib, pairs, setmetatable, table, tonumber, tostring, type = assert, error, ipairs, math, core, modlib, pairs, setmetatable, table, tonumber, tostring, type
 
 -- Set environment
 local _ENV = {}
@@ -219,7 +219,7 @@ function load(self, override, params)
 			local conditions = {}
 			local function push(condition, bound)
 				if self.range[bound] then
-					table.insert(conditions, " " .. condition .. " " .. minetest.write_json(self.range[bound]))
+					table.insert(conditions, " " .. condition .. " " .. core.write_json(self.range[bound]))
 				end
 			end
 			push(">", "min_exclusive")
@@ -239,17 +239,17 @@ function load(self, override, params)
 		end
 		if typ == "required" then
 			local key = ...
-			return "required field " .. minetest.write_json(key) .. " missing"
+			return "required field " .. core.write_json(key) .. " missing"
 		end
 		if typ == "additional" then
 			local key = ...
-			return "superfluous field " .. minetest.write_json(key)
+			return "superfluous field " .. core.write_json(key)
 		end
 		if typ == "list" then
 			return "not a list"
 		end
 		if typ == "values" then
-			return "expected one of " .. minetest.write_json(modlib.table.keys(self.values)) .. ", got " .. minetest.write_json(override)
+			return "expected one of " .. core.write_json(modlib.table.keys(self.values)) .. ", got " .. core.write_json(override)
 		end
 		_error("unknown error type")
 	end

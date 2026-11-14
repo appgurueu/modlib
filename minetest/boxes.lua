@@ -1,6 +1,6 @@
 -- Localize globals
-local assert, ipairs, math, minetest, table, type, vector
-	= assert, ipairs, math, minetest, table, type, vector
+local assert, ipairs, math, core, table, type, vector
+	= assert, ipairs, math, core, table, type, vector
 
 -- Set environment
 local _ENV = ...
@@ -27,8 +27,8 @@ local connect_sides_directions = {
 
 --> list of collisionboxes in Minetest format
 local function get_node_boxes(pos, type)
-	local node = minetest.get_node(pos)
-	local node_def = minetest.registered_nodes[node.name]
+	local node = core.get_node(pos)
+	local node_def = core.registered_nodes[node.name]
 	if not node_def or node_def[has_boxes_prop[type]] == false then
 		return {}
 	end
@@ -52,7 +52,7 @@ local function get_node_boxes(pos, type)
 			box[5] = level
 		end
 	elseif box_type == "wallmounted" then
-		local dir = minetest.wallmounted_to_dir((paramtype2 == "colorwallmounted" and node.param2 % 8 or node.param2) or 0)
+		local dir = core.wallmounted_to_dir((paramtype2 == "colorwallmounted" and node.param2 % 8 or node.param2) or 0)
 		local box
 		-- The (undocumented!) node box defaults below are taken from `NodeBox::reset`
 		if dir.y > 0 then
@@ -102,7 +102,7 @@ local function get_node_boxes(pos, type)
 		for _, side in ipairs(connect_sides_order) do
 			if connect_sides[side] then
 				local direction = connect_sides_directions[side]
-				local neighbor = minetest.get_node(vector.add(pos, direction))
+				local neighbor = core.get_node(vector.add(pos, direction))
 				local connects = connects_to(neighbor.name)
 				connected = connected or connects
 				connected_sides = connected_sides or (side ~= "top" and side ~= "bottom")

@@ -219,7 +219,7 @@ local adam7_passes = {
 		check_crc()
 	until iend
 	assert(next(idat_content), "no IDAT chunk")
-	idat_content = minetest.decompress(concat(idat_content), "deflate")
+	idat_content = core.decompress(concat(idat_content), "deflate")
 	--[[
 		For memory efficiency, we try to pack everything in a single number:
 		Grayscale/lightness: AY
@@ -468,13 +468,13 @@ local function encode_png(width, height, data, compression, raw_write)
 			insert(data_rope, char(colorspec.r, colorspec.g, colorspec.b, colorspec.a))
 		end
 	end
-	write(minetest.compress(type(data) == "string" and data or concat(data_rope), "deflate", compression))
+	write(core.compress(type(data) == "string" and data or concat(data_rope), "deflate", compression))
 	end_chunk()
 	chunk"IEND"
 	end_chunk()
 end
 
-(...).encode_png = minetest.encode_png or function(width, height, data, compression)
+(...).encode_png = core.encode_png or function(width, height, data, compression)
 	local rope = {}
 	encode_png(width, height, data, compression or 9, function(text)
 		insert(rope, text)

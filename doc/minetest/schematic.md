@@ -14,7 +14,7 @@ The table format uses a table with the following mandatory fields:
 and the following optional fields:
 
 * `light_values`: List of node `param1` (light) values (numbers)
-* `metas`: Map from indices in the cuboid to metadata tables as produced by `minetest.get_meta(pos):to_table()`
+* `metas`: Map from indices in the cuboid to metadata tables as produced by `core.get_meta(pos):to_table()`
 
 A "vector" is a table with fields `x`, `y`, `z` for the 3 coordinates.
 

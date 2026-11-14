@@ -1,6 +1,6 @@
 -- Localize globals
-local Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, select, table, type, unpack
-	= Settings, assert, minetest, modlib, next, pairs, ipairs, string, setmetatable, select, table, type, unpack
+local Settings, assert, core, modlib, next, pairs, ipairs, string, setmetatable, select, table, type, unpack
+	= Settings, assert, core, modlib, next, pairs, ipairs, string, setmetatable, select, table, type, unpack
 
 -- Set environment
 local _ENV = ...
@@ -9,9 +9,9 @@ setfenv(1, _ENV)
 max_wear = 2 ^ 16 - 1
 
 function override(function_name, function_builder)
-	local func = minetest[function_name]
-	minetest["original_" .. function_name] = func
-	minetest[function_name] = function_builder(func)
+	local func = core[function_name]
+	core["original_" .. function_name] = func
+	core[function_name] = function_builder(func)
 end
 
 local jobs = modlib.heap.new(function(a, b)
@@ -37,7 +37,7 @@ function after(seconds, func, ...)
 	jobs:push(job)
 	return job
 end
-minetest.register_globalstep(function(dtime)
+core.register_globalstep(function(dtime)
 	time = time + dtime
 	local job = jobs[1]
 	while job and job.time <= time do
@@ -54,7 +54,7 @@ function register_globalstep(interval, callback)
 		return
 	end
 	local time = 0
-	minetest.register_globalstep(function(dtime)
+	core.register_globalstep(function(dtime)
 		time = time + dtime
 		if time >= interval then
 			callback(time)
@@ -73,7 +73,7 @@ function register_form_listener(formname, func)
 end
 
 local icall = modlib.table.icall
-minetest.register_on_player_receive_fields(function(player, formname, fields)
+core.register_on_player_receive_fields(function(player, formname, fields)
 	icall(form_listeners[formname] or {}, player, fields)
 end)
 
@@ -83,7 +83,7 @@ function texture_modifier_inventorycube(face_1, face_2, face_3)
 			.. "{" .. string.gsub(face_3, "%^", "&")
 end
 function get_node_inventory_image(nodename)
-	local n = minetest.registered_nodes[nodename]
+	local n = core.registered_nodes[nodename]
 	if not n then
 		return
 	end
@@ -101,14 +101,14 @@ function get_node_inventory_image(nodename)
 	if not chosen_tiles[3] then
 		chosen_tiles[3] = chosen_tiles[2]
 	end
-	local img = minetest.registered_items[nodename].inventory_image
+	local img = core.registered_items[nodename].inventory_image
 	if string.len(img) == 0 then
 		img = nil
 	end
 	return img or texture_modifier_inventorycube(chosen_tiles[1], chosen_tiles[2], chosen_tiles[3])
 end
 function check_player_privs(playername, privtable)
-	local privs=minetest.get_player_privs(playername)
+	local privs=core.get_player_privs(playername)
 	local missing_privs={}
 	local to_lose_privs={}
 	for priv, expected_value in pairs(privtable) do
@@ -140,10 +140,10 @@ function decode_base64(base64)
 			base64 = base64:sub(1, len-1)
 		end
 	end
-	return minetest.decode_base64(base64)
+	return core.decode_base64(base64)
 end
 
-local object_refs = minetest.object_refs
+local object_refs = core.object_refs
 --+ Objects inside radius iterator. Uses a linear search.
 function objects_inside_radius(pos, radius)
 	radius = radius^2
@@ -180,7 +180,7 @@ function nodename_matcher(node_or_groupname)
 		local groups = modlib.text.split(node_or_groupname:sub(("group:"):len() + 1), ",")
 		return function(nodename)
 			for _, groupname in pairs(groups) do
-				if minetest.get_item_group(nodename, groupname) == 0 then
+				if core.get_item_group(nodename, groupname) == 0 then
 					return false
 				end
 			end
@@ -204,10 +204,10 @@ do
 		create = create or default_create
 		free = free or default_free
 		local data = {}
-		minetest.register_on_joinplayer(function(player)
+		core.register_on_joinplayer(function(player)
 			data[player:get_player_name()] = create(player)
 		end)
-		minetest.register_on_leaveplayer(function(player)
+		core.register_on_leaveplayer(function(player)
 			data[player:get_player_name()] = free(player)
 		end)
 		setmetatable(data, metatable)
@@ -217,7 +217,7 @@ end
 
 function connected_players()
 	-- TODO cache connected players
-	local connected_players = minetest.get_connected_players()
+	local connected_players = core.get_connected_players()
 	local index = 0
 	return function()
 		index = index + 1
@@ -226,7 +226,7 @@ function connected_players()
 end
 
 function set_privs(name, priv_updates)
-	local privs = minetest.get_player_privs(name)
+	local privs = core.get_player_privs(name)
 	for priv, grant in pairs(priv_updates) do
 		if grant then
 			privs[priv] = true
@@ -235,11 +235,11 @@ function set_privs(name, priv_updates)
 			privs[priv] = nil
 		end
 	end
-	return minetest.set_player_privs(name, privs)
+	return core.set_player_privs(name, privs)
 end
 
 function register_on_leaveplayer(func)
-	return minetest["register_on_" .. (minetest.is_singleplayer() and "shutdown" or "leaveplayer")](func)
+	return core["register_on_" .. (core.is_singleplayer() and "shutdown" or "leaveplayer")](func)
 end
 
 do local mod_info
@@ -247,7 +247,7 @@ function get_mod_info()
 	if mod_info then return mod_info end
 	mod_info = {}
 	-- TODO validate modnames
-	local modnames = minetest.get_modnames()
+	local modnames = core.get_modnames()
 	for _, mod in pairs(modnames) do
 		local info
 		local function read_file(filename)

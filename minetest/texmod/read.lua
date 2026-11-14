@@ -8,7 +8,7 @@ local gr = {}
 function gr.png(r)
 	r:expect":"
 	local base64 = r:match_str"[a-zA-Z0-9+/=]"
-	return assert(minetest.decode_base64(base64), "invalid base64")
+	return assert(core.decode_base64(base64), "invalid base64")
 end
 
 function gr.inventorycube(r)
