@@ -231,7 +231,7 @@ function set_privs(name, priv_updates)
 		if grant then
 			privs[priv] = true
 		else
-			-- May not be set to false; Minetest treats false as truthy in this instance
+			-- May not be set to false; Luanti treats false as truthy in this instance
 			privs[priv] = nil
 		end
 	end

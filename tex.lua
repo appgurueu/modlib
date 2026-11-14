@@ -332,7 +332,7 @@ function tex:rotated_90()
 end
 
 -- Uses box sampling. Hard to optimize.
--- TODO (...) interpolate box samples; match what Minetest does
+-- TODO (...) interpolate box samples; match what Luanti does
 --> copy of `self` resized to `w` x `h`
 function tex:resized(w, h)
 	--! This function works with 0-based indices.

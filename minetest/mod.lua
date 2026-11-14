@@ -10,7 +10,7 @@ local loaded = {}
 function require(filename)
 	local modname = core.get_current_modname()
 	loaded[modname] = loaded[modname] or {}
-	-- Minetest ensures that `/` works even on Windows (path normalization)
+	-- Luanti ensures that `/` works even on Windows (path normalization)
 	loaded[modname][filename] = loaded[modname][filename] -- already loaded?
 		or dofile(core.get_modpath(modname) .. "/" .. filename:gsub("%.", "/") .. ".lua")
 	return loaded[modname][filename]

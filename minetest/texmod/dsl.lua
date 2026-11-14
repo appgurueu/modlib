@@ -14,7 +14,7 @@ setmetatable(texmod, {__call = new})
 -- Constructors / "generators"
 
 function texmod.file(filename)
-	-- See `TEXTURENAME_ALLOWED_CHARS` in Minetest (`src/network/networkprotocol.h`)
+	-- See `TEXTURENAME_ALLOWED_CHARS` in Luanti (`src/network/networkprotocol.h`)
 	assert(not filename:find"[^%w_.-]", "invalid characters in file name")
 	return new{
 		type = "file",
@@ -402,7 +402,7 @@ function mod:hardlight(overlay)
 end
 
 -- Overlay *blend*.
--- This was unfortunately named `[overlay` in Minetest,
+-- This was unfortunately named `[overlay` in Luanti,
 -- and so is named `:overlay` for consistency.
 --! Do not confuse this with the simple `^` used for blitting
 function mod:overlay(overlay)

@@ -100,7 +100,7 @@ end
 function to_axis_angle(self)
 	local axis = modlib.vector.new{self[1], self[2], self[3]}
 	local len = axis:length()
-	-- HACK invert axis for correct rotation in Minetest
+	-- HACK invert axis for correct rotation in Luanti
 	return len == 0 and axis or axis:divide_scalar(-len), 2 * math.atan2(len, self[4])
 end
 

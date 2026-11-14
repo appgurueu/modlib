@@ -6,7 +6,7 @@ local assert, ipairs, math, core, table, type, vector
 local _ENV = ...
 setfenv(1, _ENV)
 
--- Minetest allows shorthand box = {...} instead of {{...}}
+-- Luanti allows shorthand box = {...} instead of {{...}}
 local function get_boxes(box_or_boxes)
 	return type(box_or_boxes[1]) == "number" and {box_or_boxes} or box_or_boxes
 end
@@ -25,7 +25,7 @@ local connect_sides_directions = {
 	right = vector.new(1, 0, 0),
 }
 
---> list of collisionboxes in Minetest format
+--> list of collisionboxes in Luanti format
 local function get_node_boxes(pos, type)
 	local node = core.get_node(pos)
 	local node_def = core.registered_nodes[node.name]

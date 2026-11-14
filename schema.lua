@@ -52,7 +52,7 @@ function generate_settingtypes(self)
 	elseif typ == "table" then
 		local settings = {}
 		if self._level > 0 then
-			-- HACK: Minetest automatically adds the modname
+			-- HACK: Luanti automatically adds the modname
 			-- TODO simple names (not modname.field.other_field)
 			settings = {"[" .. ("*"):rep(self._level - 1) .. self.name .. "]"}
 		end

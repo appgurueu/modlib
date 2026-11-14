@@ -4,7 +4,7 @@ local base64 = {}
 
 local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
---! This is currently 5 - 10x slower than a C(++) implementation like Minetest's `core.encode_base64`
+--! This is currently 5 - 10x slower than a C(++) implementation like Luanti's `core.encode_base64`
 function base64.encode(
 	str, -- byte string to encode
 	padding -- whether to add padding, defaults to `true`
@@ -82,7 +82,7 @@ local function decode_sextets_4(b1, b2, b3, b4)
 	)
 end
 
---! This is also about 10x slower than a C(++) implementation like Minetest's `core.decode_base64`
+--! This is also about 10x slower than a C(++) implementation like Luanti's `core.decode_base64`
 function base64.decode(
 	-- base64-encoded string to decode
 	str,

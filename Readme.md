@@ -1,6 +1,6 @@
 # ![Logo](logo.svg) Modding Library (`modlib`)
 
-Multipurpose Minetest Modding Library
+Multipurpose Luanti Modding Library
 
 ## At a glance
 

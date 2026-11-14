@@ -6,9 +6,9 @@ Uses a SQLite3 database to persistently store a Lua table. Obtaining it is a bit
 local modlib_sqlite3 = persistence.sqlite3(require"lsqlite3")
 ```
 
-(assuming `require` is that of an insecure environment if Minetest is used)
+(assuming `require` is that of an insecure environment if Luanti is used)
 
-Alternatively, if you are not running Minetest, mod security is disabled, you have (temporarily) provided `require` globally, or added `modlib` to `secure.trusted_mods`, you can simply do the following:
+Alternatively, if you are not running Luanti, mod security is disabled, you have (temporarily) provided `require` globally, or added `modlib` to `secure.trusted_mods`, you can simply do the following:
 
 ```lua
 local modlib_sqlite3 = persistence.sqlite3()
