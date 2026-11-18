@@ -167,7 +167,7 @@ function objects_inside_area(min, max)
 		until (not object) or (
 			(min.x <= object_pos.x and min.y <= object_pos.y and min.z <= object_pos.z)
 			and
-			(max.y >= object_pos.x and max.y >= object_pos.y and max.z >= object_pos.z)
+			(max.x >= object_pos.x and max.y >= object_pos.y and max.z >= object_pos.z)
 		)
 		return object
 	end
