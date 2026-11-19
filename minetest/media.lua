@@ -1,5 +1,5 @@
-local minetest, modlib, pairs, ipairs
-	= minetest, modlib, pairs, ipairs
+local core, modlib, pairs, ipairs
+	= core, modlib, pairs, ipairs
 
 -- TODO support for server texture packs (and possibly client TPs in singleplayer?)
 local media_foldernames = {"textures", "sounds", "media", "models", "locale"}
@@ -18,7 +18,7 @@ local function collect_media(modname)
 	local media = {}
 	local function traverse(folderpath)
 		-- Traverse files (collect media)
-		local filenames = minetest.get_dir_list(folderpath, false)
+		local filenames = core.get_dir_list(folderpath, false)
 		for _, filename in pairs(filenames) do
 			local _, ext = modlib.file.get_extension(filename)
 			if media_extensions[ext] then
@@ -26,7 +26,7 @@ local function collect_media(modname)
 			end
 		end
 		-- Traverse subfolders
-		local foldernames = minetest.get_dir_list(folderpath, true)
+		local foldernames = core.get_dir_list(folderpath, true)
 		for _, foldername in pairs(foldernames) do
 			if not foldername:match"^[_%.]" then -- ignore hidden subfolders / subfolders starting with `_`
 				traverse(modlib.file.concat_path{folderpath, foldername})

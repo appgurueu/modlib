@@ -8,7 +8,7 @@ local gr = {}
 function gr.png(r)
 	r:expect":"
 	local base64 = r:match_str"[a-zA-Z0-9+/=]"
-	return assert(minetest.decode_base64(base64), "invalid base64")
+	return assert(core.decode_base64(base64), "invalid base64")
 end
 
 function gr.inventorycube(r)
@@ -41,7 +41,7 @@ function gr.fill(r)
 	r:expect"x"
 	local h = r:int()
 	r:expect":"
-	-- Be strict(er than Minetest): Do not accept x, y for a base
+	-- Be strict(er than Luanti): Do not accept x, y for a base
 	local color = r:colorspec()
 	return w, h, color
 end
@@ -122,7 +122,7 @@ do
 		end
 		if r:match_charset"[rR]" then
 			local deg = r:match_str"%d"
-			-- Be strict here: Minetest won't recognize other ways to write these numbers (or other numbers)
+			-- Be strict here: Luanti won't recognize other ways to write these numbers (or other numbers)
 			assert(deg == "90" or deg == "180" or deg == "270")
 			return ("r%d"):format(deg), pr.transform(r)
 		end
@@ -261,7 +261,7 @@ function rm.peek(r, parenthesized)
 		if r.escapes == expected_escapes then
 			return r.character
 		elseif parenthesized and r.character == "^" and r.escapes < expected_escapes then
-			-- Special handling for `^` inside `(...)`: This is undocumented behavior but works in Minetest
+			-- Special handling for `^` inside `(...)`: This is undocumented behavior but works in Luanti
 			r.warn"parenthesized caret (`^`) with too few escapes"
 			return r.character
 		end
@@ -339,10 +339,10 @@ function rm.int(r)
 	return sign * tonumber(r:match_str"%d")
 end
 function rm.fname(r)
-	-- This is overly permissive, as is Minetest;
+	-- This is overly permissive, as is Luanti;
 	-- we just allow arbitrary characters up until a character which may terminate the name.
 	-- Inside an inventorycube, `&` also terminates names.
-	-- Note that the constructor will however - unlike Minetest - perform validation.
+	-- Note that the constructor will however - unlike Luanti - perform validation.
 	-- We could leverage the knowledge of the allowed charset here already,
 	-- but that might lead to more confusing error messages.
 	return r:match_str(r.invcube and "[^:^&){]" or "[^:^){]")
@@ -404,7 +404,7 @@ function rm.texp(r, parenthesized)
 			elseif gen_reader then
 				base = base:blit(texmod[type](gen_reader(r)))
 			end
-			-- TODO (?...) we could consume leftover parameters here to be as lax as Minetest
+			-- TODO (?...) we could consume leftover parameters here to be as lax as Luanti
 		else
 			base = base:blit(r:basexp())
 		end

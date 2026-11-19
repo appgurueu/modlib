@@ -14,7 +14,7 @@
 0. Default configuration: `<modfolder>/conf.lua`
 1. World configuration: `config/<modname>.<format>`
 2. Mod configuration: `<modfolder>/conf.<format>`
-3. Minetest configuration: `minetest.conf`
+3. Luanti configuration: `minetest.conf`
 
 ## Formats
 
@@ -26,6 +26,6 @@
    * Single Lua literal
    * Booleans, numbers, strings and tables
 3. [`conf`](https://github.com/minetest/minetest/blob/master/doc/lua_api.txt)
-   * Minetest-like configuration files
+   * Luanti-like configuration files
 4. [`json`](https://json.org)
    * Not recommended

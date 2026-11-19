@@ -1,5 +1,5 @@
 -- Localize globals
-local assert, error, math, minetest, setmetatable, tonumber, type = assert, error, math, minetest, setmetatable, tonumber, type
+local assert, error, math, core, setmetatable, tonumber, type = assert, error, math, core, setmetatable, tonumber, type
 local floor = math.floor
 
 -- Set environment
@@ -316,7 +316,7 @@ function colorspec:to_number()
 	return self.a * 0x1000000 + self.r * 0x10000 + self.g * 0x100 + self.b
 end
 
-colorspec_to_colorstring = minetest.colorspec_to_colorstring or function(spec)
+colorspec_to_colorstring = core.colorspec_to_colorstring or function(spec)
 	local color = colorspec.from_any(spec)
 	if not color then
 		return nil

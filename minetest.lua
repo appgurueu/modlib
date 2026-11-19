@@ -71,7 +71,7 @@ for filename, comps in pairs{
 	dirty_files[filename] = true
 end
 
-local modpath, concat_path = minetest.get_modpath(modlib.modname), modlib.file.concat_path
+local modpath, concat_path = core.get_modpath(modlib.modname), modlib.file.concat_path
 
 setmetatable(_ENV, {__index = function(_ENV, name)
 	local filename = components[name]

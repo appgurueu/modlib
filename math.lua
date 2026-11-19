@@ -1,6 +1,6 @@
 -- Localize globals
-local assert, math, math_floor, minetest, modlib_table_reverse, os, string_char, select, setmetatable, table_insert, table_concat
-	= assert, math, math.floor, minetest, modlib.table.reverse, os, string.char, select, setmetatable, table.insert, table.concat
+local assert, math, math_floor, core, modlib_table_reverse, os, string_char, select, setmetatable, table_insert, table_concat
+	= assert, math, math.floor, core, modlib.table.reverse, os, string.char, select, setmetatable, table.insert, table.concat
 
 local inf = math.huge
 
@@ -10,7 +10,7 @@ setfenv(1, _ENV)
 
 -- TODO might be too invasive
 -- Make random random
-math.randomseed(minetest and minetest.get_us_time() or os.time() + os.clock())
+math.randomseed(core and core.get_us_time() or os.time() + os.clock())
 for _ = 1, 100 do math.random() end
 
 negative_nan = 0/0

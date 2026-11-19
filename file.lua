@@ -1,6 +1,6 @@
 local dir_delim = ...
 -- Localize globals
-local assert, io, minetest, modlib, string, pcall = assert, io, minetest, modlib, string, pcall
+local assert, io, core, modlib, string, pcall = assert, io, core, modlib, string, pcall
 
 -- Set environment
 local _ENV = {}
@@ -62,7 +62,7 @@ function write_unsafe(filename, new_content)
 	return true
 end
 
-write = minetest and minetest.safe_file_write or write_unsafe
+write = core and core.safe_file_write or write_unsafe
 
 function write_binary_unsafe(filename, new_content)
 	local file, err = io.open(filename, "wb")
@@ -72,7 +72,7 @@ function write_binary_unsafe(filename, new_content)
 	return true
 end
 
-write_binary = minetest and minetest.safe_file_write or write_binary_unsafe
+write_binary = core and core.safe_file_write or write_binary_unsafe
 
 function ensure_content(filename, ensured_content)
 	local content = read(filename)
@@ -106,18 +106,18 @@ end
 
 function create_if_not_exists_from_file(filename, src_filename) return create_if_not_exists(filename, read(src_filename)) end
 
-if not minetest then return end
+if not core then return end
 
 -- Process Bridge Helpers
 process_bridges = {}
 
 function process_bridge_build(name, input, output, logs)
 	if not input or not output or not logs then
-		minetest.mkdir(minetest.get_worldpath() .. "/bridges/" .. name)
+		core.mkdir(core.get_worldpath() .. "/bridges/" .. name)
 	end
-	input = input or minetest.get_worldpath() .. "/bridges/" .. name .. "/input.txt"
-	output = output or minetest.get_worldpath() .. "/bridges/" .. name .. "/output.txt"
-	logs = logs or minetest.get_worldpath() .. "/bridges/" .. name .. "/logs.txt"
+	input = input or core.get_worldpath() .. "/bridges/" .. name .. "/input.txt"
+	output = output or core.get_worldpath() .. "/bridges/" .. name .. "/output.txt"
+	logs = logs or core.get_worldpath() .. "/bridges/" .. name .. "/logs.txt"
 	-- Clear input
 	write(input, "")
 	-- Clear output

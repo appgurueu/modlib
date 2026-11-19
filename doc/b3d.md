@@ -34,10 +34,10 @@ Convenience function to write the glTF representation to `file` using modlib's `
 This example loops over all files in `dir_path`, converting them to glTFs which are stored in `out_dir_path`.
 
 ```lua
-local modpath = minetest.get_modpath(minetest.get_current_modname())
+local modpath = core.get_modpath(core.get_current_modname())
 local dir_path = modpath .. "/b3d"
 local out_dir_path = modpath .. "/gltf"
-for _, filename in ipairs(minetest.get_dir_list(dir_path, false --[[only files]])) do
+for _, filename in ipairs(core.get_dir_list(dir_path, false --[[only files]])) do
 	-- First read the B3D
 	local in_file = assert(io.open(dir_path .. "/" .. filename, "rb"))
 	local model = assert(modlib.b3d.read(in_file))

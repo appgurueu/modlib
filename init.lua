@@ -30,7 +30,7 @@ for _, file in pairs{
 } do
 	modules[file] = file
 end
-if minetest then
+if core then
 	modules.minetest = "minetest"
 end
 
@@ -39,26 +39,26 @@ modules.string = "text"
 modules.number = "math"
 
 local parent_dir
-if not minetest then
+if not core then
 	-- TOFIX
 	local init_path = arg and arg[0]
 	parent_dir = init_path and init_path:match"^.[/\\]" or ""
 end
 
-local dir_delim = rawget(_G, "DIR_DELIM") -- Minetest
+local dir_delim = rawget(_G, "DIR_DELIM") -- Luanti
 	or (rawget(_G, "package") and package.config and assert(package.config:match("^(.-)[\r\n]"))) or "/"
 
 local function concat_path(path)
 	return table.concat(path, dir_delim)
 end
 
--- only used if Minetest is available
+-- only used if Luanti is available
 local function get_resource(modname, resource, ...)
 	if not resource then
 		resource = modname
-		modname = minetest.get_current_modname()
+		modname = core.get_current_modname()
 	end
-	return concat_path{minetest.get_modpath(modname), resource, ...}
+	return concat_path{core.get_modpath(modname), resource, ...}
 end
 
 local function load_module(self, module_name_or_alias)
@@ -72,7 +72,7 @@ local function load_module(self, module_name_or_alias)
 		-- alias handling
 		environment = self[module_name]
 	else
-		environment = dofile(minetest
+		environment = dofile(core
 			and get_resource(self.modname, module_name .. ".lua")
 			or (parent_dir .. module_name .. ".lua"))
 	end
@@ -86,8 +86,8 @@ modlib = setmetatable({}, { __index = load_module })
 -- TODO bump on release
 modlib.version = 104
 
-if minetest then
-	modlib.modname = minetest.get_current_modname()
+if core then
+	modlib.modname = core.get_current_modname()
 end
 
 -- Raw globals
@@ -123,7 +123,7 @@ end
 modlib.file = assert(loadfile(get_resource"file.lua"))(dir_delim)
 modlib.file.concat_path = concat_path
 
-if minetest then
+if core then
 	-- Force-loading of the minetest & mod modules
 	-- Also sets modlib.mod -> modlib.minetest.mod alias.
 	local ml_mt = modlib.minetest
@@ -131,7 +131,7 @@ if minetest then
 	modlib.mod = ml_mt.mod
 	-- HACK force load minetest/gametime.lua to ensure that the globalstep is registered earlier than globalsteps of mods depending on modlib
 	dofile(get_resource(modlib.modname, "minetest", "gametime.lua"))
-	local ie = minetest.request_insecure_environment()
+	local ie = core.request_insecure_environment()
 	if ie then
 		-- Force load persistence namespace to pass insecure require
 		-- TODO currently no need to set _G.require, lsqlite3 loads no dependencies that way

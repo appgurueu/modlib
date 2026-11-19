@@ -1,6 +1,6 @@
 -- Localize globals
-local Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, minetest, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type, table_concat, unpack
-	= Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, minetest, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type, table.concat, unpack
+local Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, core, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type, table_concat, unpack
+	= Settings, _G, assert, dofile, error, getmetatable, ipairs, loadfile, loadstring, core, modlib, pairs, rawget, rawset, setfenv, setmetatable, tonumber, type, table.concat, unpack
 
 -- Set environment
 local _ENV = {}
@@ -8,11 +8,11 @@ setfenv(1, _ENV)
 
 local loaded = {}
 function require(filename)
-	local modname = minetest.get_current_modname()
+	local modname = core.get_current_modname()
 	loaded[modname] = loaded[modname] or {}
-	-- Minetest ensures that `/` works even on Windows (path normalization)
+	-- Luanti ensures that `/` works even on Windows (path normalization)
 	loaded[modname][filename] = loaded[modname][filename] -- already loaded?
-		or dofile(minetest.get_modpath(modname) .. "/" .. filename:gsub("%.", "/") .. ".lua")
+		or dofile(core.get_modpath(modname) .. "/" .. filename:gsub("%.", "/") .. ".lua")
 	return loaded[modname][filename]
 end
 
@@ -28,7 +28,7 @@ end
 function include(modname, file)
 	if not file then
 		file = modname
-		modname = minetest.get_current_modname()
+		modname = core.get_current_modname()
 	end
 	return dofile(get_resource(modname, file))
 end
@@ -38,7 +38,7 @@ function include_env(file_or_string, env, is_string)
 end
 
 function create_namespace(namespace_name, parent_namespace)
-	namespace_name = namespace_name or minetest.get_current_modname()
+	namespace_name = namespace_name or core.get_current_modname()
 	parent_namespace = parent_namespace or _G
 	local metatable = {__index = parent_namespace == _G and function(_, key) return rawget(_G, key) end or parent_namespace}
 	local namespace = {}
@@ -55,7 +55,7 @@ end
 function extend(modname, file)
 	if not file then
 		file = modname
-		modname = minetest.get_current_modname()
+		modname = core.get_current_modname()
 	end
 	include_env(get_resource(modname, file .. ".lua"), rawget(_G, modname))
 end
@@ -63,7 +63,7 @@ end
 -- runs main.lua in table env
 -- formerly include_mod
 function init(modname)
-	modname = modname or minetest.get_current_modname()
+	modname = modname or core.get_current_modname()
 	create_namespace(modname)
 	extend(modname, "main")
 end
@@ -81,13 +81,13 @@ local function build_tree(dict)
 			subtree[index] = subtree[index] or {}
 			subtree = subtree[index]
 			if type(subtree) ~= "table" then
-				minetest.log("warning", warn_parent_leaf:format(table_concat({unpack(path, 1, i)}, ".")))
+				core.log("warning", warn_parent_leaf:format(table_concat({unpack(path, 1, i)}, ".")))
 				break
 			end
 		end
 		if type(subtree) == "table" then
 			if type(subtree[path[#path]]) == "table" then
-				minetest.log("warning", warn_parent_leaf:format(key))
+				core.log("warning", warn_parent_leaf:format(key))
 			end
 			subtree[path[#path]] = value
 		end
@@ -95,11 +95,11 @@ local function build_tree(dict)
 	return tree
 end
 
-settings = build_tree(minetest.settings:to_table())
+settings = build_tree(core.settings:to_table())
 
 --> conf, schema
 function configuration(modname)
-	modname = modname or minetest.get_current_modname()
+	modname = modname or core.get_current_modname()
 	local schema = modlib.schema.new(assert(include(modname, "schema.lua")))
 	schema.name = schema.name or modname
 	local settingtypes = schema:generate_settingtypes()
@@ -139,7 +139,7 @@ function configuration(modname)
 			{extension = "conf", read = function(text)
 				return build_tree(Settings(text):to_table())
 			end, convert_strings = true},
-			{extension = "json", read = minetest.parse_json}
+			{extension = "json", read = core.parse_json}
 		} do
 			local content = modlib.file.read(path .. "." .. format.extension)
 			if content then
@@ -148,7 +148,7 @@ function configuration(modname)
 			end
 		end
 	end
-	add(minetest.get_worldpath() .. "/conf/" .. modname)
+	add(core.get_worldpath() .. "/conf/" .. modname)
 	add(get_resource(modname, "conf"))
 	local minetest_conf = settings[schema.name]
 	if minetest_conf then

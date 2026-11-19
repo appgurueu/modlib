@@ -1,5 +1,5 @@
-local assert, error, math_huge, modlib, minetest, setmetatable, type, table_insert, table_sort, pairs, ipairs
-	= assert, error, math.huge, modlib, minetest, setmetatable, type, table.insert, table.sort, pairs, ipairs
+local assert, error, math_huge, modlib, core, setmetatable, type, table_insert, table_sort, pairs, ipairs
+	= assert, error, math.huge, modlib, core, setmetatable, type, table.insert, table.sort, pairs, ipairs
 
 local sqlite3 = ...
 
@@ -307,8 +307,8 @@ function ptab:close()
 	databases[self] = nil
 end
 
-if minetest then
-	minetest.register_on_shutdown(function()
+if core then
+	core.register_on_shutdown(function()
 		for self in pairs(databases) do
 			self:close()
 		end

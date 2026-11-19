@@ -1,6 +1,6 @@
 -- Localize globals
-local VoxelArea, ItemStack, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, string, table, type, vector
-	= VoxelArea, ItemStack, assert, error, io, ipairs, math, minetest, modlib, next, pairs, setmetatable, string, table, type, vector
+local VoxelArea, ItemStack, assert, error, io, ipairs, math, core, modlib, next, pairs, setmetatable, string, table, type, vector
+	= VoxelArea, ItemStack, assert, error, io, ipairs, math, core, modlib, next, pairs, setmetatable, string, table, type, vector
 
 
 local schematic = {}
@@ -13,7 +13,7 @@ end
 function schematic.create(params, pos_min, pos_max)
 	pos_min, pos_max = vector.sort(pos_min, pos_max)
 	local size = vector.add(vector.subtract(pos_max, pos_min), 1)
-	local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
+	local voxelmanip = core.get_voxel_manip(pos_min, pos_max)
 	local emin, emax = voxelmanip:read_from_map(pos_min, pos_max)
 	local voxelarea = VoxelArea:new{ MinEdge = emin, MaxEdge = emax }
 	local nodes, light_values, param2s = {}, params.light_values and {}, {}
@@ -21,10 +21,10 @@ function schematic.create(params, pos_min, pos_max)
 	local node_names, node_ids = {}, {}
 	local i = 0
 	for index in voxelarea:iterp(pos_min, pos_max) do
-		if nodes[index] == minetest.CONTENT_UNKNOWN or nodes[index] == minetest.CONTENT_IGNORE then
-			error("unknown or ignore node at " .. minetest.pos_to_string(voxelarea:position(index)))
+		if nodes[index] == core.CONTENT_UNKNOWN or nodes[index] == core.CONTENT_IGNORE then
+			error("unknown or ignore node at " .. core.pos_to_string(voxelarea:position(index)))
 		end
-		local name = minetest.get_name_from_content_id(vm_nodes[index])
+		local name = core.get_name_from_content_id(vm_nodes[index])
 		local id = node_ids[name]
 		if not id then
 			table.insert(node_names, name)
@@ -41,8 +41,8 @@ function schematic.create(params, pos_min, pos_max)
 	local metas
 	if params.metas or params.metas == nil then
 		metas = {}
-		for _, pos in ipairs(minetest.find_nodes_with_meta(pos_min, pos_max)) do
-			local meta = minetest.get_meta(pos):to_table()
+		for _, pos in ipairs(core.find_nodes_with_meta(pos_min, pos_max)) do
+			local meta = core.get_meta(pos):to_table()
 			if next(meta.fields) ~= nil or next(meta.inventory) ~= nil then
 				local relative = vector.subtract(pos, pos_min)
 				metas[((relative.z * size.y) + relative.y) * size.x + relative.x] = meta
@@ -66,13 +66,13 @@ function schematic:write_to_voxelmanip(voxelmanip, pos_min)
 	local voxelarea = VoxelArea:new{ MinEdge = emin, MaxEdge = emax }
 	local nodes, light_values, param2s, metas = self.nodes, self.light_values, self.param2s, self.metas
 	local vm_nodes, vm_lights, vm_param2s = voxelmanip:get_data(), light_values and voxelmanip:get_light_data(), voxelmanip:get_param2_data()
-	for _, pos in ipairs(minetest.find_nodes_with_meta(pos_min, pos_max)) do
+	for _, pos in ipairs(core.find_nodes_with_meta(pos_min, pos_max)) do
 		-- Clear all metadata. Due to an engine bug, nodes will actually have empty metadata.
-		minetest.get_meta(pos):from_table{}
+		core.get_meta(pos):from_table{}
 	end
 	local content_ids = {}
 	for index, name in ipairs(self.node_names) do
-		content_ids[index] = assert(minetest.get_content_id(name), ("unknown node %q"):format(name))
+		content_ids[index] = assert(core.get_content_id(name), ("unknown node %q"):format(name))
 	end
 	local i = 0
 	for index in voxelarea:iterp(pos_min, pos_max) do
@@ -96,14 +96,14 @@ function schematic:write_to_voxelmanip(voxelmanip, pos_min)
 				y = floored % size.y,
 				z = math.floor(floored / size.y)
 			}
-			minetest.get_meta(vector.add(relative, pos_min)):from_table(meta)
+			core.get_meta(vector.add(relative, pos_min)):from_table(meta)
 		end
 	end
 end
 
 function schematic:place(pos_min)
 	local pos_max = vector.subtract(vector.add(pos_min, self.size), 1) -- `pos_max` is inclusive
-	local voxelmanip = minetest.get_voxel_manip(pos_min, pos_max)
+	local voxelmanip = core.get_voxel_manip(pos_min, pos_max)
 	self:write_to_voxelmanip(voxelmanip, pos_min)
 	voxelmanip:write_to_map(not self.light_values)
 	return voxelmanip
@@ -180,14 +180,14 @@ function schematic:write_zlib_bluon(path, compression)
 	local rope = modlib.table.rope{}
 	write_bluon(self, rope)
 	local text = rope:to_text()
-	file:write(minetest.compress(text, "deflate", compression or 9))
+	file:write(core.compress(text, "deflate", compression or 9))
 	file:close()
 end
 
 function schematic.read_zlib_bluon(path)
 	local file = io.open(path, "rb")
 	assert(file:read(4) == "MLZS", "not a modlib zlib compressed bluon schematic")
-	return schematic.setmetatable(read_bluon(modlib.text.inputstream(minetest.decompress(file:read"*a", "deflate"))))
+	return schematic.setmetatable(read_bluon(modlib.text.inputstream(core.decompress(file:read"*a", "deflate"))))
 end
 
 return schematic

@@ -1,6 +1,6 @@
 -- Localize globals
-local assert, error, io, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type
-	= assert, error, io, loadfile, math, minetest, modlib, pairs, setfenv, setmetatable, type
+local assert, error, io, loadfile, math, core, modlib, pairs, setfenv, setmetatable, type
+	= assert, error, io, loadfile, math, core, modlib, pairs, setfenv, setmetatable, type
 
 -- Set environment
 local _ENV = {}
@@ -23,7 +23,7 @@ function new(file_path, root, reference_strings)
 		root = root,
 		reference_strings = reference_strings
 	}, metatable)
-	if minetest then
+	if core then
 		files[self] = true
 	end
 	return self
@@ -86,8 +86,8 @@ function close(self)
 	files[self] = nil
 end
 
-if minetest then
-	minetest.register_on_shutdown(function()
+if core then
+	core.register_on_shutdown(function()
 		for self in pairs(files) do
 			self.file:close()
 		end

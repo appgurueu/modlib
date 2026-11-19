@@ -1,9 +1,9 @@
 -- Localize globals
-local assert, math, minetest, modlib, pairs, setmetatable, vector = assert, math, minetest, modlib, pairs, setmetatable, vector
+local assert, math, core, modlib, pairs, setmetatable, vector = assert, math, core, modlib, pairs, setmetatable, vector
 
 --+ Raycast wrapper with proper flowingliquid intersections
 return function(_pos1, _pos2, objects, liquids)
-	local raycast = minetest.raycast(_pos1, _pos2, objects, liquids)
+	local raycast = core.raycast(_pos1, _pos2, objects, liquids)
 	if not liquids then
 		return raycast
 	end
@@ -18,8 +18,8 @@ return function(_pos1, _pos2, objects, liquids)
 		end
 		local _pos = pointed_thing.under
 		local pos = modlib.vector.from_minetest(_pos)
-		local node = minetest.get_node(_pos)
-		local def = minetest.registered_nodes[node.name]
+		local node = core.get_node(_pos)
+		local def = core.registered_nodes[node.name]
 		if not (def and def.drawtype == "flowingliquid") then
 			return pointed_thing
 		end

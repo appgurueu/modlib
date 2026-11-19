@@ -1,7 +1,7 @@
 local pw = {} -- parameter writers: `[type] = func(self, write)`
 
 function pw:png(w)
-	w.colon(); w.str(minetest.encode_base64(self.data))
+	w.colon(); w.str(core.encode_base64(self.data))
 end
 
 function pw:combine(w)

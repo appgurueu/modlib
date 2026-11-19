@@ -1,5 +1,5 @@
 -- Localize globals
-local math, minetest, modlib, pairs = math, minetest, modlib, pairs
+local math, core, modlib, pairs = math, core, modlib, pairs
 
 -- Set environment
 local _ENV = ...
@@ -9,8 +9,8 @@ liquid_level_max = 8
 --+ Calculates the corner levels of a flowingliquid node
 --> 4 corner levels from -0.5 to 0.5 as list of `modlib.vector`
 function get_liquid_corner_levels(pos)
-	local node = minetest.get_node(pos)
-	local def = minetest.registered_nodes[node.name]
+	local node = core.get_node(pos)
+	local def = core.registered_nodes[node.name]
 	local source, flowing = def.liquid_alternative_source, node.name
 	local range = def.liquid_range or liquid_level_max
 	local neighbors = {}
@@ -18,7 +18,7 @@ function get_liquid_corner_levels(pos)
 		neighbors[x] = {}
 		for z = -1, 1 do
 			local neighbor_pos = {x = pos.x + x, y = pos.y, z = pos.z + z}
-			local neighbor_node = minetest.get_node(neighbor_pos)
+			local neighbor_node = core.get_node(neighbor_pos)
 			local level
 			if neighbor_node.name == source then
 				level = 1
@@ -27,7 +27,7 @@ function get_liquid_corner_levels(pos)
 				level = (math.max(0, neighbor_level - liquid_level_max + range) + 0.5) / range
 			end
 			neighbor_pos.y = neighbor_pos.y + 1
-			local node_above = minetest.get_node(neighbor_pos)
+			local node_above = core.get_node(neighbor_pos)
 			neighbors[x][z] = {
 				air = neighbor_node.name == "air",
 				level = level,
@@ -114,7 +114,7 @@ function get_liquid_flow_direction(pos)
 		dir = modlib.vector.divide_scalar(dir, count)
 	end
 	if dir == modlib.vector.new{0, 0, 0} then
-		if minetest.get_node(pos).param2 % 32 > 7 then
+		if core.get_node(pos).param2 % 32 > 7 then
 			return flowing_downwards
 		end
 	end

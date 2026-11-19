@@ -1,10 +1,10 @@
-# Minetest Wavefront `.obj` file format specification
+# Luanti Wavefront `.obj` file format specification
 
-Minetest Wavefront `.obj` is a subset of [Wavefront `.obj`](http://paulbourke.net/dataformats/obj/).
+Luanti Wavefront `.obj` is a subset of [Wavefront `.obj`](http://paulbourke.net/dataformats/obj/).
 
-It is inferred from the [Minetest Irrlicht `.obj` reader](https://github.com/minetest/irrlicht/blob/master/source/Irrlicht/COBJMeshFileLoader.cpp).
+It is inferred from the [Luanti Irrlicht `.obj` reader](https://github.com/minetest/irrlicht/blob/master/source/Irrlicht/COBJMeshFileLoader.cpp).
 
-`.mtl` files are not supported since Minetest's media loading process ignores them due to the extension.
+`.mtl` files are not supported since Luanti's media loading process ignores them due to the extension.
 
 ## Lines / "Commands"
 

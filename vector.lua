@@ -56,7 +56,7 @@ function to_xyzw(v)
 	return {x = v[1], y = v[2], z = v[3], w = v[4]}
 end
 
---+ not necessarily required, as Minetest respects the metatable
+--+ not necessarily required, as Luanti respects the metatable
 function to_minetest(v)
 	return mt_vector.new(unpack(v))
 end
@@ -217,7 +217,7 @@ function rotate3(v, axis, angle)
 	assert(#v == 3 and #axis == 3)
 	local cos = math.cos(angle)
 	return multiply_scalar(v, cos)
-		-- Minetest's coordinate system is *left-handed*, so `v` and `axis` must be swapped here
+		-- Luanti's coordinate system is *left-handed*, so `v` and `axis` must be swapped here
 		+ multiply_scalar(cross3(v, axis), math.sin(angle))
 		+ multiply_scalar(axis, dot(axis, v) * (1 - cos))
 end
